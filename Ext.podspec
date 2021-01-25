@@ -3,7 +3,7 @@ Pod::Spec.new do |spec|
   spec.version         = "0.0.1"
   spec.summary      = "Some useful Swift extensions."
   spec.description  = <<-DESC
-                    Some useful Swift extensions.
+                    Some useful extensions for Swift.
                    DESC
 
   spec.homepage      = "https://github.com/naijoug/Ext"
