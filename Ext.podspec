@@ -12,6 +12,7 @@ Pod::Spec.new do |spec|
 
   spec.source           = { :git => "https://github.com/naijoug/Ext.git", :tag => spec.version.to_s }
   spec.ios.deployment_target = '11.0'
+  spec.swift_version = "5.0"
   spec.requires_arc = true
   spec.source_files = "Sources"
   spec.default_subspecs = 'Extension', 'UI'
