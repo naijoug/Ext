@@ -1,0 +1,20 @@
+PODS:
+  - Ext (0.0.1):
+    - Ext/Extension (= 0.0.1)
+    - Ext/UI (= 0.0.1)
+  - Ext/Extension (0.0.1)
+  - Ext/UI (0.0.1)
+
+DEPENDENCIES:
+  - Ext (from `../../../Ext`)
+
+EXTERNAL SOURCES:
+  Ext:
+    :path: "../../../Ext"
+
+SPEC CHECKSUMS:
+  Ext: 9033817e25c93105dc0e7acd26cc9e5cf8244c77
+
+PODFILE CHECKSUM: 7cf1508a62a599b7d6c87273c82124961e0c7116
+
+COCOAPODS: 1.10.1
