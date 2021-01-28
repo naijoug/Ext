@@ -18,12 +18,12 @@ Pod::Spec.new do |spec|
   spec.default_subspecs = 'Extension', 'UI'
     
   spec.subspec 'Extension' do |ss|
-    ss.source_files = "Sources/Extension/**/*.{swift}"
+    ss.source_files = 'Sources/Extension/**/*'
     ss.frameworks = 'UIKit', 'AVKit'
   end
   
   spec.subspec 'UI' do |ss|
-    ss.source_files = 'Sources/UI/**/*.{swift}'
+    ss.source_files = 'Sources/UI/**/*'
     ss.frameworks = 'UIKit', 'WebKit'
   end
   
