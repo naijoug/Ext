@@ -10,9 +10,9 @@ import Foundation
 extension Date: ExtCompatible{}
 
 public extension ExtWrapper where Base == Date {
-    
-    /// date formatter name
-    enum Name: String {
+
+    /// 日期格式化类型
+    enum DateFormatType: String {
         /// yyyy-MM-dd HH:mm:ss SSS
         case yyyy_MM_dd_HH_mm_ss_SSS    = "yyyy-MM-dd HH:mm:ss SSS"
         /// yyyyMMdd_HHmmss_SSS
@@ -41,8 +41,8 @@ public extension ExtWrapper where Base == Date {
     
     /// Date -> String
     /// - Parameter type: 日期格式类型
-    func format(name: Name) -> String {
-        return format(name.rawValue)
+    func format(type: DateFormatType) -> String {
+        return format(type.rawValue)
     }
     
     /// Date -> String
@@ -51,20 +51,28 @@ public extension ExtWrapper where Base == Date {
     /// - Returns: String
     func format(_ dateFormat: String) -> String {
         let formatter = DateFormatter()
+        // Reference: https://developer.apple.com/documentation/foundation/dateformatter
+        formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = dateFormat
         return formatter.string(from: base)
     }
+    
+    /// log日志时间
+    var logTime: String {
+        return format(type: .yyyy_MM_dd_HH_mm_ss_SSS)
+    }
+    
 }
 
 public extension ExtWrapper where Base == Date {
     
-    /// format timestamp
+    /// 格式化时间戳 yyyy-MM-dd HH:mm:ss SSS
     static func formatTime(_ timestamp: TimeInterval?, format: String) -> String? {
         guard let date = dateTime(timestamp) else { return nil }
         return date.ext.format(format)
     }
     
-    /// timestamp -> Date
+    /// 时间戳 -> Date
     static func dateTime(_ timestamp: TimeInterval?) -> Date? {
         guard let timestamp = timestamp else { return nil }
         return Date(timeIntervalSince1970: timestamp)
@@ -76,7 +84,7 @@ public extension ExtWrapper where Base == Date {
         return Calendar.current.date(byAdding: components, to: base) ?? base
     }
     
-    /// next oclock
+    /// 下一个整点时间
     var nextOclock: Date {
         let calendar = Calendar.current
         let minute = calendar.component(.minute, from: base)
@@ -210,3 +218,5 @@ extension ExtWrapper where Base == Date {
     /// 一周的秒数 (7天)
     private static let oneWeekOfSeconds: TimeInterval = oneDayOfSeconds * 7
 }
+
+
