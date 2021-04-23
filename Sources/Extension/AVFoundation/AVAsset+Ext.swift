@@ -84,16 +84,14 @@ public extension Ext {
 
         let bufferByteSize: UInt32 = 32768
         var srcBuffer = [UInt8](repeating: 0, count: 32768)
+        let uint8Pointer = UnsafeMutablePointer<UInt8>.allocate(capacity: srcBuffer.count)
+        uint8Pointer.initialize(from: &srcBuffer, count: srcBuffer.count)
         var sourceFrameOffset: ULONG = 0
 
         while true {
             var fillBufList = AudioBufferList(
                 mNumberBuffers: 1,
-                mBuffers: AudioBuffer(
-                    mNumberChannels: 2,
-                    mDataByteSize: UInt32(srcBuffer.count),
-                    mData: &srcBuffer
-                )
+                mBuffers: AudioBuffer(mNumberChannels: 2, mDataByteSize: UInt32(srcBuffer.count), mData: uint8Pointer)
             )
             var numFrames: UInt32 = 0
 
