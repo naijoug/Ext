@@ -31,6 +31,7 @@ Pod::Spec.new do |spec|
   spec.subspec 'Feature' do |ss|
     ss.source_files = 'Sources/Feature/**/*'
     ss.dependency 'Ext/Extension'
+    ss.dependency 'Ext/UI'
   end
   
 end
