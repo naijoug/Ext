@@ -47,7 +47,7 @@ public extension ExtWrapper where Base == UIImage {
     func applyDarkEffect(radius: CGFloat = 25) -> UIImage? {
         return applyBlurWithRadius(radius, tintColor: UIColor(white: 0.11, alpha: 0.73), saturationDeltaFactor: 1.8)
     }
-
+    
     func applyTintEffectWithColor(_ tintColor: UIColor) -> UIImage? {
         let effectColorAlpha: CGFloat = 0.6
         var effectColor = tintColor
@@ -255,4 +255,69 @@ public extension ExtWrapper where Base == UIImage {
     
 }
 
+public extension ExtWrapper where Base == UIImage {
+    
+    /**
+     * Reference:
+     *  - https://developer.apple.com/documentation/accelerate/reducing_artifacts_in_resampled_images
+     *  - https://nshipster.com/image-resizing/
+     *  - https://medium.com/ymedialabs-innovation/resizing-techniques-and-image-quality-that-every-ios-developer-should-know-e061f33f7aba
+     */
+    
+    func resizedImage(for size: CGSize) -> UIImage? {
+        guard let cgImage = base.cgImage else { return nil }
+        
+        // Define the image format
+        var format = vImage_CGImageFormat(bitsPerComponent: 8,
+                                          bitsPerPixel: 32,
+                                          colorSpace: nil,
+                                          bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.first.rawValue),
+                                          version: 0,
+                                          decode: nil,
+                                          renderingIntent: .defaultIntent)
 
+        var error: vImage_Error
+        
+        // Create and initialize the source buffer
+        var sourceBuffer = vImage_Buffer()
+        defer { sourceBuffer.data.deallocate() }
+        error = vImageBuffer_InitWithCGImage(&sourceBuffer,
+                                             &format,
+                                             nil,
+                                             cgImage,
+                                             vImage_Flags(kvImageNoFlags))
+        guard error == kvImageNoError else { return nil }
+
+        // Create and initialize the destination buffer
+        var destinationBuffer = vImage_Buffer()
+        error = vImageBuffer_Init(&destinationBuffer,
+                                  vImagePixelCount(size.height),
+                                  vImagePixelCount(size.width),
+                                  format.bitsPerPixel,
+                                  vImage_Flags(kvImageNoFlags))
+        guard error == kvImageNoError else { return nil }
+
+        // Scale the image
+        error = vImageScale_ARGB8888(&sourceBuffer,
+                                     &destinationBuffer,
+                                     nil,
+                                     vImage_Flags(kvImageHighQualityResampling))
+        guard error == kvImageNoError else { return nil }
+
+        // Create a CGImage from the destination buffer
+        guard let resizedImage =
+            vImageCreateCGImageFromBuffer(&destinationBuffer,
+                                          &format,
+                                          nil,
+                                          nil,
+                                          vImage_Flags(kvImageNoAllocate),
+                                          &error)?.takeRetainedValue(),
+            error == kvImageNoError
+        else {
+            return nil
+        }
+
+        return UIImage(cgImage: resizedImage)
+    }
+    
+}
