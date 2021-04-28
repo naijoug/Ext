@@ -108,32 +108,34 @@ public extension Ext {
         return "\((file as NSString).lastPathComponent):\(line) \t \(function)"
     }
     
-    /// Log 级别
-    enum LogLevel {
-        case info
-        case debug
+    /// Log 标记
+    enum LogTag: String {
+        case normal = ""
+        case success = "✅"
+        case failure = "❌"
+        case networking = "🌏"
+        case warnning = "⚠️"
+        case store = "🗂"
     }
     
     /// 调试函数
     ///
     /// - Parameters:
     ///   - message: 日志消息
+    ///   - tag: 日志标记
     ///   - logEnabled: 是否显示日志
     ///   - toFile: 是否保存日志到文件
-    static func debug<T>(_ message: T, level: LogLevel = .info, logEnabled: Bool = true, toFile: Bool = false,
-                         file: String = #file, line: Int = #line, function: String = #function) {
+    ///   - location: 是否打印代码定位日志
+    static func debug<T>(_ message: T, tag: LogTag = .normal, logEnabled: Bool = true, toFile: Bool = false,
+                         location: Bool = true, file: String = #file, line: Int = #line, function: String = #function) {
         #if DEBUG
         guard logEnabled || toFile else { return }
         
-        var log = codeLocation(file: file, line: line, function: function)
-        log += " \t \(message)"
+        var log = "Debug \(Date().ext.logTime) \t\(tag.rawValue)"
+        if location { log += codeLocation(file: file, line: line, function: function) }
+        log += " \(message)"
         if logEnabled {
-            switch level {
-            case .info:
-                print("Debug \(Date().ext.logTime) \(log)")
-            case .debug:
-                debugPrint("Debug \(Date().ext.logTime) \(log)")
-            }
+            print(log)
         }
         guard toFile else { return }
         DispatchQueue.global().async {
@@ -148,7 +150,7 @@ public extension Ext {
         guard let cachesUrl = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return }
         let logUrl = cachesUrl.appendingPathComponent("Logs", isDirectory: true)
         FileManager.default.ext.createIfNotExists(logUrl)
-        let fileName = "\(Date().ext.format(type: .yyyy_MM_dd)).ext.log"
+        let fileName = "Ext_\(Date().ext.format(type: .yyyy_MM_dd)).log"
         let logFile = logUrl.appendingPathComponent(fileName)
         
         let timestamp = Date().ext.format(type: .HH_mm_ss_SSS)

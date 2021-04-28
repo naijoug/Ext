@@ -18,7 +18,7 @@ public class LocalAudioPlayer: NSObject {
     
     /// 播放模式
     public enum Mode {
-        case single(_ url: URL, time: TimeInterval? = nil) // 单一播放模式
+        case single(_ url: URL) // 单一播放模式
         case queue(_ urls: [URL]) // 队列播放模式
     }
     
@@ -41,7 +41,7 @@ public class LocalAudioPlayer: NSObject {
     
 // MARK: - Player
     
-    private var avPlayer: AVAudioPlayer?
+    public private(set) var avPlayer: AVAudioPlayer?
     /// 定时器
     private var timer: CADisplayLink?
     
@@ -101,13 +101,26 @@ public extension LocalAudioPlayer {
     /// 是否正在播放
     var isPlaying: Bool { avPlayer?.isPlaying ?? false }
     
-    /// 播放音频
-    func play(_ mode: LocalAudioPlayer.Mode) {
+//    /// 播放音频
+//    func play(_ mode: LocalAudioPlayer.Mode) {
+//        self.stop()
+//        self.mode = mode
+//        switch mode {
+//        case .single(let url, let time):
+//            self.play(url, at: time)
+//        case .queue(let urls):
+//            urlQueue = urls
+//            self.playQueue()
+//        }
+//    }
+    
+    /// 设置音频播放模式
+    func setup(_ mode: LocalAudioPlayer.Mode) {
         self.stop()
         self.mode = mode
         switch mode {
-        case .single(let url, let time):
-            self.play(url, at: time)
+        case .single(let url):
+            self.play(url)
         case .queue(let urls):
             urlQueue = urls
             self.playQueue()
@@ -140,16 +153,22 @@ public extension LocalAudioPlayer {
             player.delegate = self
             Ext.debug("play audio url: \(player.currentTime) -> \(time ?? 0) | device \(player.deviceCurrentTime) | \(url.path)")
             self.avPlayer = player
-            player.isMeteringEnabled = isMeteringEnabled
-            player.currentTime = time ?? 0
-            player.play()
-            
-            delegate?.audioPlayer(self, status: .playing)
-            startTimer()
+            play(time)
         } catch {
             Ext.debug("播放音频失败")
             delegate?.audioPlayer(self, status: .failed(error))
         }
+    }
+    
+    /// 播放到指定时间
+    func play(_ time: TimeInterval? = nil) {
+        guard let player = avPlayer else { return }
+        player.isMeteringEnabled = isMeteringEnabled
+        player.currentTime = time ?? 0
+        player.play()
+        
+        delegate?.audioPlayer(self, status: .playing)
+        startTimer()
     }
     
     /// 暂停播放
