@@ -15,13 +15,6 @@ public protocol LocalAudioPlayerDelegate: AnyObject {
 
 /// 本地音频播放器
 public class LocalAudioPlayer: NSObject {
-    
-    /// 播放模式
-    public enum Mode {
-        case single(_ url: URL) // 单一播放模式
-        case queue(_ urls: [URL]) // 队列播放模式
-    }
-    
     /// 播放状态
     public enum Status {
         case playing
@@ -45,10 +38,10 @@ public class LocalAudioPlayer: NSObject {
     /// 定时器
     private var timer: CADisplayLink?
     
-    /// 播放模式
-    private var mode: LocalAudioPlayer.Mode?
-    /// 播放队列
-    private var urlQueue = [URL]()
+    /// 播放资源 urls
+    private var urls = [URL]()
+    /// 正在播放资源的索引
+    private var playIndex: Int = -1
 }
 extension LocalAudioPlayer: AVAudioPlayerDelegate {
     public func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
@@ -57,14 +50,19 @@ extension LocalAudioPlayer: AVAudioPlayerDelegate {
     }
     public func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
         Ext.debug("audio 播放完成 \(flag)")
-        switch self.mode {
-        case .single:
-            self.delegate?.audioPlayer(self, status: .playEnd)
-            self.stop()
-        case .queue:
-            self.playQueue()
-        default: break
+        
+        stopTimer()
+        avPlayer?.stop()
+        avPlayer = nil
+        
+        guard playIndex == urls.count - 1 else {
+            Ext.debug("播放下一个资源")
+            self.play()
+            return
         }
+        playIndex = -1
+        Ext.debug("全部播放完成.")
+        self.delegate?.audioPlayer(self, status: .playEnd)
     }
 }
 private extension LocalAudioPlayer {
@@ -101,74 +99,34 @@ public extension LocalAudioPlayer {
     /// 是否正在播放
     var isPlaying: Bool { avPlayer?.isPlaying ?? false }
     
-//    /// 播放音频
-//    func play(_ mode: LocalAudioPlayer.Mode) {
-//        self.stop()
-//        self.mode = mode
-//        switch mode {
-//        case .single(let url, let time):
-//            self.play(url, at: time)
-//        case .queue(let urls):
-//            urlQueue = urls
-//            self.playQueue()
-//        }
-//    }
-    
-    /// 设置音频播放模式
-    func setup(_ mode: LocalAudioPlayer.Mode) {
-        self.stop()
-        self.mode = mode
-        switch mode {
-        case .single(let url):
-            self.play(url)
-        case .queue(let urls):
-            urlQueue = urls
-            self.playQueue()
-        }
-    }
-    
-    /// 播放队列中的音频
-    private func playQueue() {
-        guard !urlQueue.isEmpty else {
-            Ext.debug("队列为空，全部播放完成.")
-            self.delegate?.audioPlayer(self, status: .playEnd)
-            self.stop()
-            return
-        }
-        // 出队列进行播放
-        let url = urlQueue.removeFirst()
-        Ext.debug("出队列播放 url: \(url.path)")
-        play(url)
-    }
-    
-    /// 播放指定路径音频
-    private func play(_ url: URL, at time: TimeInterval? = nil) {
-        do {
-            if avPlayer != nil {
-                avPlayer?.stop()
-                avPlayer = nil
-            }
-            
-            let player = try AVAudioPlayer(contentsOf: url)
-            player.delegate = self
-            Ext.debug("play audio url: \(player.currentTime) -> \(time ?? 0) | device \(player.deviceCurrentTime) | \(url.path)")
-            self.avPlayer = player
-            play(time)
-        } catch {
-            Ext.debug("播放音频失败")
-            delegate?.audioPlayer(self, status: .failed(error))
-        }
+    /// 设置播放资源 Url
+    func setup(_ urls: [URL]) {
+        self.clear()
+        
+        self.urls = urls
     }
     
     /// 播放到指定时间
     func play(_ time: TimeInterval? = nil) {
-        guard let player = avPlayer else { return }
-        player.isMeteringEnabled = isMeteringEnabled
-        player.currentTime = time ?? 0
-        player.play()
+        if let player = avPlayer {
+            if let time = time {
+                player.currentTime = time
+            }
+            player.play()
+            Ext.debug("play audio url: \(player.currentTime) -> \(time ?? 0) | device \(player.deviceCurrentTime)")
+            
+            delegate?.audioPlayer(self, status: .playing)
+            startTimer()
+            return
+        }
         
-        delegate?.audioPlayer(self, status: .playing)
-        startTimer()
+        playIndex += 1
+        
+        guard 0 <= playIndex, playIndex < urls.count else { return }
+        
+        let url = urls[playIndex]
+        Ext.debug("播放 \(playIndex) url: \(url.path)")
+        playUrl(url)
     }
     
     /// 暂停播放
@@ -180,14 +138,38 @@ public extension LocalAudioPlayer {
         Ext.debug("暂停播放")
     }
     
-    /// 停止播放
-    func stop() {
-        mode = nil
-        urlQueue.removeAll()
+    /// 清空播放器
+    func clear() {
+        urls.removeAll()
+        playIndex = -1
         
         stopTimer()
         avPlayer?.stop()
         avPlayer = nil
-        Ext.debug("停止播放")
+        Ext.debug("停止播放，清空播放器")
+    }
+    
+    /// 播放指定路径音频
+    private func playUrl(_ url: URL, time: TimeInterval? = nil) {
+        do {
+            if avPlayer != nil {
+                avPlayer?.stop()
+                avPlayer = nil
+            }
+            
+            let player = try AVAudioPlayer(contentsOf: url)
+            self.avPlayer = player
+            player.delegate = self
+            player.isMeteringEnabled = isMeteringEnabled
+            player.currentTime = time ?? 0
+            player.play()
+            Ext.debug("play audio url: \(player.currentTime) -> \(time ?? 0) | device \(player.deviceCurrentTime) | \(url.path)")
+            
+            delegate?.audioPlayer(self, status: .playing)
+            startTimer()
+        } catch {
+            Ext.debug("播放音频失败")
+            delegate?.audioPlayer(self, status: .failed(error))
+        }
     }
 }
