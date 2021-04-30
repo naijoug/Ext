@@ -170,7 +170,7 @@ public extension NetworkManager {
     ///   - handler: 数据回调
     private func data(_ request: URLRequest, msg requestMsg: String, handler: @escaping DataHandler) {
         let requestTime = Date()
-        Ext.debug("Data Request | \(requestMsg)", tag: .networking, location: false)
+        Ext.debug("Data Request | \(requestMsg)", tag: .custom("🌏"), location: false)
         DispatchQueue.global(qos: .userInitiated).async {
             let configuration = URLSessionConfiguration.default
             let session = URLSession(configuration: configuration)
@@ -192,7 +192,7 @@ public extension NetworkManager {
                 }
                 if let data = data {
                     let rawData = data.ext.prettyPrintedJSONString ?? data.ext.string ?? ""
-                    responseMsg += " | 🔥 Data => \(rawData)"
+                    responseMsg += " | 🏀 Data => \(rawData)"
                 }
                 Ext.debug("Data Response success | \(responseMsg) \n", tag: .success, location: false)
                 handler((data, response, error))
@@ -274,7 +274,7 @@ public extension NetworkManager {
         let downloadTask = DownloadTask(saveUrl: saveUrl, startTime: Date(), progress: progress, handler: handler)
         append(downloadTask, for: url)
         
-        Ext.debug("Download Request | \(url.absoluteString)", tag: .networking, logEnabled: downloadLogged, location: false)
+        Ext.debug("Download Request | \(url.absoluteString)", tag: .custom("🌏"), logEnabled: downloadLogged, location: false)
         let request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 60*10)
         let task = downloadSession.downloadTask(with: request)
         task.resume()

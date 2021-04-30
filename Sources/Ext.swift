@@ -109,13 +109,27 @@ public extension Ext {
     }
     
     /// Log 标记
-    enum LogTag: String {
-        case normal = "#"
-        case success = "✅"
-        case failure = "❌"
-        case networking = "🌏"
-        case warnning = "⚠️"
-        case store = "🗂"
+    enum LogTag {
+        case normal
+        case success
+        case failure
+        
+        case store
+        
+        /// 自定义符号
+        case custom(_ token: String)
+        
+        /// 标记符号
+        var token: String {
+            switch self {
+            case .normal:   return "#"
+            case .success:  return "✅"
+            case .failure:  return "❌"
+            
+            case .store:    return "🗂"
+            case .custom(let token): return token
+            }
+        }
     }
     
     /// 调试函数
@@ -131,7 +145,7 @@ public extension Ext {
         #if DEBUG
         guard logEnabled || toFile else { return }
         
-        var log = "Debug \(Date().ext.logTime) \(tag.rawValue)"
+        var log = "Debug \(Date().ext.logTime) \(tag.token)"
         if location { log += " 【\(codeLocation(file: file, line: line, function: function))】" }
         log += " \(message)"
         if logEnabled { print(log) }
