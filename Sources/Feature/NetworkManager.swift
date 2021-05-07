@@ -93,8 +93,8 @@ public extension NetworkManager {
     ///   - httpBody: 请求体
     ///   - handler: 数据回调
     func data(_ urlString: String, method: HttpMethod,
-              headers: [String: String]? = nil, params: Any? = nil,
-              handler: @escaping DataHandler) {
+              headers: [String: String]? = nil, headerLogged: Bool = false,
+              params: Any? = nil, handler: @escaping DataHandler) {
         
         guard let url = self.url(urlString, method: method, params: params) else {
             Ext.debug("Data HTTP url create failed. \(urlString)", tag: .failure, location: false)
@@ -112,7 +112,7 @@ public extension NetworkManager {
             for (key, value) in headers {
                 request.addValue(value, forHTTPHeaderField: key)
             }
-            if headerLogged {
+            if self.headerLogged || headerLogged {
                 requestMsg += " | headers: \(headers)"
             }
         }
