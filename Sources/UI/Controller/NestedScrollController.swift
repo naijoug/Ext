@@ -175,7 +175,7 @@ extension NestedScrollController: UITableViewDataSource, UITableViewDelegate {
 
 // MARK: - SubScrollController
 
-public protocol SubScrollControllerDelegate: class {
+public protocol SubScrollControllerDelegate: AnyObject {
     func subScrollController(_ controller: SubScrollController, didScroll scrollView: UIScrollView)
 }
 

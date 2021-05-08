@@ -99,6 +99,15 @@ public extension ExtWrapper where Base: UITableView {
         - https://stackoverflow.com/questions/48017955/ios-tableview-reload-and-scroll-top/50029233
      */
     
+    /// 刷新列表
+    func reloadData(_ completion: @escaping Ext.VoidHandler) {
+        UIView.animate(withDuration: 0, animations: {
+            base.reloadData()
+        }, completion:{ _ in
+            completion()
+        })
+    }
+    
     enum Position {
         case top
         case bottom

@@ -24,11 +24,13 @@ public protocol ExtCompatible {
 public extension ExtCompatible {
     static var ext: ExtWrapper<Self>.Type {
         get { return ExtWrapper<Self>.self }
+        // swiftlint:disable:next unused_setter_value
         set { }
     }
     var ext: ExtWrapper<Self> {
         get { return ExtWrapper(self) }
+        // swiftlint:disable:next unused_setter_value
         set { }
     }
 }
-extension NSObject: ExtCompatible {}
+extension NSObject: ExtCompatible { }
