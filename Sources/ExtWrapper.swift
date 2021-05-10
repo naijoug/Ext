@@ -7,6 +7,12 @@
 
 import Foundation
 
+/**
+ Reference:
+    - https://github.com/ReactiveX/RxSwift/blob/main/RxSwift/Reactive.swift
+    - https://kaushalelsewhere.medium.com/better-way-to-manage-swift-extensions-in-ios-project-78dc34221bc8
+ */
+
 public struct ExtWrapper<Base> {
     public let base: Base
     

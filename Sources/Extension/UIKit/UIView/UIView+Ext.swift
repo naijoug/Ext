@@ -23,6 +23,11 @@ public extension ExtWrapper where Base: UIView {
     ///
     /// - Returns: 当前类型视图实例
     static func instantiateFromNib() -> Base {
+        /**
+         Reference:
+            - https://theiconic.tech/instantiating-from-xib-using-swift-generics-632a2b3d8109
+            - https://stackoverflow.com/questions/25513271/how-to-initialize-instantiate-a-custom-uiview-class-with-a-xib-file-in-swift
+         */
         func instantceFromNib<T>() -> T where T: UIView {
             if let view = nib.instantiate(withOwner: nil, options: nil).first as? T {
                 return view
