@@ -17,7 +17,7 @@ extension ExtWrapper where Base: UIScrollView {
     
     /// 滚动到底部
     public func scrollToBottom(animated: Bool = true) {
-        let y = base.contentSize.height - base.frame.size.height
+        let y = base.contentSize.height - base.frame.size.height + base.contentInset.bottom
         guard y > 0 else { return }
         base.setContentOffset(CGPoint(x: 0, y: y), animated: animated)
     }

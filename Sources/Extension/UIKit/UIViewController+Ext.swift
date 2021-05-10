@@ -44,6 +44,28 @@ public extension ExtWrapper where Base: UIViewController {
     
 }
 
+// MARK: - Child Controller
+
+public extension ExtWrapper where Base: UIViewController {
+    
+    // Reference: https://www.swiftbysundell.com/articles/using-child-view-controllers-as-plugins-in-swift/
+    
+    /// 添加子控制器
+    func add(_ child: UIViewController) {
+        base.addChild(child)
+        base.view.addSubview(child.view)
+        child.didMove(toParent: base)
+    }
+    
+    /// 从父控制器移除
+    func remove() {
+        guard base.parent != nil else { return }
+        base.didMove(toParent: nil)
+        base.view.removeFromSuperview()
+        base.removeFromParent()
+    }
+}
+
 // MARK: - Navigation
 
 public extension ExtWrapper where Base: UINavigationController {

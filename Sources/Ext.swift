@@ -105,17 +105,31 @@ public extension Ext {
     ///   - line: 日志打印行数
     ///   - function: 函数名
     static func codeLocation(file: String = #file, line: Int = #line, function: String = #function) -> String {
-        return "\((file as NSString).lastPathComponent):\(line) \t \(function)"
+        return "\((file as NSString).lastPathComponent):\(line) \t\(function)"
     }
     
     /// Log 标记
-    enum LogTag: String {
-        case normal = ""
-        case success = "✅"
-        case failure = "❌"
-        case networking = "🌏"
-        case warnning = "⚠️"
-        case store = "🗂"
+    enum LogTag {
+        case normal
+        case success
+        case failure
+        
+        case store
+        
+        /// 自定义符号
+        case custom(_ token: String)
+        
+        /// 标记符号
+        var token: String {
+            switch self {
+            case .normal:   return "#"
+            case .success:  return "✅"
+            case .failure:  return "❌"
+            
+            case .store:    return "🗂"
+            case .custom(let token): return token
+            }
+        }
     }
     
     /// 调试函数
@@ -131,12 +145,10 @@ public extension Ext {
         #if DEBUG
         guard logEnabled || toFile else { return }
         
-        var log = "Debug \(Date().ext.logTime) \t\(tag.rawValue)"
-        if location { log += codeLocation(file: file, line: line, function: function) }
+        var log = "Debug \(Date().ext.logTime) \(tag.token)"
+        if location { log += " 【\(codeLocation(file: file, line: line, function: function))】" }
         log += " \(message)"
-        if logEnabled {
-            print(log)
-        }
+        if logEnabled { print(log) }
         guard toFile else { return }
         DispatchQueue.global().async {
             logToFile(log)

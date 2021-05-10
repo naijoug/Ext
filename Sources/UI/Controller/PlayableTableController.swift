@@ -8,13 +8,13 @@
 import UIKit
 
 /// 可视化协议 : 用于判断在屏幕的可以范围
-public protocol Visible: class {
+public protocol Visible: AnyObject {
     /// 可视视图: 用于计算可视范围的视图
     var visibleView: UIView { get }
 }
 
 /// 可播放协议
-public protocol Playable: class {
+public protocol Playable: AnyObject {
     /// 是否可以进行播放
     var isPlayable: Bool { get set }
     /// 播放

@@ -42,9 +42,10 @@ public extension ExtWrapper where Base == DispatchQueue {
     /// 延迟函数
     /// - Parameters:
     ///   - delay: 延迟时间(单位: 秒)
+    ///   - queue: 延迟操作所在队列
     ///   - handler: 延迟之后处理
-    static func after(delay: Double, handler: @escaping Ext.VoidHandler) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+    static func after(delay: Double, queue: DispatchQueue = .main, handler: @escaping Ext.VoidHandler) {
+        queue.asyncAfter(deadline: .now() + delay) {
             handler()
         }
     }

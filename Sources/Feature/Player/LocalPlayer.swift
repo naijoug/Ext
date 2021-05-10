@@ -8,7 +8,7 @@
 import Foundation
 import AVFoundation
 
-public protocol PlayerDelegate: class {
+public protocol PlayerDelegate: AnyObject {
     func player(_ player: Player, status: Player.Status)
     func player(_ player: Player, timeStatus status: Player.TimeStatus)
 }
@@ -197,7 +197,7 @@ private extension LocalPlayer {
         /// 时间点监听
         guard let times = boundaryTimes, times.count > 0 else { return }
         boundaryObserver = avPlayer.addBoundaryTimeObserver(forTimes: times, queue: DispatchQueue.main) { [weak self] in
-            guard let `self` = self else { return }
+            guard let `self` = self, self.isPlaying else { return }
             self.delegate?.player(self, timeStatus: .boundary(self.currentTime))
         }
     }
@@ -212,7 +212,8 @@ private extension LocalPlayer {
         guard let periodicTime = periodicTime, periodicTime > 0 else { return }
         let interval = CMTimeMakeWithSeconds(periodicTime, preferredTimescale: 600)
         periodicObserver = avPlayer.addPeriodicTimeObserver(forInterval: interval, queue: DispatchQueue.main) { [weak self] time in
-            guard let `self` = self else { return }
+            guard let `self` = self, self.isPlaying else { return }
+            //Ext.debug("status: \(self.status)")
             self.delegate?.player(self, timeStatus: .periodic(time.seconds))
         }
     }
