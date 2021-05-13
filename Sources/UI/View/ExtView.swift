@@ -7,7 +7,7 @@
 
 import UIKit
 
-// MARK: - 自定义视图
+// MARK: - View
 
 /// 自定义视图
 open class ExtView: UIView {
@@ -16,10 +16,11 @@ open class ExtView: UIView {
     }
     public override init(frame: CGRect) {
         super.init(frame: frame)
-        setupView()
+        setupUI()
     }
-    /// 初始化视图
-    @objc open func setupView() {}
+    
+    @objc
+    open func setupUI() {}
 }
 
 /// 自定义控件
@@ -29,23 +30,11 @@ open class ExtControl: UIControl {
     }
     public override init(frame: CGRect) {
         super.init(frame: frame)
-        setupView()
+        setupUI()
     }
-    /// 初始化视图
-    @objc open func setupView() {}
-}
-
-/// 自定义按钮 (基类)
-open class ExtButton: UIButton {
-    public required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    public override init(frame: CGRect) {
-        super.init(frame: frame)
-        setupButton()
-    }
-    /// 初始化按钮
-    @objc open func setupButton() {}
+    
+    @objc
+    open func setupUI() {}
 }
 
 /// 自定义图片
@@ -55,18 +44,19 @@ open class ExtImageView: UIImageView {
     }
     public override init(frame: CGRect) {
         super.init(frame: frame)
-        setupView()
+        setupUI()
     }
     public override init(image: UIImage?) {
         super.init(image: image)
-        setupView()
+        setupUI()
     }
     public init() {
         super.init(image: nil)
-        setupView()
+        setupUI()
     }
-    /// 初始化视图
-    @objc open func setupView() {}
+    
+    @objc
+    open func setupUI() {}
 }
 
 // MARK: - Cell
@@ -78,10 +68,11 @@ open class ExtTableCell: UITableViewCell {
     }
     public override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        setupCell()
+        setupUI()
     }
-    /// 初始化 Cell
-    @objc open func setupCell() {}
+    
+    @objc
+    open func setupUI() {}
 }
 /// 自定义 TableHeaderFooterView (基类)
 open class ExtTableHeaderFooterView: UITableViewHeaderFooterView {
@@ -90,10 +81,11 @@ open class ExtTableHeaderFooterView: UITableViewHeaderFooterView {
     }
     public override init(reuseIdentifier: String?) {
         super.init(reuseIdentifier: reuseIdentifier)
-        setupView()
+        setupUI()
     }
-    /// 初始化视图
-    @objc open func setupView() {}
+    
+    @objc
+    open func setupUI() {}
 }
 
 /// 自定义 CollectionViewCell (基类)
@@ -103,73 +95,78 @@ open class ExtCollectionCell: UICollectionViewCell {
     }
     public override init(frame: CGRect) {
         super.init(frame: frame)
-        setupCell()
+        setupUI()
     }
-    /// 初始化 Cell
-    @objc open func setupCell() {}
+    
+    @objc
+    open func setupUI() {}
 }
-
+/// 自定义 CollectionReusableView (基类)
 open class ExtCollectionReusableView: UICollectionReusableView {
     public required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     public override init(frame: CGRect) {
         super.init(frame: frame)
-        setupView()
+        setupUI()
     }
-    /// 初始化视图
-    @objc open func setupView() {}
+    
+    @objc
+    open func setupUI() {}
 }
 
 // MARK: - Wrapper
 
-open class WrapperTableCell<T: UIView>: ExtTableCell {
-    public private(set) var wrapperView: T!
+public extension Ext {
     
-    open override func setupCell() {
-        super.setupCell()
+    class WrapperTableCell<T: UIView>: ExtTableCell {
+        public private(set) var wrapperView: T!
         
-        wrapperView = contentView.ext.add(T())
-        wrapperView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            wrapperView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            wrapperView.leftAnchor.constraint(equalTo: contentView.leftAnchor),
-            wrapperView.rightAnchor.constraint(equalTo: contentView.rightAnchor),
-            wrapperView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-        ])
+        open override func setupUI() {
+            super.setupUI()
+            
+            wrapperView = contentView.ext.add(T())
+            wrapperView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                wrapperView.topAnchor.constraint(equalTo: contentView.topAnchor),
+                wrapperView.leftAnchor.constraint(equalTo: contentView.leftAnchor),
+                wrapperView.rightAnchor.constraint(equalTo: contentView.rightAnchor),
+                wrapperView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+            ])
+        }
     }
-}
 
-open class WrapperCollectionCell<T: UIView>: ExtCollectionCell {
-    public private(set) var wrapperView: T!
-    
-    open override func setupCell() {
-        super.setupCell()
+    class WrapperCollectionCell<T: UIView>: ExtCollectionCell {
+        public private(set) var wrapperView: T!
         
-        wrapperView = contentView.ext.add(T())
-        wrapperView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            wrapperView.topAnchor.constraint(equalTo: contentView.topAnchor),
-            wrapperView.leftAnchor.constraint(equalTo: contentView.leftAnchor),
-            wrapperView.rightAnchor.constraint(equalTo: contentView.rightAnchor),
-            wrapperView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-        ])
+        open override func setupUI() {
+            super.setupUI()
+            
+            wrapperView = contentView.ext.add(T())
+            wrapperView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                wrapperView.topAnchor.constraint(equalTo: contentView.topAnchor),
+                wrapperView.leftAnchor.constraint(equalTo: contentView.leftAnchor),
+                wrapperView.rightAnchor.constraint(equalTo: contentView.rightAnchor),
+                wrapperView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+            ])
+        }
     }
-}
 
-open class WrapperCollectionReusableView<T: UIView>: ExtCollectionReusableView {
-    public private(set) var wrapperView: T!
-    
-    open override func setupView() {
-        super.setupView()
+    class WrapperCollectionReusableView<T: UIView>: ExtCollectionReusableView {
+        public private(set) var wrapperView: T!
         
-        wrapperView = ext.add(T())
-        wrapperView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            wrapperView.topAnchor.constraint(equalTo: self.topAnchor),
-            wrapperView.leftAnchor.constraint(equalTo: self.leftAnchor),
-            wrapperView.rightAnchor.constraint(equalTo: self.rightAnchor),
-            wrapperView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
-        ])
+        open override func setupUI() {
+            super.setupUI()
+            
+            wrapperView = ext.add(T())
+            wrapperView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                wrapperView.topAnchor.constraint(equalTo: self.topAnchor),
+                wrapperView.leftAnchor.constraint(equalTo: self.leftAnchor),
+                wrapperView.rightAnchor.constraint(equalTo: self.rightAnchor),
+                wrapperView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
+            ])
+        }
     }
 }

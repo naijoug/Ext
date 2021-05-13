@@ -25,8 +25,9 @@ open class UpdownButton: IndicatorButton {
     /// 上下偏移
     open var margin: CGFloat = 0
     
-    open override func setupButton() {
-        super.setupButton()
+    open override func setupUI() {
+        super.setupUI()
+     
         titleLabel?.textAlignment = .center
         imageView?.contentMode = .center
     }

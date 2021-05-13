@@ -20,8 +20,8 @@ open class CameraPreviewView: ExtView {
     
     private var previewLayer: AVCaptureVideoPreviewLayer!
     
-    open override func setupView() {
-        super.setupView()
+    open override func setupUI() {
+        super.setupUI()
         
         previewLayer = AVCaptureVideoPreviewLayer(session: session)
         layer.insertSublayer(previewLayer, at: 0)

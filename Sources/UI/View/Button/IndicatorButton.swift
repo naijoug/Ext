@@ -8,29 +8,20 @@
 import UIKit
 
 /// 联网指示器按钮
-open class IndicatorButton: ExtButton {
+open class IndicatorButton: UIButton {
     
     /// 指示器视图
-    open var indicatorView: UIActivityIndicatorView!
-    
-    open override func setupButton() {
-        super.setupButton()
-        
-        indicatorView = UIActivityIndicatorView(style: .gray)
+    open lazy var indicatorView: UIActivityIndicatorView = {
+        let indicatorView = UIActivityIndicatorView(style: .gray)
         addSubview(indicatorView)
         indicatorView.style = .gray
         indicatorView.translatesAutoresizingMaskIntoConstraints = false
         indicatorView.centerXAnchor.constraint(equalTo: self.centerXAnchor).isActive = true
         indicatorView.centerYAnchor.constraint(equalTo: self.centerYAnchor).isActive = true
-        
-        isNetworking = false
-    }
-
-    open override func layoutSubviews() {
-        super.layoutSubviews()
-        bringSubviewToFront(indicatorView)
-    }
+        return indicatorView
+    }()
     
+    /// 是否正在
     open var isNetworking: Bool = false {
         didSet {
             isEnabled = !isNetworking
@@ -44,4 +35,17 @@ open class IndicatorButton: ExtButton {
         }
     }
     
+    open override func layoutSubviews() {
+        super.layoutSubviews()
+        bringSubviewToFront(indicatorView)
+    }
+    required public init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupUI()
+    }
+    @objc
+    open func setupUI() {}
 }

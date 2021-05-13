@@ -49,8 +49,8 @@ public class WaveformView: ExtView {
         }
     }
     
-    public override func setupView() {
-        super.setupView()
+    public override func setupUI() {
+        super.setupUI()
         backgroundColor = UIColor.black.withAlphaComponent(0.5)
         
         for i in 0..<numberOfWaves {
