@@ -166,7 +166,11 @@ public struct BubbleArrow {
     /// 箭头的高度
     public var height: CGFloat = 10
     /// 箭头的相对位置 (0 ~ 1.0)
-    public var position: CGFloat = 0.5
+    public var position: CGFloat = 0.5 {
+        didSet {
+            position = max(0, min(1.0, position))
+        }
+    }
     
     public init() {}
 }
