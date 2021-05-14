@@ -20,6 +20,8 @@ public final class PlayerManager {
         NotificationCenter.default.removeObserver(self)
     }
     
+    public var logEnabled: Bool = true
+    
     /// 是否静音🔇
     public var isMuted: Bool = true
 }
@@ -44,48 +46,46 @@ public extension PlayerManager {
     /// 打印当前 Audio 设置
     func logAudio(_ message: String = "") {
         let shared = AVAudioSession.sharedInstance()
-        Ext.debug("\(message) category: \(shared.category) | options \(shared.categoryOptions)")
+        Ext.debug("\(message) category: \(shared.category) | options \(shared.categoryOptions)", logEnabled: logEnabled, location: false)
     }
 }
 
 private extension PlayerManager {
     
+    private func log(_ msg: String) {
+        guard logEnabled else { return }
+        Ext.debug(msg, location: false)
+    }
+    
     @objc
     func routeChange(_ noti: Notification) {
-        let changeReason = noti.userInfo?[AVAudioSessionRouteChangeReasonKey] as? AVAudioSession.RouteChangeReason
-        switch changeReason {
-        case .oldDeviceUnavailable: // 旧输出设备不可用
-            let previousRoute = noti.userInfo?[AVAudioSessionRouteChangePreviousRouteKey] as? AVAudioSessionRouteDescription
-            if let port = previousRoute?.outputs.first {
-                switch port.portType {
-                case .headphones:
-                    /**
-                     拔出耳机时:
-                        1> 系统默认会把输出设备设置为扬声器
-                        2> 但是 Category 为 playAndRecord 时，则会把输入设备设置为听筒
-                     */
-                    Ext.debug("之前输入设备是耳机🎧，拔出耳机。")
-                    // 强制设为扬声器
-//                    do {
-//                        try AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker)
-//                    } catch {
-//                        Ext.debug("force output to speaker failed. \(error.localizedDescription)")
-//                    }
-                default: break
-                }
+        guard let reasonValue = noti.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt,
+              let reason = AVAudioSession.RouteChangeReason(rawValue: reasonValue) else { return }
+        log("reason: \(reason)")
+        switch reason {
+        case .newDeviceAvailable:
+            log("newDeviceAvailable")
+            for output in AVAudioSession.sharedInstance().currentRoute.outputs where output.portType == .headphones {
+                log("headphone plugged in")
+                break
+            }
+        case .oldDeviceUnavailable:
+            log("oldDeviceUnavailable")
+            guard let previousRoute = noti.userInfo?[AVAudioSessionRouteChangePreviousRouteKey] as? AVAudioSessionRouteDescription else { return }
+            log("previousRoute: \(previousRoute)")
+            for output in previousRoute.outputs where output.portType == .headphones {
+                /**
+                 拔出耳机时:
+                    1> 系统默认会把输出设备设置为扬声器
+                    2> 但是 Category 为 playAndRecord 时，则会把输入设备设置为听筒
+                 */
+                log("headphone pulled out")
+                break
             }
         default: break
         }
-        
         let route = AVAudioSession.sharedInstance().currentRoute
-        var isHeadphoneEnabled = false
-        for desc in route.outputs {
-            Ext.debug("\(desc)")
-            if desc.portType == .headphones {
-                isHeadphoneEnabled = true
-            }
-        }
-        Ext.debug("isHeadphoneEnabled: \(isHeadphoneEnabled)")
+        log("currentRoute: \(route)")
     }
     
     /// 播放和录音
