@@ -10,8 +10,8 @@ import AVFoundation
 extension AVAudioSessionRouteDescription {
     open override var description: String {
         var msg = ""
-        msg += "\n\t🎤 : \(inputs)"
-        msg += "\n\t🎧 : \(outputs)"
+        msg += "\t🎤 : \(inputs)"
+        msg += "\t🎧 : \(outputs)"
         return msg
     }
 }
@@ -22,7 +22,7 @@ public extension ExtWrapper where Base == AVAudioSession {
     var isHandphoneOuput: Bool {
         let route = AVAudioSession.sharedInstance().currentRoute
         for output in route.outputs {
-            Ext.debug("output: \(output)")
+            Ext.debug("output: \(output)", location: false)
             switch output.portType {
             case .headphones, .bluetoothHFP, .bluetoothA2DP:
                 return true
@@ -36,7 +36,7 @@ public extension ExtWrapper where Base == AVAudioSession {
     var isBluetoothInput: Bool {
         let route = AVAudioSession.sharedInstance().currentRoute
         for input in route.inputs {
-            Ext.debug("input: \(input)")
+            Ext.debug("input: \(input)", location: false)
             switch input.portType {
             case .bluetoothHFP:
                 return true

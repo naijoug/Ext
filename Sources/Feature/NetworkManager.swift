@@ -16,24 +16,6 @@ public enum HttpMethod: String {
     case delete     = "DELETE"
 }
 
-/// form-data 文件数据
-public struct FormData {
-    public init() {}
-    /// 附件名字
-    public var name: String?
-    /// 文件名
-    public var filename: String?
-    /// 文件 MIME 类型
-    public var mimeType: String?
-    /// 文件数据
-    public var data: Data?
-}
-extension FormData: CustomStringConvertible {
-    public var description: String {
-        return "{ name: \(name ?? ""), filename: \(filename ?? ""), mimeType: \(mimeType ?? "")}"
-    }
-}
-
 /// network manager
 public final class NetworkManager: NSObject {
     public static let shared = NetworkManager()
@@ -74,7 +56,6 @@ public final class NetworkManager: NSObject {
     private var downloadTasks = [String: DownloadTask]()
 }
 public extension NetworkManager {
-    
     
     private func url(_ urlString: String, method: HttpMethod, params: Any?) -> URL? {
         guard let url = URL(string: urlString) else { return nil }
@@ -131,6 +112,72 @@ public extension NetworkManager {
         data(request, msg: requestMsg, handler: handler)
     }
     
+    /// 数据请求
+    /// - Parameters:
+    ///   - request: 请求体
+    ///   - requestMsg: 请求日志
+    ///   - handler: 数据回调
+    private func data(_ request: URLRequest, msg requestMsg: String, handler: @escaping DataHandler) {
+        func dataHandler(_ data: Data?, _ response: URLResponse?, _ error: Error?) {
+            DispatchQueue.main.async {
+                handler((data, response, error))
+            }
+        }
+        
+        let requestTime = Date()
+        Ext.debug("Data Request | \(requestMsg)", tag: .custom("🌏"), location: false)
+        DispatchQueue.global(qos: .userInitiated).async {
+            let configuration = URLSessionConfiguration.default
+            let session = URLSession(configuration: configuration)
+            let task = session.dataTask(with: request) { (data, response, error) in
+                let elapsed = Date().timeIntervalSince(requestTime)
+                var responseMsg = "elapsed : \(String(format: "%.4f", elapsed)) | \(requestMsg)"
+                let httpResponse = response as? HTTPURLResponse
+                guard httpResponse?.statusCode == 200 else {
+                    guard let error = error else {
+                        responseMsg += " | statusCcode != 200, \(httpResponse?.statusCode ?? 0)"
+                        Ext.debug("Data Response failure | \(responseMsg)", tag: .failure, location: false)
+                        dataHandler(nil, response, Ext.Error.inner("Server error \(httpResponse?.statusCode ?? 0)."))
+                        return
+                    }
+                    responseMsg += " | Error: \(error.localizedDescription)"
+                    Ext.debug("Data Response failure | \(responseMsg)", tag: .failure, location: false)
+                    dataHandler(data, response, error)
+                    return
+                }
+                if let data = data {
+                    let rawData = data.ext.prettyPrintedJSONString ?? data.ext.string ?? ""
+                    responseMsg += " | 🏀 Data => \(rawData)"
+                }
+                Ext.debug("Data Response success | \(responseMsg) \n", tag: .success, location: false)
+                dataHandler(data, response, error)
+            }
+            task.resume()
+        }
+    }
+}
+
+// MARK: - FormData Upload
+
+/// form-data 文件数据
+public struct FormData {
+    public init() {}
+    /// 附件名字
+    public var name: String?
+    /// 文件名
+    public var filename: String?
+    /// 文件 MIME 类型
+    public var mimeType: String?
+    /// 文件数据
+    public var data: Data?
+}
+extension FormData: CustomStringConvertible {
+    public var description: String {
+        return "{ name: \(name ?? ""), filename: \(filename ?? ""), mimeType: \(mimeType ?? "")}"
+    }
+}
+
+public extension NetworkManager {
     
     /// formdata 格式上传
     /// - Parameters:
@@ -160,45 +207,6 @@ public extension NetworkManager {
         requestMsg += " | \(msg)"
         
         data(request, msg: requestMsg, handler: handler)
-    }
-    
-    
-    /// 数据请求
-    /// - Parameters:
-    ///   - request: 请求体
-    ///   - requestMsg: 请求日志
-    ///   - handler: 数据回调
-    private func data(_ request: URLRequest, msg requestMsg: String, handler: @escaping DataHandler) {
-        let requestTime = Date()
-        Ext.debug("Data Request | \(requestMsg)", tag: .custom("🌏"), location: false)
-        DispatchQueue.global(qos: .userInitiated).async {
-            let configuration = URLSessionConfiguration.default
-            let session = URLSession(configuration: configuration)
-            let task = session.dataTask(with: request) { (data, response, error) in
-                let elapsed = Date().timeIntervalSince(requestTime)
-                var responseMsg = "elapsed : \(String(format: "%.4f", elapsed)) | \(requestMsg)"
-                let httpResponse = response as? HTTPURLResponse
-                guard httpResponse?.statusCode == 200 else {
-                    guard let error = error else {
-                        responseMsg += " | statusCcode != 200, \(httpResponse?.statusCode ?? 0)"
-                        Ext.debug("Data Response failure | \(responseMsg)", tag: .failure, location: false)
-                        handler((nil, response, Ext.Error.inner("Server error \(httpResponse?.statusCode ?? 0).")))
-                        return
-                    }
-                    responseMsg += " | Error: \(error.localizedDescription)"
-                    Ext.debug("Data Response failure | \(responseMsg)", tag: .failure, location: false)
-                    handler((data, response, error))
-                    return
-                }
-                if let data = data {
-                    let rawData = data.ext.prettyPrintedJSONString ?? data.ext.string ?? ""
-                    responseMsg += " | 🏀 Data => \(rawData)"
-                }
-                Ext.debug("Data Response success | \(responseMsg) \n", tag: .success, location: false)
-                handler((data, response, error))
-            }
-            task.resume()
-        }
     }
     
     /// 创建 multipart/form-data Body 体
@@ -250,6 +258,7 @@ fileprivate extension Data {
     }
 }
 
+// MARK: - Download
 
 public extension NetworkManager {
     
