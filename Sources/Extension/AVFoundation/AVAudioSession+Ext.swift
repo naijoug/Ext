@@ -7,15 +7,6 @@
 
 import AVFoundation
 
-extension AVAudioSessionRouteDescription {
-    open override var description: String {
-        var msg = ""
-        msg += "\t🎤 : \(inputs)"
-        msg += "\t🎧 : \(outputs)"
-        return msg
-    }
-}
-
 public extension ExtWrapper where Base == AVAudioSession {
     
     /// 是否连接耳机输出

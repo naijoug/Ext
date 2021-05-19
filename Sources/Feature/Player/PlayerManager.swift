@@ -14,10 +14,14 @@ private var AudioSessionCategoryContext = 0
 public final class PlayerManager {
     public static let shared = PlayerManager()
     private init() {
-        NotificationCenter.default.addObserver(self, selector: #selector(routeChange(_:)), name: AVAudioSession.routeChangeNotification, object: nil)
+        addNotification()
+        
+        let session = AVAudioSession.sharedInstance()
+        Ext.debug("availableCategories: \(session.availableCategories.map({ $0.rawValue }))", tag: .custom("📢"))
+        Ext.debug("availableModes: \(session.availableModes.map({ $0.rawValue }))", tag: .custom("📢"))
     }
     deinit {
-        NotificationCenter.default.removeObserver(self)
+        removeNotfication()
     }
     
     public var logEnabled: Bool = true
@@ -26,31 +30,24 @@ public final class PlayerManager {
     public var isMuted: Bool = true
 }
 
-extension AVAudioSession.RouteChangeReason: CustomStringConvertible {
-    public var description: String {
-        switch self {
-        case .unknown:                      return "unknown"
-        case .newDeviceAvailable:           return "newDeviceAvailable"
-        case .oldDeviceUnavailable:         return "oldDeviceUnavailable"
-        case .categoryChange:               return "categoryChange"
-        case .override:                     return "override"
-        case .wakeFromSleep:                return "wakeFromSleep"
-        case .noSuitableRouteForCategory:   return "noSuitableRouteForCategory"
-        case .routeConfigurationChange:     return "routeConfigurationChange"
-        default: return "none"
-        }
-    }
-}
+// MARK: - Notification
 
 private extension PlayerManager {
     
-    private func log(_ msg: String) {
-        guard logEnabled else { return }
-        Ext.debug(msg, tag: .custom("📣"), location: false)
+    func addNotification() {
+        NotificationCenter.default.addObserver(self, selector: #selector(routeChange(_:)), name: AVAudioSession.routeChangeNotification, object: nil)
+    }
+    func removeNotfication() {
+        NotificationCenter.default.removeObserver(self)
     }
     
     @objc
     func routeChange(_ noti: Notification) {
+        func log(_ msg: String) {
+            guard logEnabled else { return }
+            Ext.debug(msg, tag: .custom("📣"), location: false)
+        }
+        
         guard let reasonValue = noti.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt,
               let reason = AVAudioSession.RouteChangeReason(rawValue: reasonValue) else { return }
         log("routeChange reason => \(reason)")
@@ -76,20 +73,16 @@ private extension PlayerManager {
             log("audio session category changed.")
         default: break
         }
-        let shared = AVAudioSession.sharedInstance()
-        log("category: \(shared.category.rawValue) | options \(shared.categoryOptions.rawValue)")
-        log("currentRoute: \(shared.currentRoute)")
-        log("availableCategories: \(shared.availableCategories)")
-        log("availableModes: \(shared.availableModes)")
-        log("availableInputs: \(shared.availableInputs ?? [])")
-        log("isInputAvailable: \(shared.isInputAvailable)")
-        log("preferredInput: \(String(describing: shared.preferredInput))")
-        log("preferredInputNumberOfChannels: \(shared.preferredInputNumberOfChannels)")
-        log("preferredOutputNumberOfChannels: \(shared.preferredOutputNumberOfChannels)")
+        log("audio session: \(AVAudioSession.sharedInstance())")
     }
 }
 
 public extension PlayerManager {
+    
+    /**
+     Reference:
+        - [AVAudioSession bluetooth support](http://devmonologue.com/tutorials/avaudiosession-bluetooth-support/)
+     */
     
     enum AudioCategory {
         /// 播放模式
@@ -126,32 +119,31 @@ public extension PlayerManager {
     
     /// 设置音频分类
     func setAudio(_ category: AudioCategory) {
-        let shared = AVAudioSession.sharedInstance()
+        let session = AVAudioSession.sharedInstance()
         logAudio("Set \(category) start, options \(category.options.rawValue)")
-        guard shared.category != category.category || shared.categoryOptions != category.options  else {
+        guard session.category != category.category || session.categoryOptions != category.options  else {
             Ext.debug("no need to set \(category)", logEnabled: logEnabled, location: false)
             return
         }
         do {
-            let shared = AVAudioSession.sharedInstance()
-            try shared.setCategory(category.category, mode: category.mode, options: category.options)
+            try session.setCategory(category.category, mode: category.mode, options: category.options)
             if category.category == .playAndRecord {
                 var inputsPriority: [(type: AVAudioSession.Port, input: AVAudioSessionPortDescription?)] = [
                     (.headsetMic, nil),
                     (.bluetoothHFP, nil),
                     (.builtInMic, nil),
                 ]
-                for availableInput in shared.availableInputs ?? [] {
+                for availableInput in session.availableInputs ?? [] {
                     guard let index = inputsPriority.firstIndex(where: { $0.type == availableInput.portType }) else { continue }
                     inputsPriority[index].input = availableInput
                 }
                 guard let input = inputsPriority.filter({ $0.input != nil }).first?.input else {
-                    fatalError("No Available Ports For Recording")
+                    fatalError("no avalible input")
                 }
-                try shared.setPreferredInput(input)
+                try session.setPreferredInput(input)
                 Ext.debug("set preferred input: \(input)")
             }
-            try shared.setActive(true)
+            try session.setActive(true)
         } catch {
             Ext.debug("set Audio \(category), options: \(category.options.rawValue) failure \(error.localizedDescription)", tag: .failure, logEnabled: logEnabled, location: false)
         }
@@ -160,7 +152,58 @@ public extension PlayerManager {
     
     /// 打印当前 Audio 设置
     func logAudio(_ message: String = "") {
-        let shared = AVAudioSession.sharedInstance()
-        Ext.debug("\(message) | category: \(shared.category.rawValue) options: \(shared.categoryOptions.rawValue)", tag: .custom("⚙️"), logEnabled: logEnabled, location: false)
+        let session = AVAudioSession.sharedInstance()
+        Ext.debug("\(message) | \(session)", tag: .custom("⚙️"), logEnabled: logEnabled, location: false)
+    }
+}
+
+// MARK: - Log
+
+extension AVAudioSession.RouteChangeReason: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .unknown:                      return "unknown"
+        case .newDeviceAvailable:           return "newDeviceAvailable"
+        case .oldDeviceUnavailable:         return "oldDeviceUnavailable"
+        case .categoryChange:               return "categoryChange"
+        case .override:                     return "override"
+        case .wakeFromSleep:                return "wakeFromSleep"
+        case .noSuitableRouteForCategory:   return "noSuitableRouteForCategory"
+        case .routeConfigurationChange:     return "routeConfigurationChange"
+        default: return "none"
+        }
+    }
+}
+extension AVAudioSessionRouteDescription {
+    open override var description: String {
+        var msg = "{"
+        msg += "🎤 : \(inputs)"
+        msg += ", 🎧 : \(outputs)"
+        msg += "}"
+        return msg
+    }
+}
+extension AVAudioSessionPortDescription {
+    open override var description: String {
+        var msg = "{"
+        msg += "portType: \(portType.rawValue)"
+        msg += ", portName: \(portName)"
+        msg += "}"
+        return msg
+    }
+}
+extension AVAudioSession {
+    open override var description: String {
+        var msg = "{"
+        msg += "category: \(category.rawValue)"
+        msg += ", options \(categoryOptions.rawValue)"
+        msg += ", currentRoute: \(currentRoute)"
+        msg += ", preferredOutputNumberOfChannels: \(preferredOutputNumberOfChannels)"
+        msg += ", preferredInputNumberOfChannels: \(preferredInputNumberOfChannels)"
+        msg += ", isInputAvailable: \(isInputAvailable)"
+        msg += ", availableInputs: \(availableInputs ?? [])"
+        if let preferredInput = preferredInput { msg += ", preferredInput: \(preferredInput)" }
+        msg += "}"
+        return msg
     }
 }

@@ -20,7 +20,7 @@ open class UpdownButton: IndicatorButton {
     
     /// 按钮模式
     open var mode: UpdownMode = .imageTitle
-    /// 上下比例
+    /// 上下比例 (默认: 0.5, 1 : 1)
     open var ratio: CGFloat = 0.5
     /// 上下偏移
     open var margin: CGFloat = 0
