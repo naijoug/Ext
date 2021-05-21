@@ -211,12 +211,12 @@ public extension ExtWrapper where Base: UIView {
 
 // MARK: - Shake
 
-extension ExtWrapper where Base: UIView {
+public extension ExtWrapper where Base: UIView {
     
     // Reference: https://www.hangge.com/blog/cache/detail_1603.html
     
     /// 抖动方向
-    public enum ShakeDirection: Int {
+    enum ShakeDirection: Int {
         case horizontal //水平抖动
         case vertical   //垂直抖动
     }
@@ -228,7 +228,7 @@ extension ExtWrapper where Base: UIView {
     ///   - interval: 每次抖动时间（默认: 0.1秒）
     ///   - delta: 抖动偏移量（默认: 1）
     ///   - completion: 抖动动画结束后的回调
-    public func shake(direction: ShakeDirection = .vertical,
+    func shake(direction: ShakeDirection = .vertical,
                       times: Int = 1,
                       interval: TimeInterval = 0.1,
                       delta: CGFloat = 1,
@@ -273,51 +273,49 @@ public extension ExtWrapper where Base: UIView {
     /// - Parameters:
     ///   - fontSize: 字体大小
     ///   - color: 字体颜色
-    ///   - hasBold: 是否加粗
+    ///   - bold: 是否加粗
     ///   - multiline: 是否多行
     func addLabel(fontSize: CGFloat,
                   color: UIColor,
-                  hasBold: Bool = false,
+                  bold: Bool = false,
                   multiline: Bool = false) -> UILabel {
         let label = add(UILabel())
         label.textColor = color
         label.numberOfLines = multiline ? 0 : 1
-        label.font = hasBold ? UIFont.boldSystemFont(ofSize: fontSize) : UIFont.systemFont(ofSize: fontSize)
+        label.font = bold ? UIFont.boldSystemFont(ofSize: fontSize) : UIFont.systemFont(ofSize: fontSize)
         return label
     }
     
     /// 添加顶部分割线
-    /// - Parameter color: 分割线颜色
-    /// - Parameter border: 分割线宽度
-    @discardableResult func addTopLine(color: UIColor = UIColor.ext.rgbHex(0xdddddd),
-                                              border: CGFloat = 0.5,
-                                              left: CGFloat = 0,
-                                              right: CGFloat = 0) -> UIView {
+    /// - Parameter color: 线颜色
+    /// - Parameter width: 线宽度
+    @discardableResult
+    func addTopLine(color: UIColor = UIColor.ext.rgbHex(0xdddddd),
+                    width: CGFloat = 0.5, left: CGFloat = 0, right: CGFloat = 0) -> UIView {
         let line = add(UIView(), backgroundColor: color)
         line.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             line.topAnchor.constraint(equalTo: base.topAnchor),
             line.leftAnchor.constraint(equalTo: base.leftAnchor, constant: left),
             line.rightAnchor.constraint(equalTo: base.rightAnchor, constant: right),
-            line.heightAnchor.constraint(equalToConstant: border)
+            line.heightAnchor.constraint(equalToConstant: width)
         ])
         return line
     }
     
     /// 添加底部分割线
-    /// - Parameter color: 分割线颜色
-    /// - Parameter border: 分割线宽度
-    @discardableResult func addBottomLine(color: UIColor = UIColor.ext.rgbHex(0xdddddd),
-                                                 border: CGFloat = 0.5,
-                                                 left: CGFloat = 0,
-                                                 right: CGFloat = 0) -> UIView {
+    /// - Parameter color: 线颜色
+    /// - Parameter width: 线宽度
+    @discardableResult
+    func addBottomLine(color: UIColor = UIColor.ext.rgbHex(0xdddddd),
+                       width: CGFloat = 0.5, left: CGFloat = 0, right: CGFloat = 0) -> UIView {
         let line = add(UIView(), backgroundColor: color)
         line.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             line.bottomAnchor.constraint(equalTo: base.bottomAnchor),
             line.leftAnchor.constraint(equalTo: base.leftAnchor, constant: left),
             line.rightAnchor.constraint(equalTo: base.rightAnchor, constant: right),
-            line.heightAnchor.constraint(equalToConstant: border)
+            line.heightAnchor.constraint(equalToConstant: width)
         ])
         return line
     }

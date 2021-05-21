@@ -44,3 +44,15 @@ public extension ExtWrapper where Base: UICollectionView {
     }
 }
 
+public extension ExtWrapper where Base: UICollectionView {
+    
+    /// 刷新列表
+    func reloadData(_ completion: @escaping Ext.VoidHandler) {
+        UIView.animate(withDuration: 0, animations: {
+            base.reloadData()
+        }, completion:{ _ in
+            completion()
+        })
+    }
+    
+}

@@ -347,6 +347,6 @@ extension NetworkManager: URLSessionDownloadDelegate {
 
 /**
  HTTP Error Code
-    
+    - 405 Method not allowed :
     - 415 Unsupported Media Type : ContentType 有误
  */

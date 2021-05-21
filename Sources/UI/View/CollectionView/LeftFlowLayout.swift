@@ -1,5 +1,5 @@
 //
-//  CenteredFlowLayout.swift
+//  LeftFlowLayout.swift
 //  Ext
 //
 //  Created by naijoug on 2021/3/19.
