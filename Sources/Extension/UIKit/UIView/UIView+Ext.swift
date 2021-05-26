@@ -255,7 +255,17 @@ public extension ExtWrapper where Base: UIView {
     
 }
 
+private extension UIView {
+    /// do nothing for lazy view active
+    func active() {}
+}
+
 public extension ExtWrapper where Base: UIView {
+    
+    /// do nothing for lazy view active
+    func active() {
+        base.active()
+    }
     
     /// 添加子视图
     /// - Parameters:
