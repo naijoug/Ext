@@ -15,9 +15,9 @@ public protocol PlayerDelegate: AnyObject {
 
 open class Player: NSObject {
     /// 播放状态
-    public enum Status {
+    public enum Status: Equatable {
         case readyToPlay                    // 准备好播放 (资源加载成功)
-        case playing                        // 播放中
+        case playing(_ time: TimeInterval)  // 播放中
         case paused                         // 暂停播放
         case playEnd                        // 播放结束
     }
@@ -41,7 +41,12 @@ open class Player: NSObject {
     }
     
     /// 播放状态
-    public var isPlaying: Bool { status == .playing }
+    public var isPlaying: Bool {
+        switch status {
+        case .playing: return true
+        default: return false
+        }
+    }
 }
 
 /// 播放器
@@ -154,7 +159,7 @@ public extension LocalPlayer {
             currentTime = 0
         }
         avPlayer.play()
-        status = .playing
+        status = .playing(currentTime)
     }
     /// 暂停播放
     /// - Parameter time: 指定暂停时间点 (秒)
