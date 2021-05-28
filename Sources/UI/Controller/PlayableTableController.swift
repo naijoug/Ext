@@ -254,35 +254,43 @@ extension PlayableTableController {
         cell.isPlayable = false
     }
     
-    open func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        Ext.debug("开始拖拽", logEnabled: scrollLog)
-        dragOffsetY = scrollView.contentOffset.y
-        dragIndex = playableIndex
-        
-        isDragScrolling = true
-    }
-    open func scrollViewDidScroll(_ scrollView: UIScrollView) {
+    open override func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        super.scrollViewDidScroll(scrollView)
         guard scrollView.isDragging else { return }
         guard scrollView.isTracking else { return }
         Ext.debug("手指正在拖拽...", logEnabled: scrollLog)
         scrollTracking()
     }
-    open func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+    
+    open override func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        super.scrollViewWillBeginDragging(scrollView)
+        Ext.debug("开始拖拽", logEnabled: scrollLog)
+        dragIndex = playableIndex
+        
+        isDragScrolling = true
+    }
+    open override func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        super.scrollViewWillEndDragging(scrollView, withVelocity: velocity, targetContentOffset: targetContentOffset)
         Ext.debug("将要结束拖拽", logEnabled: scrollLog)
         Ext.debug("target offset: \(targetContentOffset.pointee) | velocity \(velocity)", logEnabled: scrollLog)
     }
-    open func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+    open override func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+        super.scrollViewDidEndDragging(scrollView, willDecelerate: decelerate)
         guard !decelerate else { return }
         Ext.debug("拖拽无减速，直接静止", logEnabled: scrollLog)
         innerScrollEnd()
     }
-    open func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
+    
+    open override func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
+        super.scrollViewWillBeginDecelerating(scrollView)
         Ext.debug("停止拖拽，开始减速", logEnabled: scrollLog)
     }
-    open func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+    open override func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+        super.scrollViewDidEndDecelerating(scrollView)
         Ext.debug("拖拽之后减速停止", logEnabled: scrollLog)
         innerScrollEnd()
     }
+    
     open func scrollViewDidScrollToTop(_ scrollView: UIScrollView) {
         Ext.debug("已经滚动到最顶部", logEnabled: scrollLog)
         scrollToTop()
