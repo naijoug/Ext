@@ -48,9 +48,7 @@ public extension RouteManager {
                fullScreen: Bool = false,
                animated: Bool = true) {
         let vc = wrapped ? self.modalWrapper(controller) : controller
-        if wrapped, fullScreen {
-            vc.modalPresentationStyle = .fullScreen
-        }
+        if fullScreen { vc.modalPresentationStyle = .fullScreen }
         topController?.present(vc, animated: animated, completion: nil)
     }
     
