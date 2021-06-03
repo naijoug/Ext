@@ -26,6 +26,12 @@ public extension ExtWrapper where Base == UIApplication {
             return UIEdgeInsets(top: statusBarHeight, left: 0, bottom: 0, right: 0)
         }
     }
+    
+    /// 安全的底部间隙 safeAreaInsets.bottom > 0 ? safeAreaInsets.bottom : bottom
+    func safeBottom(_ bottom: CGFloat) -> CGFloat {
+        return safeAreaInsets.bottom > 0 ? safeAreaInsets.bottom : bottom
+    }
+    
     /// 顶部高度 = (安全区域顶部偏移 + 导航栏高度)
     var topHeight: CGFloat  { return safeAreaInsets.top + 44 }
     /// 底部高度 = (工具栏高度 + 安全区域底部偏移)
