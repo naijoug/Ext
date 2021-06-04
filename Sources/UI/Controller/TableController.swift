@@ -72,7 +72,6 @@ open class TableController: UIViewController, ControllerScrollable {
     /// 下拉刷新
     @objc
     open func pullToRefresh() {}
-    
 }
 
 // MARK: - Table

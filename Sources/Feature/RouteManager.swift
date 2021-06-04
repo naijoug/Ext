@@ -13,7 +13,7 @@ public final class RouteManager {
     private init() {}
     
     public lazy var modalWrapper: Ext.FuncHandler<UIViewController, UINavigationController> = {
-        return { NavigationController(rootViewController: $0) }
+        { NavigationController(rootViewController: $0) }
     }()
 }
 
