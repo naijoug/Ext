@@ -10,7 +10,6 @@ import AVFoundation
 
 public protocol PlayerDelegate: AnyObject {
     func player(_ player: Player, status: Player.Status)
-    func player(_ player: Player, timeStatus status: Player.TimeStatus)
 }
 
 open class Player: NSObject {
@@ -20,11 +19,6 @@ open class Player: NSObject {
         case playing(_ time: TimeInterval)  // 播放中
         case paused                         // 暂停播放
         case playEnd                        // 播放结束
-    }
-    /// 播放时间状态
-    public enum TimeStatus {
-        case boundary(_ time: TimeInterval) // 播放到边界时间点
-        case periodic(_ time: TimeInterval) // 播放到周期时间点
     }
     public weak var delegate: PlayerDelegate?
     
@@ -159,7 +153,7 @@ public extension LocalPlayer {
             currentTime = 0
         }
         avPlayer.play()
-        status = .playing(currentTime)
+        status = .playing(time ?? currentTime)
     }
     /// 暂停播放
     /// - Parameter time: 指定暂停时间点 (秒)
@@ -203,7 +197,7 @@ private extension LocalPlayer {
         guard let times = boundaryTimes, times.count > 0 else { return }
         boundaryObserver = avPlayer.addBoundaryTimeObserver(forTimes: times, queue: DispatchQueue.main) { [weak self] in
             guard let `self` = self, self.isPlaying else { return }
-            self.delegate?.player(self, timeStatus: .boundary(self.currentTime))
+            self.status = .playing(self.currentTime)
         }
     }
     /// 添加周期监听
@@ -218,8 +212,7 @@ private extension LocalPlayer {
         let interval = CMTimeMakeWithSeconds(periodicTime, preferredTimescale: 600)
         periodicObserver = avPlayer.addPeriodicTimeObserver(forInterval: interval, queue: DispatchQueue.main) { [weak self] time in
             guard let `self` = self, self.isPlaying else { return }
-            //Ext.debug("status: \(self.status)")
-            self.delegate?.player(self, timeStatus: .periodic(time.seconds))
+            self.status = .playing(time.seconds)
         }
     }
     

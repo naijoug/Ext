@@ -10,10 +10,10 @@ import AVFoundation
 
 extension AVPlayer {
     /// 是否正在播放视频
-    var isPlaying: Bool { return timeControlStatus == .playing }
+    var isPlaying: Bool { timeControlStatus == .playing }
 }
 
-public protocol ExtPlayerDelegate: class {
+public protocol ExtPlayerDelegate: AnyObject {
     func extPlayer(_ player: ExtPlayer, status: ExtPlayer.Status)
     func extPlayer(_ player: ExtPlayer, timeStatus status: ExtPlayer.TimeStatus)
 }
@@ -133,9 +133,6 @@ open class ExtPlayer: NSObject {
     }
     private var boundaryObserver: Any?  // 边界监听
     private var periodicObserver: Any?  // 周期监听
-    
-    private var manager = VGPlayerResourceLoaderManager()
-    
 }
 
 //MARK: - Public
@@ -147,12 +144,10 @@ extension ExtPlayer {
         guard let url = url else { return }
         clear()
         playerUrl = url
-        if url.absoluteString.hasPrefix("file:///") { // 本地资源
-            let keys = ["tracks", "playable"]
-            playerItem = AVPlayerItem(asset: AVURLAsset(url: url), automaticallyLoadedAssetKeys: keys)
-        } else { // 远程资源
-            playerItem = manager.playerItem(url)
-        }
+        
+        let keys = ["tracks", "playable"]
+        playerItem = AVPlayerItem(asset: AVURLAsset(url: url), automaticallyLoadedAssetKeys: keys)
+        
         avPlayer = AVPlayer(playerItem: playerItem)
     }
     

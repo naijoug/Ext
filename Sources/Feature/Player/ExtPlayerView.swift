@@ -37,7 +37,7 @@ extension ExtPlayerView: ExtPlayerDelegate {
     }
 }
 
-public protocol ExtPlayerViewDelegate: class {
+public protocol ExtPlayerViewDelegate: AnyObject {
     func extPlayerView(_ playerView: ExtPlayerView, status: ExtPlayer.Status)
     func extPlayerView(_ playerView: ExtPlayerView, timeStatus: ExtPlayer.TimeStatus)
     
@@ -133,7 +133,7 @@ open class ExtPlayerView: UIView {
 public extension ExtPlayerView {
     
     /// 开始播放
-    func play(_ time: Double? = nil) {
+    func play(_ time: TimeInterval? = nil) {
         Ext.debug("")
         isPlaying = true
         guard let time = time else {
@@ -146,7 +146,7 @@ public extension ExtPlayerView {
         }
     }
     /// 暂停播放
-    func pause(_ time: Double? = nil) {
+    func pause(_ time: TimeInterval? = nil) {
         Ext.debug("")
         isPlaying = false
         extPlayer.pause()
