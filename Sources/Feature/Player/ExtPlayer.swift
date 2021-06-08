@@ -25,6 +25,11 @@ open class ExtPlayer: NSObject {
             return lhs.description == rhs.description
         }
         
+        /**
+         Reference:
+            - https://stackoverflow.com/questions/38867190/how-can-i-check-if-my-avplayer-is-buffering
+         */
+        
         case unknown                // 位置状态 (还未加载任何播放资源)
         case buffering              // 缓冲中
         case readyToPlay            // 准备好播放
@@ -43,16 +48,16 @@ open class ExtPlayer: NSObject {
     }
     /// 播放器时间状态
     public enum TimeStatus {
-        case buffer(_ time: TimeInterval, duration: TimeInterval)
-        case periodic(_ time: TimeInterval, duration: TimeInterval)
-        case boundary(_ time: TimeInterval, duration: TimeInterval)
+        case buffer(_ time: TimeInterval, _ duration: TimeInterval)
+        case periodic(_ time: TimeInterval, _ duration: TimeInterval)
+        case boundary(_ time: TimeInterval, _ duration: TimeInterval)
     }
     public weak var delegate: ExtPlayerDelegate?
     
 // MARK: - Status
     
     /// 是否需要打印日志
-    public var logEnabled: Bool = false
+    public var logEnabled: Bool = true
     
     /// 播放状态
     private(set) var status: ExtPlayer.Status = .unknown {
@@ -209,7 +214,7 @@ private extension ExtPlayer {
             guard let `self` = self else { return }
             guard let currentTime = self.currentTime, let duration = self.duration else { return }
             Ext.debug("boundary:  --- \(self) | \(currentTime) / \(duration)", logEnabled: self.logEnabled)
-            self.delegate?.extPlayer(self, timeStatus: .boundary(currentTime, duration: duration))
+            self.delegate?.extPlayer(self, timeStatus: .boundary(currentTime, duration))
         }
     }
     func removeBoundaryObserver() {
@@ -227,7 +232,7 @@ private extension ExtPlayer {
             guard let `self` = self else { return }
             guard let currentTime = self.currentTime, let duration = self.duration else { return }
             Ext.debug("periodic:  --- \(self) | \(currentTime) / \(duration)", logEnabled: self.logEnabled)
-            self.delegate?.extPlayer(self, timeStatus: .periodic(currentTime, duration: duration))
+            self.delegate?.extPlayer(self, timeStatus: .periodic(currentTime, duration))
         }
     }
     func removePeriodicObserver() {
@@ -369,7 +374,7 @@ extension ExtPlayer {
             // 缓冲到的时间
             let bufferTime = bufferTimeRange.start.seconds  + bufferTimeRange.duration.seconds
             guard let duration = self.duration else { return }
-            self.delegate?.extPlayer(self, timeStatus: .buffer(bufferTime, duration: duration))
+            self.delegate?.extPlayer(self, timeStatus: .buffer(bufferTime, duration))
         }
         else if keyPath == #keyPath(AVPlayerItem.isPlaybackBufferEmpty) {
             guard let isPlaybackBufferEmpty = newValue as? Bool, isPlaybackBufferEmpty else { return }
@@ -399,10 +404,14 @@ extension ExtPlayer {
 extension ExtPlayer.Status: CustomStringConvertible {
     public var description: String {
         switch self {
-        case .failed(let error): return "failed: \(error.localizedDescription)"
-        default: break
+        case .unknown:              return "unknown"
+        case .buffering:            return "buffering"
+        case .readyToPlay:          return "readyToPlay"
+        case .playing:              return "playing"
+        case .paused:               return "paused"
+        case .playToEnd:            return "playToEnd"
+        case .failed(let error):    return "failed: \(error.localizedDescription)"
         }
-        return "\(self)"
     }
 }
 

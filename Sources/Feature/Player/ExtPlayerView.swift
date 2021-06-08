@@ -10,8 +10,8 @@ import AVFoundation
 
 /// Apple PlayerView
 public class ApplePlayerView: UIView {
-    public override class var layerClass: AnyClass { return AVPlayerLayer.self }
-    public var playerLayer: AVPlayerLayer { return layer as! AVPlayerLayer }
+    public override class var layerClass: AnyClass { AVPlayerLayer.self }
+    public var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
     public var avPlayer: AVPlayer? {
         get { return playerLayer.player }
         set { playerLayer.player = newValue }
@@ -39,7 +39,7 @@ extension ExtPlayerView: ExtPlayerDelegate {
 
 public protocol ExtPlayerViewDelegate: AnyObject {
     func extPlayerView(_ playerView: ExtPlayerView, status: ExtPlayer.Status)
-    func extPlayerView(_ playerView: ExtPlayerView, timeStatus: ExtPlayer.TimeStatus)
+    func extPlayerView(_ playerView: ExtPlayerView, timeStatus status: ExtPlayer.TimeStatus)
     
     func extPlayerView(_ playerView: ExtPlayerView, didAction action: ExtPlayerView.Action)
 }
@@ -74,7 +74,7 @@ open class ExtPlayerView: UIView {
 // MARK: - Status
     
     /// 是否打印日志
-    public var logEnabled: Bool = false
+    public var logEnabled: Bool = true
     
     /// 是否正在播放
     public var isPlaying = false
@@ -97,7 +97,16 @@ open class ExtPlayerView: UIView {
         return extPlayer
     }()
     
-    private var playerView: ApplePlayerView!
+    private lazy var playerView: ApplePlayerView = {
+        let playerView = ext.add(ApplePlayerView())
+        NSLayoutConstraint.activate([
+            playerView.topAnchor.constraint(equalTo: self.topAnchor),
+            playerView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+            playerView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            playerView.trailingAnchor.constraint(equalTo: self.trailingAnchor)
+        ])
+        return playerView
+    }()
     
     private lazy var indicatorView: UIActivityIndicatorView = {
         let indicatorView = UIActivityIndicatorView(style: .whiteLarge)
@@ -116,16 +125,9 @@ open class ExtPlayerView: UIView {
     public override init(frame: CGRect) {
         super.init(frame: frame)
         
-        playerView  = ext.add(ApplePlayerView())
-        
-        NSLayoutConstraint.activate([
-            playerView.topAnchor.constraint(equalTo: self.topAnchor),
-            playerView.leftAnchor.constraint(equalTo: self.leftAnchor),
-            playerView.rightAnchor.constraint(equalTo: self.rightAnchor),
-            playerView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
-        ])
+        backgroundColor = .black
+        playerView.ext.active()
     }
-    
 }
 
 // MARK: - Public
