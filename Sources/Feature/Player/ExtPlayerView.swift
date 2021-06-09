@@ -8,12 +8,16 @@
 import UIKit
 import AVFoundation
 
-/// Apple PlayerView
+/**
+ Apple PlayerView
+ 
+ Reference: https://developer.apple.com/documentation/avfoundation/avplayerlayer
+ */
 public class ApplePlayerView: UIView {
     public override class var layerClass: AnyClass { AVPlayerLayer.self }
-    public var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
+    private var playerLayer: AVPlayerLayer { layer as! AVPlayerLayer }
     public var avPlayer: AVPlayer? {
-        get { return playerLayer.player }
+        get { playerLayer.player }
         set { playerLayer.player = newValue }
     }
 }
@@ -21,7 +25,6 @@ public class ApplePlayerView: UIView {
 
 extension ExtPlayerView: ExtPlayerDelegate {
     public func extPlayer(_ player: ExtPlayer, status: ExtPlayer.Status) {
-        Ext.debug("status: \(status) | isPlaying: \(isPlaying) | \(urlString ?? "")", logEnabled: logEnabled)
         isBuffering = status == .buffering
         
         delegate?.extPlayerView(self, status: status)
@@ -99,6 +102,7 @@ open class ExtPlayerView: UIView {
     
     private lazy var playerView: ApplePlayerView = {
         let playerView = ext.add(ApplePlayerView())
+        playerView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             playerView.topAnchor.constraint(equalTo: self.topAnchor),
             playerView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
@@ -109,8 +113,7 @@ open class ExtPlayerView: UIView {
     }()
     
     private lazy var indicatorView: UIActivityIndicatorView = {
-        let indicatorView = UIActivityIndicatorView(style: .whiteLarge)
-        self.addSubview(indicatorView)
+        let indicatorView = ext.add(UIActivityIndicatorView(style: .whiteLarge))
         indicatorView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             indicatorView.centerXAnchor.constraint(equalTo: self.centerXAnchor),
@@ -119,6 +122,9 @@ open class ExtPlayerView: UIView {
         return indicatorView
     }()
     
+    deinit {
+        clear()
+    }
     required public init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -133,6 +139,10 @@ open class ExtPlayerView: UIView {
 // MARK: - Public
 
 public extension ExtPlayerView {
+    
+    func clear() {
+        extPlayer.clear()
+    }
     
     /// 开始播放
     func play(_ time: TimeInterval? = nil) {
