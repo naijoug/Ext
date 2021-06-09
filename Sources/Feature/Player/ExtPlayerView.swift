@@ -67,7 +67,7 @@ open class ExtPlayerView: UIView {
     public var url: URL? {
         didSet {
             guard let url = url else { return }
-            extPlayer.setPlayer(url)
+            extPlayer.playerUrl = url
             extPlayer.periodicTime = 2.0
             extPlayer.boundaryTimes = [NSValue(time: CMTime.init(value: 1, timescale: 1))]
             playerView.avPlayer = extPlayer.avPlayer
