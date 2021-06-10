@@ -24,7 +24,7 @@ public protocol ExtPlayerDelegate: AnyObject {
     func extPlayer(_ player: ExtPlayer, timeStatus status: ExtPlayer.TimeStatus)
 }
 
-open class ExtPlayer: NSObject {
+public class ExtPlayer: NSObject {
     /// 播放状态
     public enum Status: Equatable {
         public static func == (lhs: ExtPlayer.Status, rhs: ExtPlayer.Status) -> Bool {
@@ -61,10 +61,19 @@ open class ExtPlayer: NSObject {
         }
     }
     
-    /// 是否正在播放
-    private(set) var isPlaying: Bool = false
     /// 是否正在 seek 播放时间
     private var isSeeking: Bool = false
+    
+    /// 是否循环播放
+    private var isLoop: Bool = false
+    
+    /// 是否静音🔇
+    public var isMuted: Bool = false {
+        didSet {
+            guard avPlayer.isMuted != isMuted else { return }
+            avPlayer.isMuted = isMuted
+        }
+    }
     
 // MARK: - Public
     
@@ -83,6 +92,19 @@ open class ExtPlayer: NSObject {
     /// 缓冲时间间隔 (默认: 2s)
     public let bufferInterval: TimeInterval = 2.0
     
+    /// 当前时间 (单位: 秒)
+    public var currentTime: TimeInterval {
+        get {
+            let time = CMTimeGetSeconds(avPlayer.currentTime())
+            return (time.isNaN || time.isInfinite) ? 0 : time
+        }
+        set {
+            let newTime = CMTimeMakeWithSeconds(newValue, preferredTimescale: playerItem?.asset.duration.timescale ?? 600)
+            Ext.debug("newTime: \(newTime) | \(newTime.seconds)", logEnabled: logEnabled)
+            avPlayer.seek(to: newTime, toleranceBefore: CMTime.zero, toleranceAfter: CMTime.zero)
+        }
+    }
+    
 // MARK: - Init
     
     deinit {
@@ -94,21 +116,6 @@ open class ExtPlayer: NSObject {
         
         addPlayerObservers()
         addItemObservers()
-    }
-    /// 清理
-    func clear() {
-        avPlayer.pause()
-        /// 资源清理
-        periodicTime = nil
-        boundaryTimes = nil
-        playerItem?.asset.cancelLoading()
-        playerItem?.cancelPendingSeeks()
-        playerItem = nil
-        
-        /// 状态清理
-        isPlaying = false
-        isSeeking = false
-        status = .unknown
     }
     
 // MARK: - Player
@@ -125,8 +132,21 @@ open class ExtPlayer: NSObject {
     
     public var playerItem: AVPlayerItem? {
         didSet {
+            func addNotifications() {
+                if let item = oldValue {
+                    NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: item)
+                    NotificationCenter.default.removeObserver(self, name: .AVPlayerItemFailedToPlayToEndTime, object: item)
+                }
+                guard let item = playerItem else { return }
+                NotificationCenter.default.addObserver(self, selector: #selector(didPlayToEnd(_:)),
+                                                       name: .AVPlayerItemDidPlayToEndTime, object: item)
+                NotificationCenter.default.addObserver(self, selector: #selector(failedToPlayToEnd(_:)),
+                                                       name: .AVPlayerItemFailedToPlayToEndTime, object: item)
+            }
+            
+            addNotifications()
+            
             avPlayer.replaceCurrentItem(with: playerItem)
-            addItemNotifications()
         }
     }
     /// AVPlayer
@@ -141,39 +161,75 @@ open class ExtPlayer: NSObject {
 
 //MARK: - Public
 
-extension ExtPlayer {
+public extension ExtPlayer {
     
-    /// 当前播放时间
-    public var currentTime: TimeInterval? { avPlayer.currentTime().seconds }
+    /// 清理
+    func clear() {
+        avPlayer.pause()
+        /// 资源清理
+        periodicTime = nil
+        boundaryTimes = nil
+        playerItem?.asset.cancelLoading()
+        playerItem?.cancelPendingSeeks()
+        playerItem = nil
+        
+        /// 状态清理
+        isSeeking = false
+        status = .unknown
+    }
+    
+    /// 播放状态
+    var isPlaying: Bool {
+        switch status {
+        case .playing: return true
+        default: return false
+        }
+    }
+    
     /// 当前播放资源总时长
-    public var duration: TimeInterval? {
+    var duration: TimeInterval? {
         guard let time = avPlayer.currentItem?.duration.seconds else { return nil }
         return (time.isNaN || time.isInfinite) ? nil : time
     }
     
     /// 播放进度
-    public var progress: Double {
-        guard let currentTime = currentTime, let duration = duration,
-              duration > 0 else { return 0.0 }
+    var progress: Double {
+        guard let duration = duration, duration > 0 else { return 0.0 }
         return currentTime/duration
     }
     
     /// 播放
-    open func play() {
+    /// - Parameter time: 指定播放时间点 (秒)
+    func play(_ time: TimeInterval? = nil) {
+        seek(time)
+        Ext.debug("currentTime: \(currentTime) | duration: \(String(describing: duration))", logEnabled: logEnabled)
+        // 播放到了最后，设置到开头
+        if let duration = duration, duration > 0, currentTime == duration {
+            currentTime = 0
+        }
         avPlayer.play()
+        status = .playing
     }
-    
-    /// 暂停
-    open func pause() {
+    /// 暂停播放
+    /// - Parameter time: 指定暂停时间点 (秒)
+    func pause(_ time: TimeInterval? = nil) {
+        seek(time)
         avPlayer.pause()
+        status = .paused
+    }
+    /// 暂停或播放
+    func playOrPause() {
+        isPlaying ? self.pause() : self.play()
+    }
+    /// 循环播放
+    func loop() {
+        isLoop = true
+        self.play()
     }
     
     /// 从指定时间开始播放
-    open func seekTime(_ time: TimeInterval) {
-        seekTime(time, completion: nil)
-    }
-    open func seekTime(_ time: TimeInterval, completion: ((Bool) -> Void)?) {
-        guard !time.isNaN, playerItem?.status == .readyToPlay, !isSeeking else {
+    func seek(_ time: TimeInterval?, completion: ((Bool) -> Void)? = nil) {
+        guard let time = time, !time.isNaN, playerItem?.status == .readyToPlay, !isSeeking else {
             completion?(false)
             return
         }
@@ -203,9 +259,9 @@ private extension ExtPlayer {
         guard let times = boundaryTimes, times.count > 0 else { return }
         boundaryObserver = avPlayer.addBoundaryTimeObserver(forTimes: times, queue: .main) { [weak self] in
             guard let `self` = self else { return }
-            guard let currentTime = self.currentTime, let duration = self.duration else { return }
-            Ext.debug("boundary: \(currentTime) / \(duration)", logEnabled: self.logEnabled)
-            self.delegate?.extPlayer(self, timeStatus: .boundary(currentTime, duration))
+            guard let duration = self.duration else { return }
+            Ext.debug("boundary: \(self.currentTime) / \(duration)", logEnabled: self.logEnabled)
+            self.delegate?.extPlayer(self, timeStatus: .boundary(self.currentTime, duration))
         }
     }
     
@@ -222,27 +278,10 @@ private extension ExtPlayer {
         guard let time = periodicTime, time > 0 else { return }
         periodicObserver = avPlayer.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(time, preferredTimescale: 600), queue: .main) { [weak self] time in
             guard let `self` = self else { return }
-            guard let currentTime = self.currentTime, let duration = self.duration else { return }
-            Ext.debug("periodic: \(currentTime) / \(duration)", logEnabled: self.logEnabled)
-            self.delegate?.extPlayer(self, timeStatus: .periodic(currentTime, duration))
+            guard let duration = self.duration else { return }
+            Ext.debug("periodic: \(self.currentTime) / \(duration)", logEnabled: self.logEnabled)
+            self.delegate?.extPlayer(self, timeStatus: .periodic(self.currentTime, duration))
         }
-    }
-    
-    
-    /// 添加 playerItem 通知
-    func addItemNotifications() {
-        func removeItemNotifations() {
-            guard let item = playerItem else { return }
-            NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: item)
-            NotificationCenter.default.removeObserver(self, name: .AVPlayerItemFailedToPlayToEndTime, object: item)
-        }
-        
-        removeItemNotifations()
-        guard let item = playerItem else { return }
-        NotificationCenter.default.addObserver(self, selector: #selector(didPlayToEnd(_:)),
-                                               name: .AVPlayerItemDidPlayToEndTime, object: item)
-        NotificationCenter.default.addObserver(self, selector: #selector(failedToPlayToEnd(_:)),
-                                               name: .AVPlayerItemFailedToPlayToEndTime, object: item)
     }
     
     @objc
@@ -250,6 +289,9 @@ private extension ExtPlayer {
         guard let item = notification.object as? AVPlayerItem, item == playerItem else { return }
         Ext.debug("didPlayToEnd", logEnabled: logEnabled)
         status = .playToEnd
+        if isLoop {
+            play(0)
+        }
     }
     @objc
     func failedToPlayToEnd(_ noti: Notification) {
@@ -289,8 +331,6 @@ private extension ExtPlayer {
             guard let `self` = self else { return }
             Ext.debug("player timeControlStatus: \(player.timeControlStatus)", logEnabled: self.logEnabled)
             switch player.timeControlStatus {
-            case .playing:  self.status = .playing
-            case .paused:   self.status = .paused
             case .waitingToPlayAtSpecifiedRate:
                 // 缓冲区域内容不够播放时，变为缓冲状态
                 guard !(player.currentItem?.isPlaybackLikelyToKeepUp ?? false) else { return }

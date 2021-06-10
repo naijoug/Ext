@@ -152,7 +152,7 @@ public extension ExtPlayerView {
             extPlayer.play()
             return
         }
-        extPlayer.seekTime(time) { completion in
+        extPlayer.seek(time) { completion in
             guard completion else { return }
             self.extPlayer.play()
         }
@@ -163,6 +163,6 @@ public extension ExtPlayerView {
         isPlaying = false
         extPlayer.pause()
         guard let time = time else { return }
-        extPlayer.seekTime(time)
+        extPlayer.seek(time)
     }
 }
