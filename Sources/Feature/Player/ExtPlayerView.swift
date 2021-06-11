@@ -179,22 +179,13 @@ public extension ExtPlayerView {
     func play(_ time: TimeInterval? = nil) {
         Ext.debug("")
         isPlaying = true
-        guard let time = time else {
-            extPlayer.play()
-            return
-        }
-        extPlayer.seek(time) { completion in
-            guard completion else { return }
-            self.extPlayer.play()
-        }
+        extPlayer.play(time)
     }
     /// 暂停播放
     func pause(_ time: TimeInterval? = nil) {
         Ext.debug("")
         isPlaying = false
-        extPlayer.pause()
-        guard let time = time else { return }
-        extPlayer.seek(time)
+        extPlayer.pause(time)
     }
 }
 

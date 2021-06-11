@@ -27,6 +27,12 @@ public extension ExtWrapper where Base == AVAsset {
         //Ext.debug("naturalSize: \(videoTrack.naturalSize) => \(size)")
         return CGSize(width: abs(size.width), height: abs(size.height))
     }
+    
+    /// 资源 url
+    var urlString: String? {
+        guard let asset = base as? AVURLAsset else { return nil }
+        return asset.url.absoluteString
+    }
 }
 
 import AudioToolbox

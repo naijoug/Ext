@@ -53,7 +53,7 @@ public class ExtPlayer: NSObject {
 // MARK: - Status
     
     /// 日志标识
-    public var logEnabled: Bool = true
+    public var logEnabled: Bool = false
     /// 时间监听回调日志
     public var timeLogEnabled: Bool = false
     
@@ -147,6 +147,7 @@ public class ExtPlayer: NSObject {
     /// 播放资源 Item
     public var playerItem: AVPlayerItem? {
         didSet {
+            Ext.debug("\(String(describing: oldValue)) -> \(String(describing: playerItem))")
             func addNotifications() {
                 if let item = oldValue {
                     NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: item)
@@ -228,8 +229,10 @@ public extension ExtPlayer {
     /// 播放
     /// - Parameter time: 指定播放时间点 (秒)
     func play(_ time: TimeInterval? = nil) {
-        seek(time)
         Ext.debug("play to \(time ?? 0) | currentTime: \(currentTime) | duration: \(String(describing: duration))", logEnabled: logEnabled)
+        if let time = time, !time.isNaN {
+            currentTime = time
+        }
         // 播放到了最后，设置到开头
         if let duration = duration, duration > 0, currentTime == duration {
             currentTime = 0
@@ -240,24 +243,11 @@ public extension ExtPlayer {
     /// 暂停播放
     /// - Parameter time: 指定暂停时间点 (秒)
     func pause(_ time: TimeInterval? = nil) {
-        seek(time)
+        if let time = time, !time.isNaN {
+            currentTime = time
+        }
         avPlayer.pause()
         status = .paused
-    }
-    
-    /// 从指定时间开始播放
-    func seek(_ time: TimeInterval?, completion: ((Bool) -> Void)? = nil) {
-        guard let time = time, !time.isNaN, playerItem?.status == .readyToPlay, !isSeeking else {
-            completion?(false)
-            return
-        }
-        isSeeking = true
-        self.playerItem?.seek(to: CMTimeMakeWithSeconds(time, preferredTimescale: Int32(NSEC_PER_SEC)), completionHandler: { (finished) in
-            DispatchQueue.main.async {
-                self.isSeeking = false
-                completion?(finished)
-            }
-        })
     }
 }
 
@@ -277,7 +267,7 @@ private extension ExtPlayer {
         guard let times = boundaryTimes, times.count > 0 else { return }
         boundaryObserver = avPlayer.addBoundaryTimeObserver(forTimes: times, queue: .main) { [weak self] in
             guard let `self` = self, let duration = self.duration else { return }
-            Ext.debug("boundary: \(self.currentTime) / \(duration) | playerStatus: \(self.status)", logEnabled: self.timeLogEnabled)
+            Ext.debug("boundary: \(self.currentTime) / \(duration) | playerStatus: \(self.status) | isPlaying: \(self.isPlaying)", logEnabled: self.timeLogEnabled)
             guard self.isPlaying else { return }
             self.delegate?.extPlayer(self, timeStatus: .boundary(self.currentTime, duration))
         }
@@ -296,7 +286,7 @@ private extension ExtPlayer {
         guard let time = periodicTime, time > 0 else { return }
         periodicObserver = avPlayer.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(time, preferredTimescale: 600), queue: .main) { [weak self] time in
             guard let `self` = self, let duration = self.duration else { return }
-            Ext.debug("periodic: \(self.currentTime) / \(duration) | playerStatus: \(self.status)", logEnabled: self.timeLogEnabled)
+            Ext.debug("periodic: \(self.currentTime) / \(duration) | playerStatus: \(self.status) | isPlaying: \(self.isPlaying)", logEnabled: self.timeLogEnabled)
             guard self.isPlaying else { return }
             self.delegate?.extPlayer(self, timeStatus: .periodic(self.currentTime, duration))
         }
@@ -410,17 +400,10 @@ private extension ExtPlayer {
 
 // MARK: - Log
 
-private extension AVPlayerItem {
-    var urlString: String? {
-        guard let asset = asset as? AVURLAsset else { return nil }
-        return asset.url.absoluteString
-    }
-}
-
 extension ExtPlayer {
     public override var description: String {
         var msg = super.description
-        msg += "status: \(status) | bufferStatus: \(bufferStatus) | \(playerItem?.urlString ?? "")"
+        msg += " | status: \(status) \t| bufferStatus: \(bufferStatus) | \(playerItem?.asset.ext.urlString ?? "nil")"
         return msg
     }
 }
@@ -479,7 +462,9 @@ extension AVPlayer.TimeControlStatus: CustomStringConvertible {
 extension AVPlayerItem {
     open override var description: String {
         var msg = super.description
-        msg += " | status \(status) | isPlaybackBufferEmpty: \(isPlaybackBufferEmpty) | isPlaybackLikelyToKeepUp: \(isPlaybackLikelyToKeepUp) | isPlaybackBufferFull: \(isPlaybackBufferFull)"
+        msg += " | status \(status)"
+        msg += " | isPlaybackBufferEmpty: \(isPlaybackBufferEmpty) | isPlaybackLikelyToKeepUp: \(isPlaybackLikelyToKeepUp) | isPlaybackBufferFull: \(isPlaybackBufferFull)"
+        msg += " | \(asset.ext.urlString ?? "")"
         return msg
     }
 }
