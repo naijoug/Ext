@@ -22,32 +22,22 @@ public class ApplePlayerView: UIView {
     }
 }
 
-
-extension ExtPlayerView: ExtPlayerDelegate {
-    public func extPlayer(_ player: ExtPlayer, status: ExtPlayer.Status) {
-        isBuffering = status == .buffering
-        
-        delegate?.extPlayerView(self, status: status)
-    }
-    public func extPlayer(_ player: ExtPlayer, timeStatus status: ExtPlayer.TimeStatus) {
-        delegate?.extPlayerView(self, timeStatus: status)
-    }
-    
-    @objc
-    public func extPlayer(_ player: ExtPlayer, playerFailed error: Error?) {
-        Ext.debug("\(error.debugDescription)  | \(urlString ?? "")")
-        isPlaying = false
-    }
-}
-
 public protocol ExtPlayerViewDelegate: AnyObject {
-    func extPlayerView(_ playerView: ExtPlayerView, status: ExtPlayer.Status)
-    func extPlayerView(_ playerView: ExtPlayerView, timeStatus status: ExtPlayer.TimeStatus)
-    
+    func extPlayerView(_ playerView: ExtPlayerView, status: ExtPlayerView.Status)
     func extPlayerView(_ playerView: ExtPlayerView, didAction action: ExtPlayerView.Action)
 }
 
 open class ExtPlayerView: UIView {
+    /// 播放器视图状态
+    public enum Status: Equatable {
+        case unknown                        // 未知状态
+        case buffering                      // 正在缓冲
+        case readyToPlay                    // 准备好播放
+        case playing(time: TimeInterval, duration: TimeInterval) // 播放中
+        case paused                         // 暂停播放
+        case playToEnd                      // 播放结束
+    }
+    /// 播放器视图交互
     public enum Action {
         case tap
         case control(_ isPlaying: Bool)
@@ -94,7 +84,17 @@ open class ExtPlayerView: UIView {
         }
     }
     
-    private(set) lazy var extPlayer: ExtPlayer = {
+    public private(set) var status: ExtPlayerView.Status = .unknown {
+        didSet {
+            guard oldValue != status else { return }
+            Ext.debug("\(oldValue) -> \(status)", logEnabled: logEnabled)
+            delegate?.extPlayerView(self, status: status)
+        }
+    }
+    
+// MARK: - UII
+    
+    private lazy var extPlayer: ExtPlayer = {
         let extPlayer = ExtPlayer()
         extPlayer.delegate = self
         return extPlayer
@@ -136,6 +136,37 @@ open class ExtPlayerView: UIView {
     }
 }
 
+extension ExtPlayerView: ExtPlayerDelegate {
+    public func extPlayer(_ player: ExtPlayer, status: ExtPlayer.Status) {
+        isPlaying = player.isPlaying
+        
+        switch status {
+        case .paused:
+            self.status = .paused
+        case .playToEnd:
+            self.status = .playToEnd
+        default: ()
+        }
+    }
+    public func extPlayer(_ player: ExtPlayer, bufferStatus status: ExtPlayer.BufferStatus) {
+        isBuffering = status == .buffering
+        switch status {
+        case .buffering:
+            self.status = .buffering
+        default: ()
+        }
+    }
+    public func extPlayer(_ player: ExtPlayer, timeStatus status: ExtPlayer.TimeStatus) {
+        switch status {
+        case .periodic(let time, let duration):
+            self.status = .playing(time: time, duration: duration)
+        case .boundary(let time, let duration):
+            self.status = .playing(time: time, duration: duration)
+        default: ()
+        }
+    }
+}
+
 // MARK: - Public
 
 public extension ExtPlayerView {
@@ -164,5 +195,18 @@ public extension ExtPlayerView {
         extPlayer.pause()
         guard let time = time else { return }
         extPlayer.seek(time)
+    }
+}
+
+extension ExtPlayerView.Status: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .unknown:                          return "unknown"
+        case .buffering:                        return "buffering"
+        case .readyToPlay:                      return "readyToPlay"
+        case .playing(let time, let duration):  return "playing \(time) / \(duration)"
+        case .paused:                           return "paused"
+        case .playToEnd:                        return "playToEnd"
+        }
     }
 }
