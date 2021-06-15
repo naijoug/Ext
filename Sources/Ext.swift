@@ -114,8 +114,8 @@ public extension Ext {
         case success
         case failure
         
+        case fire
         case store
-        
         /// 自定义符号
         case custom(_ token: String)
         
@@ -126,6 +126,7 @@ public extension Ext {
             case .success:  return "✅"
             case .failure:  return "❌"
             
+            case .fire:     return "🔥"
             case .store:    return "🗂"
             case .custom(let token): return token
             }
