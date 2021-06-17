@@ -179,14 +179,14 @@ extension FormData: CustomStringConvertible {
 
 public extension NetworkManager {
     
-    /// formdata 格式上传
+    /// formdata 格式上传 (POST)
     /// - Parameters:
     ///   - urlString: 请求 URL
-    ///   - method: 请求方法 (默认: POST)
     ///   - params: 请求参数
     ///   - formDatas: 请求 FormData 数据
     ///   - handler: 数据回调
-    func upload(_ urlString: String, method: HttpMethod = .post,
+    func upload(_ urlString: String,
+                headers: [String: String]? = nil, headerLogged: Bool = false,
                 params: [String: Any]? = nil, formDatas: [FormData],
                 handler: @escaping DataHandler) {
         guard let url = URL(string: urlString) else {
@@ -194,11 +194,20 @@ public extension NetworkManager {
             handler((nil, nil, Ext.Error.inner("http url create failed.")))
             return
         }
-        var requestMsg = "\(method.rawValue) | \(urlString)"
+        var requestMsg = "FormData upload | \(urlString)"
         
         var request = URLRequest(url: url, timeoutInterval: 60*2) // 上传超时时间: 2分钟
         // 设置 HTTP 请求方法
-        request.httpMethod = method.rawValue
+        request.httpMethod = HttpMethod.post.rawValue
+        // 设置 HTTP 请求头
+        if let headers = headers {
+            for (key, value) in headers {
+                request.addValue(value, forHTTPHeaderField: key)
+            }
+            if self.headerLogged || headerLogged {
+                requestMsg += " | headers: \(headers)"
+            }
+        }
         // 设置 HTTP 请求体
         let boundary = "Boundary-\(UUID().uuidString)"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
@@ -346,7 +355,9 @@ extension NetworkManager: URLSessionDownloadDelegate {
 }
 
 /**
+ Reference: https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status
  HTTP Error Code
-    - 405 Method not allowed :
+    - 401 Unauthorized : 授权出错
+    - 405 Method not allowed : HTTP 方法错误
     - 415 Unsupported Media Type : ContentType 有误
  */
