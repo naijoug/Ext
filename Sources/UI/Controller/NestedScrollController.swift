@@ -12,189 +12,164 @@ import UIKit
     - https://stackoverflow.com/questions/44473232/twitter-profile-page-ios-swift-dissection-multiple-uitableviews-in-uiscrollview
  */
 
-// MARK: - NestedTableView
+// MARK: - InnerScrollController
 
-open class NestedTableView: UITableView, UIGestureRecognizerDelegate {
-    /// 可以同时滚动的手势
-    var scrollRecongnizers = [UIGestureRecognizer]()
-    
-    open func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-        return scrollRecongnizers.contains(otherGestureRecognizer)
-//        return true
-    }
+/// 内部滚动控制器
+protocol InnerScrollControllerDelegate: AnyObject {
+    func innerScrollController(_ controller: InnerScrollController, didScroll scrollView: UIScrollView)
 }
 
-// MARK: - NestedCell
-
-open class NestedCell: ExtTableCell {
-    open var nestedView: UIView? {
-        didSet {
-            guard let view = nestedView else { return }
-            contentView.addSubview(view)
-            view.bottomAnchor.constraint(equalTo: contentView.bottomAnchor).isActive = true
-            view.leftAnchor.constraint(equalTo: contentView.leftAnchor).isActive = true
-            view.rightAnchor.constraint(equalTo: contentView.rightAnchor).isActive = true
-            view.topAnchor.constraint(equalTo: contentView.topAnchor).isActive = true
+/// 可滚动的内部控制器
+open class InnerScrollController: UIViewController, UIScrollViewDelegate {
+    weak var delegate: InnerScrollControllerDelegate?
+    
+    open override func viewDidLoad() {
+        super.viewDidLoad()
+        
+    }
+    
+    /// 内部滚动视图 (子内实现)
+    open var innerScrollView: UIScrollView? { nil }
+    
+    /// 滚动协议
+    open func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView == innerScrollView {
+            delegate?.innerScrollController(self, didScroll: scrollView)
         }
     }
 }
 
 // MARK: - NestedScrollController
 
+/// 可嵌套滚动视图
+private class NestedScrollView: UIScrollView, UIGestureRecognizerDelegate {
+    /// 可以同时滚动的手势
+    var scrollRecongnizers = [UIGestureRecognizer]()
+    
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        return scrollRecongnizers.contains(otherGestureRecognizer)
+    }
+}
+
+/// 可嵌套滚动控制器
 open class NestedScrollController: UIViewController {
     
-    open lazy var tableView: NestedTableView = {
-        let tableView = NestedTableView()
-        view.addSubview(tableView)
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.backgroundColor = .clear
-        tableView.ext.registerClass(NestedCell.self)
-        tableView.showsVerticalScrollIndicator = false
-        tableView.showsHorizontalScrollIndicator = false
-        tableView.translatesAutoresizingMaskIntoConstraints = false
-        tableView.topAnchor.constraint(equalTo: view.topAnchor).isActive = true
-        tableView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
-        tableView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
-        tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor).isActive = true
-        
-        return tableView
+    private lazy var scrollView: NestedScrollView = {
+        let scrollView = view.ext.add(NestedScrollView())
+        scrollView.delegate = self
+        scrollView.showsVerticalScrollIndicator = false
+        scrollView.showsHorizontalScrollIndicator = false
+        scrollView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: view.topAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+        ])
+        return scrollView
     }()
     
-    private var canScroll: Bool = true      // 父视图是否可滚动
-    private var subCanScroll: Bool = false  // 子视图是否可滚动
+    /// 内嵌是视图容器
+    public lazy var contentView: UIView = {
+        let contentView = scrollView.ext.add(UIView())
+        contentView.translatesAutoresizingMaskIntoConstraints = false
+        let contentViewHeightAnchor = contentView.heightAnchor.constraint(equalTo: view.heightAnchor)
+        contentViewHeightAnchor.priority = UILayoutPriority(rawValue: 1)
+
+        NSLayoutConstraint.activate([
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.leftAnchor.constraint(equalTo: scrollView.leftAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.rightAnchor.constraint(equalTo: scrollView.rightAnchor),
+            contentView.widthAnchor.constraint(equalTo: view.widthAnchor),
+            contentViewHeightAnchor
+        ])
+        return contentView
+    }()
     
-    /// 下拉刷新
-    var headerRefreshHandler: Ext.VoidHandler?
+// MARK: - Status
     
-    /// 父视图滚动最大偏移
-    open var maxOffsetY: CGFloat = 0
-    /// 子视图可滚动的控制器
-    open var subScrollItems = [SubScrollController]()
+    public var logEnabled: Bool = true
+    
+    /// 外部视图是否可滚动
+    private var outerScrollable: Bool = true
+    /// 内部视图是否可滚动
+    private var innerScrollable: Bool = false
+    
+    /// 外部视图滚动最大偏移
+    public var outerMaxOffsetY: CGFloat = 0
+    /// 内部可滚动的控制器
+    open var innerScrollControllers: [InnerScrollController] { [] }
     
 // MARK: - Lifecyle
     
     open override func viewDidLoad() {
         super.viewDidLoad()
         
-        setupData()
+        scrollView.ext.active()
+        contentView.ext.active()
         
-        for item in subScrollItems {
-            addChild(item)
-            item.delegate = self
-            if let scrollView = item.canScrollView() {
-                scrollView.alwaysBounceVertical = true
-                tableView.scrollRecongnizers.append(contentsOf: scrollView.gestureRecognizers ?? [])
+        for controller in innerScrollControllers {
+            addChild(controller)
+            controller.delegate = self
+            if let innerScrollView = controller.innerScrollView {
+                innerScrollView.alwaysBounceVertical = true
+                scrollView.scrollRecongnizers.append(contentsOf: innerScrollView.gestureRecognizers ?? [])
             }
         }
-        
     }
-    
-    /// 子类重载，初始化数据
-    open func setupData() {}
-    
+    open override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        Ext.debug("contentSize: \(scrollView.contentSize)", logEnabled: logEnabled)
+    }
 }
 
-extension NestedScrollController: UIScrollViewDelegate, SubScrollControllerDelegate {
+extension NestedScrollController: UIScrollViewDelegate, InnerScrollControllerDelegate {
     
-    /// 是否打印滚动日志
-    private var scrollLog: Bool { return true }
-    
-    /// 父滚动视图，滚动回调
+    /// 外部滚动视图，滚动回调
     open func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let offsetY = scrollView.contentOffset.y
-        guard scrollView == tableView else { return }
+        guard scrollView == self.scrollView else { return }
         
-        guard canScroll else { // 父滚动视图不能滚动
-            scrollView.contentOffset.y = maxOffsetY
+        let offsetY = scrollView.contentOffset.y
+        Ext.debug("outer scroll | offsetY: \(offsetY) | outerScrollable \(outerScrollable) | innerScrollable: \(innerScrollable) | outerMaxOffsetY: \(outerMaxOffsetY)", logEnabled: logEnabled)
+        guard outerScrollable else {
+            Ext.debug("外部视图不能滚动", logEnabled: logEnabled)
+            scrollView.contentOffset.y = outerMaxOffsetY
             return
         }
         
-        if offsetY >= maxOffsetY { // 父视图滑动到顶端 => 父视图不能滑动，子视图可以滑动
-            canScroll = false
-            subCanScroll = true
-            scrollView.contentOffset.y = maxOffsetY
+        if offsetY >= outerMaxOffsetY {
+            Ext.debug("外部视图滑动到顶端 => 外部视图不能滑动，内部视图可以滑动", logEnabled: logEnabled)
+            outerScrollable = false
+            innerScrollable = true
+            scrollView.contentOffset.y = outerMaxOffsetY
         }
     }
     
-    /// 子滚动视图，滚动回调
-    open func subScrollController(_ controller: SubScrollController, didScroll scrollView: UIScrollView) {
+    /// 内部滚动视图，滚动回调
+    public func innerScrollController(_ controller: InnerScrollController, didScroll scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
-        guard subCanScroll else { // 子滚动视图不能滚动
+        Ext.debug("innser scroll | offsetY: \(offsetY) | outerScrollable \(outerScrollable) | innerScrollable: \(innerScrollable) | outerMaxOffsetY: \(outerMaxOffsetY)", logEnabled: logEnabled)
+        guard innerScrollable else {
+            Ext.debug("内部视图不能滚动", logEnabled: logEnabled)
             scrollView.contentOffset.y = 0
             return
         }
         
-        if offsetY <= 0 { // 子滑动视图滑动到顶端 => 父视图能滑动，子视图不能滑动
-            canScroll = true
-            subCanScroll = false
+        if offsetY <= 0 {
+            Ext.debug("内部视图滑动到顶端 => 外部视图能滑动，内部视图不能滑动", logEnabled: logEnabled)
+            outerScrollable = true
+            innerScrollable = false
             
             // 调整所有子滚动视图偏移到顶端
-            for item in subScrollItems {
-                if let subScrollView = item.canScrollView() {
-                    subScrollView.contentOffset.y = 0
+            for controller in innerScrollControllers {
+                if let innerScrollView = controller.innerScrollView {
+                    innerScrollView.contentOffset.y = 0
                 }
             }
         }
         // 更新指示条显示状态
-        scrollView.showsVerticalScrollIndicator = subCanScroll
-    }
-    
-}
-
-// MARK: - UITableView
-
-extension NestedScrollController: UITableViewDataSource, UITableViewDelegate {
-    
-    open func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
-    }
-    open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.ext.dequeueReusableCell(NestedCell.self, for: indexPath)
-        return cell
-    }
-    
-    open func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return tableView.frame.height
-    }
-    
-    open func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        return nil
-    }
-    open func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return CGFloat.leastNormalMagnitude
-    }
-    open func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-        return nil
-    }
-    open func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return CGFloat.leastNormalMagnitude
-    }
-    
-}
-
-// MARK: - SubScrollController
-
-public protocol SubScrollControllerDelegate: AnyObject {
-    func subScrollController(_ controller: SubScrollController, didScroll scrollView: UIScrollView)
-}
-
-/// 可滚动的子控制器基类
-open class SubScrollController: UIViewController, UIScrollViewDelegate {
-    weak var delegate: SubScrollControllerDelegate?
-    
-    open override func viewDidLoad() {
-        super.viewDidLoad()
-        
-    }
-    
-    open func canScrollView() -> UIScrollView? {
-        return nil
-    }
-    
-    open func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if scrollView == canScrollView() {
-            delegate?.subScrollController(self, didScroll: scrollView)
-        }
+        scrollView.showsVerticalScrollIndicator = outerScrollable
     }
 }
