@@ -12,34 +12,13 @@ import UIKit
     - https://stackoverflow.com/questions/44473232/twitter-profile-page-ios-swift-dissection-multiple-uitableviews-in-uiscrollview
  */
 
-// MARK: - InnerScrollController
-
-/// 内部滚动控制器
-protocol InnerScrollControllerDelegate: AnyObject {
-    func innerScrollController(_ controller: InnerScrollController, didScroll scrollView: UIScrollView)
+/// 嵌套内部滚动视图协议
+public protocol NestedInnerViewScrollable {
+    /// 内部滚动的视图
+    var scrollView: UIScrollView { get }
+    /// 内部视图滚动回调
+    var didScrollHandler: Ext.VoidHandler? { get set }
 }
-
-/// 可滚动的内部控制器
-open class InnerScrollController: UIViewController, UIScrollViewDelegate {
-    weak var delegate: InnerScrollControllerDelegate?
-    
-    open override func viewDidLoad() {
-        super.viewDidLoad()
-        
-    }
-    
-    /// 内部滚动视图 (子内实现)
-    open var innerScrollView: UIScrollView? { nil }
-    
-    /// 滚动协议
-    open func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        if scrollView == innerScrollView {
-            delegate?.innerScrollController(self, didScroll: scrollView)
-        }
-    }
-}
-
-// MARK: - NestedScrollController
 
 /// 可嵌套滚动视图
 private class NestedScrollView: UIScrollView, UIGestureRecognizerDelegate {
@@ -59,6 +38,7 @@ open class NestedScrollController: UIViewController {
         scrollView.delegate = self
         scrollView.showsVerticalScrollIndicator = false
         scrollView.showsHorizontalScrollIndicator = false
+        scrollView.contentInsetAdjustmentBehavior = .never
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -78,9 +58,9 @@ open class NestedScrollController: UIViewController {
 
         NSLayoutConstraint.activate([
             contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            contentView.leftAnchor.constraint(equalTo: scrollView.leftAnchor),
             contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            contentView.rightAnchor.constraint(equalTo: scrollView.rightAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
             contentView.widthAnchor.constraint(equalTo: view.widthAnchor),
             contentViewHeightAnchor
         ])
@@ -96,10 +76,23 @@ open class NestedScrollController: UIViewController {
     /// 内部视图是否可滚动
     private var innerScrollable: Bool = false
     
+// MARK: - Data
+    
     /// 外部视图滚动最大偏移
     public var outerMaxOffsetY: CGFloat = 0
-    /// 内部可滚动的控制器
-    open var innerScrollControllers: [InnerScrollController] { [] }
+    /// 内部可滚动
+    public var innerItems = [NestedInnerViewScrollable]() {
+        didSet {
+            for var item in innerItems {
+                scrollView.scrollRecongnizers.append(contentsOf: item.scrollView.gestureRecognizers ?? [])
+                item.scrollView.showsVerticalScrollIndicator = true
+                item.didScrollHandler = { [weak self] in
+                    guard let `self` = self else { return }
+                    self.innerScrollViewDidScroll(item.scrollView)
+                }
+            }
+        }
+    }
     
 // MARK: - Lifecyle
     
@@ -108,15 +101,6 @@ open class NestedScrollController: UIViewController {
         
         scrollView.ext.active()
         contentView.ext.active()
-        
-        for controller in innerScrollControllers {
-            addChild(controller)
-            controller.delegate = self
-            if let innerScrollView = controller.innerScrollView {
-                innerScrollView.alwaysBounceVertical = true
-                scrollView.scrollRecongnizers.append(contentsOf: innerScrollView.gestureRecognizers ?? [])
-            }
-        }
     }
     open override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -125,7 +109,7 @@ open class NestedScrollController: UIViewController {
     }
 }
 
-extension NestedScrollController: UIScrollViewDelegate, InnerScrollControllerDelegate {
+extension NestedScrollController: UIScrollViewDelegate {
     
     /// 外部滚动视图，滚动回调
     open func scrollViewDidScroll(_ scrollView: UIScrollView) {
@@ -146,9 +130,8 @@ extension NestedScrollController: UIScrollViewDelegate, InnerScrollControllerDel
             scrollView.contentOffset.y = outerMaxOffsetY
         }
     }
-    
     /// 内部滚动视图，滚动回调
-    public func innerScrollController(_ controller: InnerScrollController, didScroll scrollView: UIScrollView) {
+    private func innerScrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
         Ext.debug("innser scroll | offsetY: \(offsetY) | outerScrollable \(outerScrollable) | innerScrollable: \(innerScrollable) | outerMaxOffsetY: \(outerMaxOffsetY)", logEnabled: logEnabled)
         guard innerScrollable else {
@@ -163,10 +146,9 @@ extension NestedScrollController: UIScrollViewDelegate, InnerScrollControllerDel
             innerScrollable = false
             
             // 调整所有子滚动视图偏移到顶端
-            for controller in innerScrollControllers {
-                if let innerScrollView = controller.innerScrollView {
-                    innerScrollView.contentOffset.y = 0
-                }
+            for item in innerItems {
+                guard scrollView != item.scrollView else { continue }
+                item.scrollView.contentOffset.y = 0
             }
         }
         // 更新指示条显示状态
