@@ -33,7 +33,7 @@ private class NestedScrollView: UIScrollView, UIGestureRecognizerDelegate {
 /// 可嵌套滚动控制器
 open class NestedScrollController: UIViewController {
     
-    private lazy var scrollView: NestedScrollView = {
+    private lazy var nestedScrollView: NestedScrollView = {
         let scrollView = view.ext.add(NestedScrollView())
         scrollView.delegate = self
         scrollView.showsVerticalScrollIndicator = false
@@ -48,19 +48,20 @@ open class NestedScrollController: UIViewController {
         ])
         return scrollView
     }()
+    public var scrollView: UIScrollView { nestedScrollView }
     
     /// 内嵌是视图容器
     public lazy var contentView: UIView = {
-        let contentView = scrollView.ext.add(UIView())
+        let contentView = nestedScrollView.ext.add(UIView())
         contentView.translatesAutoresizingMaskIntoConstraints = false
         let contentViewHeightAnchor = contentView.heightAnchor.constraint(equalTo: view.heightAnchor)
         contentViewHeightAnchor.priority = UILayoutPriority(rawValue: 1)
 
         NSLayoutConstraint.activate([
-            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
-            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
-            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.topAnchor.constraint(equalTo: nestedScrollView.topAnchor),
+            contentView.bottomAnchor.constraint(equalTo: nestedScrollView.bottomAnchor),
+            contentView.leadingAnchor.constraint(equalTo: nestedScrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: nestedScrollView.trailingAnchor),
             contentView.widthAnchor.constraint(equalTo: view.widthAnchor),
             contentViewHeightAnchor
         ])
@@ -84,7 +85,7 @@ open class NestedScrollController: UIViewController {
     public var innerItems = [NestedInnerViewScrollable]() {
         didSet {
             for var item in innerItems {
-                scrollView.scrollRecongnizers.append(contentsOf: item.scrollView.gestureRecognizers ?? [])
+                nestedScrollView.scrollRecongnizers.append(contentsOf: item.scrollView.gestureRecognizers ?? [])
                 item.scrollView.showsVerticalScrollIndicator = true
                 item.didScrollHandler = { [weak self] in
                     guard let `self` = self else { return }
@@ -99,13 +100,13 @@ open class NestedScrollController: UIViewController {
     open override func viewDidLoad() {
         super.viewDidLoad()
         
-        scrollView.ext.active()
+        nestedScrollView.ext.active()
         contentView.ext.active()
     }
     open override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
-        Ext.debug("contentSize: \(scrollView.contentSize)", logEnabled: logEnabled)
+        Ext.debug("contentSize: \(nestedScrollView.contentSize)", logEnabled: logEnabled)
     }
 }
 
@@ -113,7 +114,7 @@ extension NestedScrollController: UIScrollViewDelegate {
     
     /// 外部滚动视图，滚动回调
     open func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        guard scrollView == self.scrollView else { return }
+        guard scrollView == self.nestedScrollView else { return }
         
         let offsetY = scrollView.contentOffset.y
         Ext.debug("outer scroll | offsetY: \(offsetY) | outerScrollable \(outerScrollable) | innerScrollable: \(innerScrollable) | outerMaxOffsetY: \(outerMaxOffsetY)", logEnabled: logEnabled)
