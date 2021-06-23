@@ -11,34 +11,27 @@ import UIKit
 
 public extension ExtWrapper where Base == String {
     
-    func height(_ width: CGFloat, font: UIFont) -> CGFloat {
-        let size = CGSize(width: width, height: .greatestFiniteMagnitude)
-        let rect = base.boundingRect(with: size,
-                                     options: .usesLineFragmentOrigin,
-                                     attributes: [NSAttributedString.Key.font: font],
-                                     context: nil)
-        return ceil(rect.height) + 4
-    }
-    func width(_ height: CGFloat, font: UIFont) -> CGFloat {
-        let size = CGSize(width: .greatestFiniteMagnitude, height: height)
-        let rect = base.boundingRect(with: size,
-                                     options: .usesLineFragmentOrigin,
-                                     attributes: [NSAttributedString.Key.font: font],
-                                     context: nil)
-        return ceil(rect.width)
+    func height(_ width: CGFloat, font: UIFont) -> CGFloat { ceil(boundingRect(with: CGSize(width: width, height: .greatestFiniteMagnitude), font: font).height) + 4 }
+    func width(_ height: CGFloat, font: UIFont) -> CGFloat { ceil(boundingRect(with: CGSize(width: .greatestFiniteMagnitude, height: height), font: font).width) }
+    
+    private func boundingRect(with size: CGSize, font: UIFont) -> CGRect {
+        base.boundingRect(with: size,
+                          options: .usesLineFragmentOrigin,
+                          attributes: [NSAttributedString.Key.font: font],
+                          context: nil)
     }
 }
 
 public extension ExtWrapper where Base == NSAttributedString {
-    func height(_ width: CGFloat) -> CGFloat {
-        let size = CGSize(width: width, height: .greatestFiniteMagnitude)
-        let rect = base.boundingRect(with: size, options: .usesLineFragmentOrigin, context: nil)
-        return ceil(rect.height) + 4
-    }
-    func width(_ height: CGFloat) -> CGFloat {
-        let size = CGSize(width: .greatestFiniteMagnitude, height: height)
-        let rect = base.boundingRect(with: size, options: .usesLineFragmentOrigin, context: nil)
-        return ceil(rect.width)
+    
+    func size(height: CGFloat) -> CGSize { boundingRect(with: CGSize(width: .greatestFiniteMagnitude, height: height)).size }
+    func size(width: CGFloat) -> CGSize { boundingRect(with: CGSize(width: width, height: .greatestFiniteMagnitude)).size }
+    
+    func height(_ width: CGFloat) -> CGFloat { ceil(boundingRect(with: CGSize(width: width, height: .greatestFiniteMagnitude)).height) + 4 }
+    func width(_ height: CGFloat) -> CGFloat { ceil(boundingRect(with: CGSize(width: .greatestFiniteMagnitude, height: height)).width) }
+    
+    private func boundingRect(with size: CGSize) -> CGRect {
+        base.boundingRect(with: size, options: .usesLineFragmentOrigin, context: nil)
     }
 }
 
