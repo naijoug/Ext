@@ -50,6 +50,23 @@ public class ExtPlayer: NSObject {
     }
     public weak var delegate: ExtPlayerDelegate?
     
+    /// 时间监听
+    private var timeHandlers = [Ext.DataHandler<TimeStatus>]()
+    
+    private func handleTime(_ status: TimeStatus) {
+        Ext.debug("\(status)", logEnabled: timeLogEnabled)
+        delegate?.extPlayer(self, timeStatus: status)
+        
+        for handler in timeHandlers {
+            handler(status)
+        }
+    }
+    
+    /// 添加是时间状态监听者
+    public func addTimeHandler(_ handler: @escaping Ext.DataHandler<TimeStatus>) {
+        timeHandlers.append(handler)
+    }
+    
 // MARK: - Status
     
     /// 日志标识
@@ -224,6 +241,7 @@ public extension ExtPlayer {
         isSeeking = false
         status = .unknown
         bufferStatus = .unknown
+        timeHandlers.removeAll()
     }
     
     /// 播放
@@ -269,7 +287,7 @@ private extension ExtPlayer {
             guard let `self` = self, let duration = self.duration else { return }
             Ext.debug("boundary: \(self.currentTime) / \(duration) | playerStatus: \(self.status) | isPlaying: \(self.isPlaying)", logEnabled: self.timeLogEnabled)
             guard self.isPlaying else { return }
-            self.delegate?.extPlayer(self, timeStatus: .boundary(self.currentTime, duration))
+            self.handleTime(.boundary(self.currentTime, duration))
         }
     }
     
@@ -288,7 +306,7 @@ private extension ExtPlayer {
             guard let `self` = self, let duration = self.duration else { return }
             Ext.debug("periodic: \(self.currentTime) / \(duration) | playerStatus: \(self.status) | isPlaying: \(self.isPlaying)", logEnabled: self.timeLogEnabled)
             guard self.isPlaying else { return }
-            self.delegate?.extPlayer(self, timeStatus: .periodic(self.currentTime, duration))
+            self.handleTime(.periodic(self.currentTime, duration))
         }
     }
     
@@ -386,7 +404,7 @@ private extension ExtPlayer {
             // 缓冲到的时间
             let bufferTime = bufferTimeRange.start.seconds  + bufferTimeRange.duration.seconds
             Ext.debug("buffering: \(bufferTime) / \(duration) | \(player.currentItem?.loadedTimeRanges ?? [])", logEnabled: self.timeLogEnabled)
-            self.delegate?.extPlayer(self, timeStatus: .buffer(bufferTime, duration))
+            self.handleTime(.buffer(bufferTime, duration))
         }))
         // isPlaybackBufferFull : 缓冲区是否完成
         itemObservers.append(avPlayer.observe(\.currentItem?.isPlaybackBufferFull, options: [.new], changeHandler: { [weak self] player, change in

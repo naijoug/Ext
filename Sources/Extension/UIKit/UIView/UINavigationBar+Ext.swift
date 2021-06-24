@@ -32,7 +32,6 @@ public extension ExtWrapper where Base: UINavigationBar {
             - https://stackoverflow.com/questions/2315862/make-uinavigationbar-transparent
             - https://stackoverflow.com/questions/25845855/transparent-navigation-bar-ios
         */
-        base.isTranslucent = isTransparent
         base.shadowImage = isTransparent ? UIImage() : nil
         base.setBackgroundImage(isTransparent ? UIImage() : nil, for: .default)
     }

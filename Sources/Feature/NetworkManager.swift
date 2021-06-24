@@ -103,7 +103,7 @@ public extension NetworkManager {
          - https://stackoverflow.com/questions/56955595/1103-error-domain-nsurlerrordomain-code-1103-resource-exceeds-maximum-size-i
          */
         if method != .get, let params = params,
-           let httpBody = try? JSONSerialization.data(withJSONObject: params, options: [.prettyPrinted, .sortedKeys]) {
+           let httpBody = try? JSONSerialization.data(withJSONObject: params, options: [.sortedKeys]) {
             request.httpBody = httpBody
             request.setValue("application/json; charset=UTF-8", forHTTPHeaderField: "Content-Type")
             requestMsg += " | \(httpBody.ext.prettyPrintedJSONString ?? "")"
