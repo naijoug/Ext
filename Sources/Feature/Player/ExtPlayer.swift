@@ -164,7 +164,7 @@ public class ExtPlayer: NSObject {
     /// 播放资源 Item
     public var playerItem: AVPlayerItem? {
         didSet {
-            Ext.debug("\(String(describing: oldValue)) -> \(String(describing: playerItem))")
+            Ext.debug("\(String(describing: oldValue)) -> \(String(describing: playerItem))", logEnabled: logEnabled)
             func addNotifications() {
                 if let item = oldValue {
                     NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: item)

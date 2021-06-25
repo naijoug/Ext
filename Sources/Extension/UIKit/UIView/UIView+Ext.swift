@@ -298,34 +298,34 @@ public extension ExtWrapper where Base: UIView {
     
     /// 添加顶部分割线
     /// - Parameter color: 线颜色
-    /// - Parameter width: 线宽度
+    /// - Parameter width: 线高度
     @discardableResult
     func addTopLine(color: UIColor = UIColor.ext.rgbHex(0xdddddd),
-                    width: CGFloat = 0.5, left: CGFloat = 0, right: CGFloat = 0) -> UIView {
+                    height: CGFloat = 0.5, left: CGFloat = 0, right: CGFloat = 0) -> UIView {
         let line = add(UIView(), backgroundColor: color)
         line.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             line.topAnchor.constraint(equalTo: base.topAnchor),
             line.leftAnchor.constraint(equalTo: base.leftAnchor, constant: left),
             line.rightAnchor.constraint(equalTo: base.rightAnchor, constant: right),
-            line.heightAnchor.constraint(equalToConstant: width)
+            line.heightAnchor.constraint(equalToConstant: height)
         ])
         return line
     }
     
     /// 添加底部分割线
     /// - Parameter color: 线颜色
-    /// - Parameter width: 线宽度
+    /// - Parameter width: 线高度
     @discardableResult
     func addBottomLine(color: UIColor = UIColor.ext.rgbHex(0xdddddd),
-                       width: CGFloat = 0.5, left: CGFloat = 0, right: CGFloat = 0) -> UIView {
+                       height: CGFloat = 0.5, left: CGFloat = 0, right: CGFloat = 0) -> UIView {
         let line = add(UIView(), backgroundColor: color)
         line.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             line.bottomAnchor.constraint(equalTo: base.bottomAnchor),
             line.leftAnchor.constraint(equalTo: base.leftAnchor, constant: left),
             line.rightAnchor.constraint(equalTo: base.rightAnchor, constant: right),
-            line.heightAnchor.constraint(equalToConstant: width)
+            line.heightAnchor.constraint(equalToConstant: height)
         ])
         return line
     }
