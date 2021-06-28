@@ -78,7 +78,7 @@ public extension ExtWrapper where Base == Date {
         return Date(timeIntervalSince1970: timestamp)
     }
     
-    ///
+    /// 该时间
     func dateWith(day: Int? = nil, hour: Int? = nil, minute: Int? = nil, second: Int? = nil) -> Date {
         let components = DateComponents(day: day, hour: hour, minute: minute, second: second)
         return Calendar.current.date(byAdding: components, to: base) ?? base
@@ -98,7 +98,6 @@ public extension ExtWrapper where Base == Date {
         let components = Calendar.current.dateComponents([.day, .hour, .minute, .second], from: Date(), to: date)
         return components.day
     }
-    
 }
 
 extension ExtWrapper where Base == Date {
@@ -219,4 +218,37 @@ extension ExtWrapper where Base == Date {
     private static let oneWeekOfSeconds: TimeInterval = oneDayOfSeconds * 7
 }
 
-
+public extension ExtWrapper where Base == Date {
+    /// 当前月份天数
+    var daysInMonth: Int? {
+        Calendar.current.range(of: .day, in: .month, for: base)?.count
+    }
+    
+    /// 改时间所在周的第一天日期
+    var startOfWeek: Date? {
+        let calendar = Calendar.current
+        let componets = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: base)
+        return calendar.date(from: componets)
+    }
+    /// 该时间所在周的最后一天日期
+    var endOfWeek: Date? { startOfWeek?.ext.date(day: 6) }
+    /// 该时间所在周的最后一天日期
+    var endTimeOfWeek: Date? {
+        guard let start = startOfWeek else { return nil }
+        let calendar = Calendar.current
+        var componets = DateComponents()
+        componets.day = 7
+        componets.second = -1
+        return calendar.date(byAdding: componets, to: start)
+    }
+    
+    
+    /// 改时间的偏移天数之后的日期
+    /// - Parameter day: 偏移天数
+    func date(day: Int) -> Date? {
+        let calendar = Calendar.current
+        var componets = DateComponents()
+        componets.day = day
+        return calendar.date(byAdding: componets, to: base)
+    }
+}
