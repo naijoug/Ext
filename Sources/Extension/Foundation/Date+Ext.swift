@@ -133,22 +133,22 @@ extension ExtWrapper where Base == Date {
     
     /// 日期状态
     public var status: DateStatus {
-        if isInTomorrow         { return .tomorrow }
-        if isInToday            { return .today }
-        if isInYesterday        { return .yesterday }
-        if isInTwoDaysAgo       { return .twoDaysAgo }
-        if isInThisWeek         { return .thisWeek }
-        if isInLastWeek         { return .lastWeek }
-        if isInThisMonth        { return .thisMonth }
-        if isInLastMonth        { return .lastMonth }
-        if isInThisYear         { return .thisYear }
+        if isTomorrow         { return .tomorrow }
+        if isToday            { return .today }
+        if isYesterday        { return .yesterday }
+        if isTwoDaysAgo       { return .twoDaysAgo }
+        if isThisWeek         { return .thisWeek }
+        if isLastWeek         { return .lastWeek }
+        if isThisMonth        { return .thisMonth }
+        if isLastMonth        { return .lastMonth }
+        if isThisYear         { return .thisYear }
         return .normal
     }
     
     /// 未来时间
-    public var isInTheFuture: Bool { base > Date() }
+    public var isFuture: Bool { base > Date() }
     /// 过去时间
-    public var isInThePast:   Bool { base < Date() }
+    public var isPast:   Bool { base < Date() }
     
     /// 日期组成 [年、月、日、周、时、分、秒]
     public var dateComponents: DateComponents {
@@ -156,48 +156,36 @@ extension ExtWrapper where Base == Date {
     }
     
     /// 明天
-    var isInTomorrow:  Bool { Calendar.current.isDateInTomorrow(base) }
+    var isTomorrow:  Bool { Calendar.current.isDateInTomorrow(base) }
     /// 今天
-    var isInToday:     Bool { Calendar.current.isDateInToday(base) }
+    var isToday:     Bool { Calendar.current.isDateInToday(base) }
     /// 昨天
-    var isInYesterday: Bool { Calendar.current.isDateInYesterday(base) }
+    var isYesterday: Bool { Calendar.current.isDateInYesterday(base) }
     /// 前天
-    var isInTwoDaysAgo: Bool { return isInSameDay(date: Date().addingTimeInterval(-ExtWrapper<Date>.oneDayOfSeconds*2)) }
+    var isTwoDaysAgo: Bool { return isSameDay(date: Date().addingTimeInterval(-ExtWrapper<Date>.oneDayOfSeconds*2)) }
     /// 本周
-    var isInThisWeek: Bool {
+    var isThisWeek: Bool {
         let seconds = Date().timeIntervalSince(base)
         guard 0 <= seconds && seconds < ExtWrapper<Date>.oneWeekOfSeconds else { return false }
         return true
     }
     /// 上周
-    var isInLastWeek: Bool  {
+    var isLastWeek: Bool  {
         let seconds = Date().timeIntervalSince(base)
         guard ExtWrapper<Date>.oneWeekOfSeconds <= seconds && seconds < ExtWrapper<Date>.oneWeekOfSeconds*2 else { return false }
         return true
     }
     /// 本月
-    var isInThisMonth: Bool { isInSameMonth(date: Date()) }
+    var isThisMonth: Bool { isSameMonth(date: Date()) }
     /// 上个月
-    var isInLastMonth: Bool {
+    var isLastMonth: Bool {
         var components = DateComponents()
         components.month = -1
         guard let date = Calendar.current.date(byAdding: components, to: Date()) else { return false }
-        return isInSameMonth(date: date)
+        return isSameMonth(date: date)
     }
     /// 今年
-    var isInThisYear: Bool  { isInSameYear(date: Date()) }
-    
-    /// 同一天
-    func isInSameDay  (date: Date) -> Bool { isEqual(to: date, toGranularity: .day) }
-    /// 同一个月
-    func isInSameMonth(date: Date) -> Bool { isEqual(to: date, toGranularity: .month) }
-    /// 同一年
-    func isInSameYear (date: Date) -> Bool { isEqual(to: date, toGranularity: .year) }
-    
-    /// 日期相等比较
-    func isEqual(to date: Date, toGranularity component: Calendar.Component, in calendar: Calendar = .current) -> Bool {
-        calendar.isDate(base, equalTo: date, toGranularity: component)
-    }
+    var isThisYear: Bool  { isSameYear(date: Date()) }
     
     /// 年月日是否相等
     func equalYMD(_ other: Date) -> Bool {
@@ -216,6 +204,21 @@ extension ExtWrapper where Base == Date {
     private static let oneDayOfSeconds: TimeInterval = oneHourOfSeconds * 24
     /// 一周的秒数 (7天)
     private static let oneWeekOfSeconds: TimeInterval = oneDayOfSeconds * 7
+}
+
+public extension ExtWrapper where Base == Date {
+    
+    /// 同一天
+    func isSameDay  (date: Date) -> Bool { isEqual(to: date, toGranularity: .day) }
+    /// 同一个月
+    func isSameMonth(date: Date) -> Bool { isEqual(to: date, toGranularity: .month) }
+    /// 同一年
+    func isSameYear (date: Date) -> Bool { isEqual(to: date, toGranularity: .year) }
+    
+    /// 日期相等比较
+    private func isEqual(to date: Date, toGranularity component: Calendar.Component, in calendar: Calendar = .current) -> Bool {
+        calendar.isDate(base, equalTo: date, toGranularity: component)
+    }
 }
 
 public extension ExtWrapper where Base == Date {
@@ -250,5 +253,18 @@ public extension ExtWrapper where Base == Date {
         var componets = DateComponents()
         componets.day = day
         return calendar.date(byAdding: componets, to: base)
+    }
+    
+    /// 返回当前时间，往前指定条数日期
+    /// - Parameter count: > 0 往后 | < 0 往前
+    func dates(_ count: Int) -> [Date] {
+        var items = [Date]()
+        items.append(base)
+        let sign = count > 0 ? 1 : -1
+        for i in 1..<abs(count) {
+            guard let date = date(day: sign * i) else { continue }
+            items.append(date)
+        }
+        return items
     }
 }
