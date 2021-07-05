@@ -135,7 +135,7 @@ public extension NetworkManager {
                 let httpResponse = response as? HTTPURLResponse
                 guard httpResponse?.statusCode == 200 else {
                     guard let error = error else {
-                        responseMsg += " | statusCcode != 200, \(httpResponse?.statusCode ?? 0)"
+                        responseMsg += " | statusCcode != 200, \(httpResponse?.statusCode ?? 0) (\(httpResponse?.statusCode.statusMessage ?? ""))"
                         Ext.debug("Data Response failure | \(responseMsg)", tag: .failure, location: false)
                         dataHandler(nil, response, Ext.Error.inner("Server error \(httpResponse?.statusCode ?? 0)."))
                         return
@@ -196,7 +196,7 @@ public extension NetworkManager {
         }
         var requestMsg = "FormData upload | \(urlString)"
         
-        var request = URLRequest(url: url, timeoutInterval: 60*2) // 上传超时时间: 2分钟
+        var request = URLRequest(url: url, timeoutInterval: 60 * 2) // 上传超时时间: 2分钟
         // 设置 HTTP 请求方法
         request.httpMethod = HttpMethod.post.rawValue
         // 设置 HTTP 请求头
@@ -358,6 +358,19 @@ extension NetworkManager: URLSessionDownloadDelegate {
  Reference: https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status
  HTTP Error Code
     - 401 Unauthorized : 授权出错
-    - 405 Method not allowed : HTTP 方法错误
+    - 404 Not Found : 资源不存在
+    - 405 Method Not Allowed : HTTP 方法错误
     - 415 Unsupported Media Type : ContentType 有误
  */
+
+private extension Int {
+    var statusMessage: String? {
+        switch self {
+        case 401: return "Unauthorized"
+        case 404: return "Not Found"
+        case 405: return "Method Not Allowed"
+        case 415: return "Unsupported Media Type"
+        default: return ""
+        }
+    }
+}
