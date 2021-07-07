@@ -36,7 +36,11 @@ open class WebController: UIViewController {
         navigationItem.largeTitleDisplayMode = .never
         
         if isModal {
-            navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(closeAction))
+            if #available(iOS 13.0, *) {
+                navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(closeAction))
+            } else {
+                navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: self, action: #selector(closeAction))
+            }
         }
         
         setupWebView()
