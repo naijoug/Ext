@@ -10,7 +10,7 @@ import Foundation
 extension String: ExtCompatible {}
 extension Character: ExtCompatible {}
 
-/*
+/**
  let str = "abcdef"
  str[1 ..< 3] // returns "bc"
  str[5] // returns "f"
@@ -71,10 +71,27 @@ public extension ExtWrapper where Base == String {
             .reduce(String.UnicodeScalarView()) { $0 + [$1] }
         return String(usv)
     }
-
 }
 
 public extension ExtWrapper where Base == String {
+    
+    /**
+     首字符大写
+
+     string:           toDo
+     uppercased:       TODO
+     capitalized:      Todo
+     firstCapitalized: ToDo
+     
+     string:           hello world.
+     uppercased:       HELLO WORLD.
+     capitalized:      Hello World.
+     firstCapitalized: Hello world.
+     
+     Reference:
+        - https://stackoverflow.com/questions/26306326/swift-apply-uppercasestring-to-only-the-first-letter-of-a-string
+     */
+    var firstCapitalized: String { base.prefix(1).capitalized + base.dropFirst() }
     
     /**
      HTML Encoded String
