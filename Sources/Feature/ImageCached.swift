@@ -8,25 +8,23 @@
 import UIKit
 import CoreGraphics
 
-/// 图片缓存
+/// 简陋的图片缓存
 public struct ImageCached {
     /// 缓存容器
     private static var cache = NSCache<AnyObject, AnyObject>()
-    
+}
+public extension ImageCached {
     /// 获取缓存图片
-    private static func getImage(forKey key: String?) -> UIImage? {
+    static func getImage(forKey key: String?) -> UIImage? {
         guard let key = key else { return  nil }
         return cache.object(forKey: key as AnyObject) as? UIImage
     }
     /// 保存缓存图片
-    private static func setImage(_ image: UIImage?, forKey key: String?) {
+    static func setImage(_ image: UIImage?, forKey key: String?) {
         guard let image = image, let key = key else { return }
         cache.setObject(image, forKey: key as AnyObject)
     }
     
-    
-}
-public extension ImageCached {
     /// 生成图片，并且进行缓存
     /// - Parameters:
     ///   - key: 图片缓存的 Key
