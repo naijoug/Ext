@@ -179,4 +179,18 @@ public extension ExtWrapper where Base == NSAttributedString {
         }
     }
     
+    /// 添加阴影
+    /// - Parameters:
+    ///   - color: 阴影颜色
+    ///   - blurRadius: 模糊半径
+    ///   - offset: 偏移
+    func shadow(color: UIColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.3), blurRadius: CGFloat = 5, offset: CGSize = .zero) -> NSAttributedString {
+        let mAttri = NSMutableAttributedString(attributedString: base)
+        let shadow = NSShadow()
+        shadow.shadowColor = color
+        shadow.shadowBlurRadius = blurRadius
+        shadow.shadowOffset = offset
+        mAttri.addAttribute(.shadow, value: shadow, range: NSRange(location: 0, length: mAttri.length))
+        return mAttri
+    }
 }

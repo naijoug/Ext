@@ -98,12 +98,15 @@ public extension ExtWrapper where Base == String {
      Reference:
         - https://stackoverflow.com/questions/25607247/how-do-i-decode-html-entities-in-swift
      */
-    var htmlDecoded: String {
-        let decoded = try? NSAttributedString(data: Data(base.utf8), options: [
+    var htmlDecoded: String? {
+        guard let data = base.data(using: .utf8) else { return nil }
+        guard let attri = try? NSAttributedString(data: data, options: [
             .documentType: NSAttributedString.DocumentType.html,
             .characterEncoding: String.Encoding.utf8.rawValue
-        ], documentAttributes: nil).string
-        return decoded ?? base
+        ], documentAttributes: nil) else {
+            return nil
+        }
+        return attri.string
     }
 }
 

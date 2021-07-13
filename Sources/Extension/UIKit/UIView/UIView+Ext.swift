@@ -109,16 +109,12 @@ public extension ExtWrapper where Base: UIView {
     /// - Parameters:
     ///   - opaque: 是否透明背景
     ///   - scale: 缩放比例
-    func uiImage(opaque: Bool = false, scale: CGFloat = 1) -> UIImage? {
+    func uiImage(opaque: Bool = false, scale: CGFloat = UIScreen.main.scale) -> UIImage? {
         UIGraphicsBeginImageContextWithOptions(base.bounds.size, opaque, scale)
-        guard let context = UIGraphicsGetCurrentContext() else {
-            UIGraphicsEndImageContext()
-            return nil
-        }
+        defer { UIGraphicsEndImageContext() }
+        guard let context = UIGraphicsGetCurrentContext() else { return nil }
         base.layer.render(in: context)
-        let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return image
+        return UIGraphicsGetImageFromCurrentImageContext()
     }
     
 }
