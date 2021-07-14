@@ -103,7 +103,11 @@ extension ExtWrapper where Base: UIView {
 
 public extension ExtWrapper where Base: UIView {
     
-    // Reference: https://stackoverflow.com/questions/4334233/how-to-capture-uiview-to-uiimage-without-loss-of-quality-on-retina-display
+    /**
+    Reference:
+        - https://stackoverflow.com/questions/4334233/how-to-capture-uiview-to-uiimage-without-loss-of-quality-on-retina-display
+        - https://nshipster.com/image-resizing/
+     */
     
     /// UIView -> UIImage
     /// - Parameters:
