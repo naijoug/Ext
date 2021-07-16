@@ -99,6 +99,38 @@ extension ExtWrapper where Base: UIView {
     
 }
 
+// MARK: - Visible
+
+public extension ExtWrapper where Base: UIView {
+    
+    /// 视图是否可见
+    var isVisible: Bool {
+        guard base.superview != nil, !base.isHidden else { return false }
+        guard let window = base.window, window.isKeyWindow else { return false }
+        guard let rect = base.superview?.convert(base.frame, to: window) else { return false }
+        
+        //Ext.debug("rect: \(rect) | \(base.window?.frame ?? .zero) | \(base.superview?.frame ?? .zero)")
+        guard !rect.isNull, !rect.isEmpty, !rect.size.equalTo(.zero) else { return false }
+        let screenRect = UIScreen.main.bounds
+        let intersectionRect = rect.intersection(screenRect)
+        //Ext.debug("intersectionRect: \(intersectionRect)")
+        guard !intersectionRect.isNull, !intersectionRect.isEmpty, !intersectionRect.size.equalTo(.zero) else {
+            return false
+        }
+        return true
+    }
+    
+    /// 视图是否完成可见
+    var isFullyVisible: Bool {
+        guard isVisible else { return false }
+        guard let window = base.window, let rect = base.superview?.convert(base.frame, to: window) else { return false }
+        let screenRect = UIScreen.main.bounds
+        //Ext.debug("rect: \(rect)")
+        return screenRect.contains(rect)
+    }
+    
+}
+
 // MARK: - Image
 
 public extension ExtWrapper where Base: UIView {
@@ -227,12 +259,14 @@ public extension ExtWrapper where Base: UIView {
     ///   - times: 抖动次数（默认: 1次）
     ///   - interval: 每次抖动时间（默认: 0.1秒）
     ///   - delta: 抖动偏移量（默认: 1）
+    ///   - recover: 动画完成是否恢复初始状态
     ///   - completion: 抖动动画结束后的回调
     func shake(direction: ShakeDirection = .vertical,
-                      times: Int = 1,
-                      interval: TimeInterval = 0.1,
-                      delta: CGFloat = 1,
-                      completion: (() -> Void)? = nil) {
+               times: Int = 1,
+               interval: TimeInterval = 0.1,
+               delta: CGFloat = 1,
+               recover: Bool = true,
+               completion: (() -> Void)? = nil) {
         UIView.animate(withDuration: interval, animations: { () -> Void in
             switch direction {
             case .horizontal:
@@ -245,9 +279,13 @@ public extension ExtWrapper where Base: UIView {
                 self.shake(direction: direction, times: times - 1,  interval: interval, delta: delta * -1, completion: completion)
                 return
             }
+            guard recover else {
+                completion?()
+                return
+            }
             UIView.animate(withDuration: interval, animations: { () -> Void in
-                self.base.layer.setAffineTransform(CGAffineTransform.identity)
-            }, completion: { (complete) -> Void in
+                self.base.layer.setAffineTransform(.identity)
+            }, completion: { _ in
                 completion?()
             })
         }
