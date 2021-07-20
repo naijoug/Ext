@@ -176,16 +176,21 @@ public extension ExtPlayerView {
     }
     
     /// 开始播放
-    func play(_ time: TimeInterval? = nil) {
+    func play() {
         Ext.debug("")
         isPlaying = true
-        extPlayer.play(time)
+        extPlayer.play()
     }
     /// 暂停播放
-    func pause(_ time: TimeInterval? = nil) {
+    func pause() {
         Ext.debug("")
         isPlaying = false
-        extPlayer.pause(time)
+        extPlayer.pause()
+    }
+    
+    /// 调整播放时间
+    func seek(_ time: TimeInterval, handler: Ext.ResultVoidHandler?) {
+        extPlayer.seek(time, handler: handler)
     }
 }
 

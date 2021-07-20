@@ -92,7 +92,7 @@ public class ExtPlayer: NSObject {
     }
     
     /// 是否正在 seek 播放时间
-    private var isSeeking: Bool = false
+    public private(set) var isSeeking: Bool = false
     
     /// 是否静音🔇
     public var isMuted: Bool = false {
@@ -118,19 +118,6 @@ public class ExtPlayer: NSObject {
     }
     /// 缓冲时间间隔 (默认: 2s)
     public let bufferInterval: TimeInterval = 2.0
-    
-    /// 当前时间 (单位: 秒)
-    public var currentTime: TimeInterval {
-        get {
-            let time = CMTimeGetSeconds(avPlayer.currentTime())
-            return (time.isNaN || time.isInfinite) ? 0 : time
-        }
-        set {
-            let newTime = CMTimeMakeWithSeconds(newValue, preferredTimescale: playerItem?.asset.duration.timescale ?? 600)
-            Ext.debug("newTime: \(newTime) | \(newTime.seconds)", logEnabled: logEnabled)
-            avPlayer.seek(to: newTime, toleranceBefore: CMTime.zero, toleranceAfter: CMTime.zero)
-        }
-    }
     
 // MARK: - Init
     
@@ -213,6 +200,11 @@ public extension ExtPlayer {
         }
     }
     
+    /// 当前时间 (单位: 秒)
+    var currentTime: TimeInterval {
+        let time = CMTimeGetSeconds(avPlayer.currentTime())
+        return (time.isNaN || time.isInfinite) ? 0 : time
+    }
     /// 当前播放资源总时长
     var duration: TimeInterval? {
         guard let time = avPlayer.currentItem?.duration.seconds else { return nil }
@@ -245,27 +237,41 @@ public extension ExtPlayer {
     }
     
     /// 播放
-    /// - Parameter time: 指定播放时间点 (秒)
-    func play(_ time: TimeInterval? = nil) {
-        Ext.debug("play to \(time ?? 0) | currentTime: \(currentTime) | duration: \(String(describing: duration))", logEnabled: logEnabled)
-        if let time = time, !time.isNaN {
-            currentTime = time
-        }
-        // 播放到了最后，设置到开头
-        if let duration = duration, duration > 0, currentTime == duration {
-            currentTime = 0
-        }
+    func play() {
+        Ext.debug("play currentTime: \(currentTime) | duration: \(duration ?? 0)", logEnabled: logEnabled)
         avPlayer.play()
         status = .playing
     }
     /// 暂停播放
-    /// - Parameter time: 指定暂停时间点 (秒)
-    func pause(_ time: TimeInterval? = nil) {
-        if let time = time, !time.isNaN {
-            currentTime = time
-        }
+    func pause() {
+        Ext.debug("pause currentTime: \(currentTime) | duration: \(duration ?? 0)", logEnabled: logEnabled)
         avPlayer.pause()
         status = .paused
+    }
+    
+    /// 调整播放时间点
+    /// - Parameters:
+    ///   - time: 需要调整到的时间
+    ///   - handler: 调整完成回调
+    func seek(_ time: TimeInterval?, handler: Ext.ResultVoidHandler?) {
+        guard let time = time, time > 0 else {
+            handler?(.failure(Ext.Error.inner("seek time is invalid.")))
+            return
+        }
+        self.pause()
+        let newTime = CMTimeMakeWithSeconds(time, preferredTimescale: playerItem?.asset.duration.timescale ?? 600)
+        Ext.debug("begin seeking newTime: \(newTime) | \(newTime.seconds) | \(time)", tag: .custom("📌"), logEnabled: logEnabled)
+        isSeeking = true
+        avPlayer.seek(to: newTime, toleranceBefore: .zero, toleranceAfter: .zero) { [weak self] completion in
+            guard let `self` = self else { return }
+            self.isSeeking = false
+            Ext.debug("end player seeking \(completion) | \(self.currentTime)", tag: .custom("🚩"), logEnabled: self.logEnabled)
+            guard completion else {
+                handler?(.failure(Ext.Error.inner("seek time failure.")))
+                return
+            }
+            handler?(.success(()))
+        }
     }
 }
 
@@ -286,7 +292,7 @@ private extension ExtPlayer {
         boundaryObserver = avPlayer.addBoundaryTimeObserver(forTimes: times, queue: .main) { [weak self] in
             guard let `self` = self, let duration = self.duration else { return }
             Ext.debug("boundary: \(self.currentTime) / \(duration) | playerStatus: \(self.status) | isPlaying: \(self.isPlaying)", logEnabled: self.timeLogEnabled)
-            guard self.isPlaying else { return }
+            guard self.isPlaying  else { return }
             self.handleTime(.boundary(self.currentTime, duration))
         }
     }
@@ -314,6 +320,8 @@ private extension ExtPlayer {
     func didPlayToEnd(_ notification: Notification) {
         guard let item = notification.object as? AVPlayerItem, item == playerItem else { return }
         Ext.debug("didPlayToEnd", logEnabled: logEnabled)
+        // play to end, seek to start
+        avPlayer.seek(to: .zero)
         status = .playToEnd
     }
     @objc
