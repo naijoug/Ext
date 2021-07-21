@@ -62,7 +62,7 @@ public extension NetworkManager {
         guard method == .get, let params = params as? [String: Any],
               var urlComponets = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return url }
         // GET请求，添加查询参数
-        urlComponets.queryItems = params.map({ URLQueryItem(name: $0.key, value: "\($0.value)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed)) })
+        urlComponets.queryItems = params.map({ URLQueryItem(name: $0.key, value: "\($0.value)") })
         return urlComponets.url ?? url
     }
     
