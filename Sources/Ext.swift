@@ -114,8 +114,17 @@ public extension Ext {
         case success
         case failure
         
+        case tag
+        case fix
+        case get
         case fire
+        case full
         case store
+        case target
+        case launch
+        case recycle
+        case champion
+        
         /// 自定义符号
         case custom(_ token: String)
         
@@ -126,8 +135,17 @@ public extension Ext {
             case .success:  return "✅"
             case .failure:  return "❌"
             
+            case .tag:      return "📌"
+            case .fix:      return "🛠"
+            case .get:      return "🚩"
             case .fire:     return "🔥"
+            case .full:     return "💯"
             case .store:    return "🗂"
+            case .target:   return "🎯"
+            case .launch:   return "🚀"
+            case .recycle:  return "♻️"
+            case .champion: return "🏆"
+            
             case .custom(let token): return token
             }
         }

@@ -31,6 +31,32 @@ public extension ExtWrapper where Base: UIViewController {
 
 public extension ExtWrapper where Base: UIViewController {
     
+    /// 控制类名
+    var className: String { "\(type(of: base))" }
+    
+    /// 控制器生命周期
+    enum Lifecycle: String {
+        case viewDidLoad
+        case viewWillAppear
+        case viewDidAppear
+        case viewWillDisappear
+        case viewDidDisappear
+        
+        public var tag: String {
+            switch self {
+            case .viewDidLoad:          return "🌞"
+            case .viewWillAppear:       return "🌖"
+            case .viewDidAppear:        return "🌕"
+            case .viewWillDisappear:    return "🌒"
+            case .viewDidDisappear:     return "🌑"
+            }
+        }
+    }
+    
+    func log(_ lifecycle: Lifecycle) {
+        Ext.debug("\(lifecycle.rawValue) \t | \(className)", tag: .custom(lifecycle.tag), location: false)
+    }
+    
     /// 控制器是否可见
     var isVisible: Bool {
         // Refrence: https://stackoverflow.com/questions/2777438/how-to-tell-if-uiviewcontrollers-view-is-visible
