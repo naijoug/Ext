@@ -54,7 +54,7 @@ public extension ExtWrapper where Base: UIViewController {
     }
     
     func log(_ lifecycle: Lifecycle) {
-        Ext.debug("\(lifecycle.rawValue) \t | \(className)", tag: .custom(lifecycle.tag), location: false)
+        Ext.debug("\(lifecycle.rawValue) \t | \(className)", tag: .custom(lifecycle.tag), locationEnabled: false)
     }
     
     /// 控制器是否可见

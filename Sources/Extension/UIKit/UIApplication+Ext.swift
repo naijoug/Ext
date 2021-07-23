@@ -110,7 +110,7 @@ public extension ExtWrapper where Base == UIApplication {
                 try FileManager.default.removeItem(atPath: path2)
             }
         } catch {
-            print("Failed to clear LaunchScreen cache | error: \(error)")
+            Ext.debug("Failed to clear LaunchScreen cache", error: error, tag: .fix, locationEnabled: false)
         }
     }
 }

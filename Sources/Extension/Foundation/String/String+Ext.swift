@@ -97,16 +97,19 @@ public extension ExtWrapper where Base == String {
      HTML Encoded String
      Reference:
         - https://stackoverflow.com/questions/25607247/how-do-i-decode-html-entities-in-swift
+        - https://stackoverflow.com/questions/53954178/initialization-of-nsattributedstring-is-crashing-application
      */
     var htmlDecoded: String? {
         guard let data = base.data(using: .utf8) else { return nil }
-        guard let attri = try? NSAttributedString(data: data, options: [
-            .documentType: NSAttributedString.DocumentType.html,
-            .characterEncoding: String.Encoding.utf8.rawValue
-        ], documentAttributes: nil) else {
+        do {
+            return try NSAttributedString(data: data, options: [
+                .documentType: NSAttributedString.DocumentType.html,
+                .characterEncoding: String.Encoding.utf8.rawValue
+            ], documentAttributes: nil).string
+        } catch {
+            Ext.debug("html decoded failed", error: error, tag: .error)
             return nil
         }
-        return attri.string
     }
 }
 

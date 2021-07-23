@@ -128,7 +128,7 @@ extension WebController: WKNavigationDelegate {
         Ext.debug("webView load finish. \(loadingSeconds)")
     }
     public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        Ext.debug("webView load fail. \(error.localizedDescription)")
+        Ext.debug("webView load fail.", error: error)
         endNetworking()
     }
     
@@ -166,7 +166,7 @@ extension WebController {
             do {
                 json = try JSONSerialization.jsonObject(with: Data(string.utf8), options: [.allowFragments, .mutableLeaves]) as? Dictionary<String, Any>
             } catch {
-                Ext.debug("json 解析错误, \(error.localizedDescription)")
+                Ext.debug("JSON 解析错误", error: error)
             }
             routeJSMethod(json)
         } else if body is NSDictionary, let json = body as? Dictionary<String, Any> {

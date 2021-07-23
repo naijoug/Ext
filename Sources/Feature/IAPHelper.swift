@@ -61,7 +61,7 @@ extension IAPHelper {
     public var canMakePayments: Bool { return SKPaymentQueue.canMakePayments() }
     /// 购买产品
     public func buyProduct(_ product: SKProduct, handler: @escaping PaymentCompletionHandler) {
-        print("Buying \(product.productIdentifier)...")
+        Ext.debug("Buying \(product.productIdentifier)...")
         paymentHandler = handler
         let payment = SKPayment(product: product)
         SKPaymentQueue.default().add(payment)
@@ -107,8 +107,7 @@ extension IAPHelper: SKProductsRequestDelegate {
     }
     
     public func request(_ request: SKRequest, didFailWithError error: Error) {
-        print("Failed to load list of products.")
-        print("Error: \(error.localizedDescription)")
+        Ext.debug("Failed to load list of products.", error: error)
         handleProducts(nil, error: error)
     }
     
@@ -138,7 +137,7 @@ extension IAPHelper: SKPaymentTransactionObserver {
     }
 
     private func complete(transaction: SKPaymentTransaction) {
-        print("complete...")
+        Ext.debug("complete...")
         handlePayment(transaction, error: nil)
         SKPaymentQueue.default().finishTransaction(transaction)
     }
@@ -146,7 +145,7 @@ extension IAPHelper: SKPaymentTransactionObserver {
     private func restore(transaction: SKPaymentTransaction) {
         guard let productIdentifier = transaction.original?.payment.productIdentifier else { return }
 
-        print("restore... \(productIdentifier)")
+        Ext.debug("restore... \(productIdentifier)")
         SKPaymentQueue.default().finishTransaction(transaction)
     }
 
@@ -155,9 +154,9 @@ extension IAPHelper: SKPaymentTransactionObserver {
         if let transactionError = transaction.error as NSError?,
         let localizedDescription = transaction.error?.localizedDescription,
             transactionError.code != SKError.paymentCancelled.rawValue {
-            print("Transaction Error: \(localizedDescription)")
+            Ext.debug("Transaction Error: \(localizedDescription)", error: transaction.error)
         } else {
-            print("Transaction cancelled.")
+            Ext.debug("Transaction cancelled.", error: transaction.error)
         }
         handlePayment(transaction, error: transaction.error)
         SKPaymentQueue.default().finishTransaction(transaction)

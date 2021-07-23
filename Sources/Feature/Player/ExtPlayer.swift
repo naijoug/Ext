@@ -442,7 +442,7 @@ extension ExtPlayer.Status: CustomStringConvertible {
         case .playing:              return "playing"
         case .paused:               return "paused"
         case .playToEnd:            return "playToEnd"
-        case .failed(let error):    return "failed: \(error.localizedDescription)"
+        case .failed(let error):    return "failed (\(error.localizedDescription))"
         }
     }
 }

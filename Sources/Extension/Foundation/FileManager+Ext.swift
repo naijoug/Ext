@@ -16,14 +16,14 @@ public extension ExtWrapper where Base == FileManager {
         do {
             try base.removeItem(at: url)
         } catch {
-            print("remove \(url.absoluteString) failure. error : \(error.localizedDescription)")
+            Ext.debug("remove \(url.absoluteString) failure.", error: error, tag: .file, locationEnabled: false)
         }
     }
     
     /// 如果文件夹不存在，创建
     func createIfNotExists(_ folderUrl: URL?) {
         guard let folderUrl = folderUrl else {
-            print("📂 Url 为 nil")
+            Ext.debug("folder url is nil", tag: .file, locationEnabled: false)
             return
         }
         guard !base.fileExists(atPath: folderUrl.path) else {
@@ -33,7 +33,7 @@ public extension ExtWrapper where Base == FileManager {
         do {
             try base.createDirectory(at: folderUrl, withIntermediateDirectories: true, attributes: nil)
         } catch {
-            print("创建 📂 失败")
+            Ext.debug("folder create failure | \(folderUrl.path)", error: error, tag: .file, locationEnabled: false)
         }
     }
     
@@ -56,7 +56,7 @@ public extension ExtWrapper where Base == FileManager {
             // 保存数据
             try string.write(to: url, atomically: false, encoding: .utf8)
         } catch {
-            Ext.debug("save failure. \(error.localizedDescription)")
+            Ext.debug("save failure.", error: error, tag: .file, locationEnabled: false)
         }
     }
     
@@ -77,7 +77,7 @@ public extension ExtWrapper where Base == FileManager {
             // 保存数据
             try data.write(to: url)
         } catch {
-            Ext.debug("save failure. \(error.localizedDescription)")
+            Ext.debug("save failure.", error: error, locationEnabled: false)
         }
     }
     
@@ -102,11 +102,11 @@ public extension ExtWrapper where Base == FileManager {
         do {
             try base.moveItem(at: sourceUrl, to: url)
         } catch {
-            Ext.debug("move failure. \(error.localizedDescription)")
+            Ext.debug("move failure.", error: error, tag: .file, locationEnabled: false)
             do {
                 try base.copyItem(at: sourceUrl, to: url)
             } catch {
-                Ext.debug("copy failure. \(error.localizedDescription)")
+                Ext.debug("copy failure.", error: error, tag: .file, locationEnabled: false)
             }
         }
     }
@@ -132,7 +132,7 @@ public extension ExtWrapper where Base == FileManager {
         do {
             try base.copyItem(at: sourceUrl, to: url)
         } catch {
-            Ext.debug("copy failure. \(error.localizedDescription)")
+            Ext.debug("copy failure.", error: error, tag: .file, locationEnabled: false)
         }
     }
 }

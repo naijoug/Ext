@@ -42,7 +42,7 @@ public extension ExtWrapper where Base == URL {
             }
             return UInt64(resourceValues.totalFileAllocatedSize ?? resourceValues.fileAllocatedSize ?? 0)
         } catch {
-            print("regularFileAllocatedSize error. \(error.localizedDescription)")
+            Ext.debug("regularFileAllocatedSize error.", error: error, locationEnabled: false)
         }
         return 0
     }
@@ -72,7 +72,7 @@ public extension ExtWrapper where Base == URL {
             }
             return total
         } catch {
-            print("cal size error \(error)")
+            Ext.debug("clac size error", error: error, tag: .file, locationEnabled: false)
         }
         return 0
     }

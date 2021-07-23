@@ -78,7 +78,7 @@ public extension NetworkManager {
               params: Any? = nil, handler: @escaping DataHandler) {
         
         guard let url = self.url(urlString, method: method, params: params) else {
-            Ext.debug("Data HTTP url create failed. \(urlString)", tag: .failure, location: false)
+            Ext.debug("Data HTTP url create failed. \(urlString)", tag: .failure, locationEnabled: false)
             handler((nil, nil, Ext.Error.inner("http url create failed.")))
             return
         }
@@ -125,7 +125,7 @@ public extension NetworkManager {
         }
         
         let requestTime = Date()
-        Ext.debug("Data Request | \(requestMsg)", tag: .custom("🌏"), location: false)
+        Ext.debug("Data Request | \(requestMsg)", tag: .network, locationEnabled: false)
         DispatchQueue.global(qos: .userInitiated).async {
             let configuration = URLSessionConfiguration.default
             let session = URLSession(configuration: configuration)
@@ -136,20 +136,20 @@ public extension NetworkManager {
                 guard httpResponse?.statusCode == 200 else {
                     guard let error = error else {
                         responseMsg += " | statusCcode != 200, \(httpResponse?.statusCode ?? 0) (\(httpResponse?.statusCode.statusMessage ?? ""))"
-                        Ext.debug("Data Response failure | \(responseMsg)", tag: .failure, location: false)
+                        Ext.debug("Data Response failure | \(responseMsg)", tag: .failure, locationEnabled: false)
                         dataHandler(nil, response, Ext.Error.inner("Server error \(httpResponse?.statusCode ?? 0)."))
                         return
                     }
-                    responseMsg += " | Error: \(error.localizedDescription)"
-                    Ext.debug("Data Response failure | \(responseMsg)", tag: .failure, location: false)
+                    responseMsg += " | \(Ext.LogTag.error.token) \(error.localizedDescription)"
+                    Ext.debug("Data Response failure | \(responseMsg)", tag: .failure, locationEnabled: false)
                     dataHandler(data, response, error)
                     return
                 }
                 if let data = data {
                     let rawData = data.ext.prettyPrintedJSONString ?? data.ext.string ?? ""
-                    responseMsg += " | 🏀 Data => \(rawData)"
+                    responseMsg += " | \(Ext.LogTag.bingo.token) Data => \(rawData)"
                 }
-                Ext.debug("Data Response success | \(responseMsg) \n", tag: .success, location: false)
+                Ext.debug("Data Response success | \(responseMsg) \n", tag: .success, locationEnabled: false)
                 dataHandler(data, response, error)
             }
             task.resume()
@@ -190,7 +190,7 @@ public extension NetworkManager {
                 params: [String: Any]? = nil, formDatas: [FormData],
                 handler: @escaping DataHandler) {
         guard let url = URL(string: urlString) else {
-            Ext.debug("Upload HTTP url create failed. \(urlString)", tag: .failure, location: false)
+            Ext.debug("Upload HTTP url create failed. \(urlString)", tag: .failure, locationEnabled: false)
             handler((nil, nil, Ext.Error.inner("http url create failed.")))
             return
         }
@@ -279,20 +279,20 @@ public extension NetworkManager {
     ///   - handler: 下载数据回调
     @discardableResult func download(urlString: String, saveUrl: URL, progress: ProgressHandler? = nil, handler: @escaping DownloadHandler) -> URLSessionDownloadTask? {
         guard let url = URL(string: urlString) else {
-            Ext.debug("Download HTTP url create failed. \(urlString)", tag: .failure, location: false)
+            Ext.debug("Download HTTP url create failed. \(urlString)", tag: .failure, locationEnabled: false)
             handler((nil, Ext.Error.inner("download url create failed.")))
             return nil
         }
         
         if task(for: url) != nil {
-            Ext.debug("\(url.absoluteString) is downloading...", location: false)
+            Ext.debug("\(url.absoluteString) is downloading...", locationEnabled: false)
             return nil
         }
         
         let downloadTask = DownloadTask(saveUrl: saveUrl, startTime: Date(), progress: progress, handler: handler)
         append(downloadTask, for: url)
         
-        Ext.debug("Download Request | \(url.absoluteString)", tag: .custom("🌏"), logEnabled: downloadLogged, location: false)
+        Ext.debug("Download Request | \(url.absoluteString)", tag: .network, logEnabled: downloadLogged, locationEnabled: false)
         let request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 60*10)
         let task = downloadSession.downloadTask(with: request)
         task.resume()
@@ -321,7 +321,7 @@ extension NetworkManager: URLSessionDownloadDelegate {
         let elapsed = Date().timeIntervalSince(task.startTime)
         let speed = Double(totalBytesWritten) / elapsed
         task.progress?((progress, speed))
-        Ext.debug("Download progress: \(progress) | speed: \(speed)", logEnabled: downloadLogged, location: false)
+        Ext.debug("Download progress: \(progress) | speed: \(speed)", logEnabled: downloadLogged, locationEnabled: false)
     }
     /// download finish
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
@@ -330,9 +330,9 @@ extension NetworkManager: URLSessionDownloadDelegate {
     
         let downloadUrlString = downloadTask.currentRequest?.url?.absoluteString ?? ""
         let elapsed = Date().timeIntervalSince(task.startTime)
-        Ext.debug("Download success. \(elapsed) | \(downloadUrlString)", tag: .success, logEnabled: downloadLogged, location: false)
+        Ext.debug("Download success. \(elapsed) | \(downloadUrlString)", tag: .success, logEnabled: downloadLogged, locationEnabled: false)
         guard httpResponse.statusCode == 200 else {
-            Ext.debug("Download failure. \(elapsed) | \(downloadUrlString) | statusCode != 200, \(httpResponse.statusCode)", tag: .failure, location: false)
+            Ext.debug("Download failure. \(elapsed) | \(downloadUrlString) | statusCode != 200, \(httpResponse.statusCode)", tag: .failure, locationEnabled: false)
             task.handler?((nil, nil))
             return
         }
@@ -349,7 +349,7 @@ extension NetworkManager: URLSessionDownloadDelegate {
         guard let httpResponse = task.response as? HTTPURLResponse else { return }
         
         let elapsed = Date().timeIntervalSince(downloadTask.startTime)
-        Ext.debug("Download error. \(elapsed) | \(task.currentRequest?.url?.absoluteString ?? "") | \(httpResponse.statusCode) | Error: \(error?.localizedDescription ?? "")", tag: .failure, location: false)
+        Ext.debug("Download error. \(elapsed) | \(task.currentRequest?.url?.absoluteString ?? "") | \(httpResponse.statusCode)", error: error, tag: .failure, locationEnabled: false)
         downloadTask.handler?((nil, error))
     }
 }

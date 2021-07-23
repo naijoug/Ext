@@ -37,7 +37,7 @@ extension ExtWrapper where Base == Data {
             let data = try JSONSerialization.data(withJSONObject: object, options: isPrettyPrinted ? [.prettyPrinted] : [])
             return String(data: data, encoding: .utf8)
         } catch {
-            Ext.debug("json deserialization error: \(error)")
+            Ext.debug("JSON deserialization error", error: error)
             return nil
         }
     }
