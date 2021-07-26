@@ -7,6 +7,12 @@
 
 import UIKit
 
+/// 可进行路由注册协议
+public protocol Routable {
+    /// 路由键
+    var routeKey: String { get }
+}
+
 /// 页面跳转路由管理
 public final class RouteManager {
     public static let shared = RouteManager()
@@ -15,6 +21,38 @@ public final class RouteManager {
     public lazy var modalWrapper: Ext.FuncHandler<UIViewController, UINavigationController> = {
         { NavigationController(rootViewController: $0) }
     }()
+    
+    /// 路由表
+    private var routeMap = [String: Ext.VoidHandler]()
+}
+
+public extension RouteManager {
+    
+    /// 注册页面路由
+    /// - Parameters:
+    ///   - key: 指定路由 key
+    ///   - handler: 路由跳转实现
+    func register(_ key: String, handler: @escaping Ext.VoidHandler) {
+        routeMap[key] = handler
+    }
+    /// 路由到指定页面
+    @discardableResult
+    func route(to key: String) -> Bool {
+        guard let handler = routeMap[key] else { return false }
+        handler()
+        return true
+    }
+    
+    /// 注册路由
+    func register(_ router: Routable, handler: @escaping Ext.VoidHandler) {
+        register(router.routeKey, handler: handler)
+    }
+    
+    /// 跳转到指定路由
+    @discardableResult
+    func route(to router: Routable) -> Bool {
+        return route(to: router.routeKey)
+    }
 }
 
 public extension RouteManager {
