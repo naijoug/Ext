@@ -32,14 +32,15 @@ public extension ExtWrapper where Base == NSAttributedString {
     static func text(_ text: String,
                      fontSize: CGFloat,
                      color: UIColor,
-                     hasBold: Bool = false,
-                     hasUnderline: Bool = false) -> NSAttributedString {
-        return NSAttributedString.ext.text(text,
-                                           font: hasBold ? UIFont.boldSystemFont(ofSize: fontSize) : UIFont.systemFont(ofSize: fontSize),
-                                           color: color,
-                                           hasUnderline: hasUnderline)
+                     bold: Bool = false,
+                     underline: Bool = false) -> NSAttributedString {
+        NSAttributedString.ext.text(
+            text,
+            font: bold ? UIFont.boldSystemFont(ofSize: fontSize) : UIFont.systemFont(ofSize: fontSize),
+            color: color,
+            underline: underline
+        )
     }
-    
     /// 富文本文字
     /// - Parameters:
     ///   - text: 文字内容
@@ -49,11 +50,11 @@ public extension ExtWrapper where Base == NSAttributedString {
     static func text(_ text: String,
                      font: UIFont,
                      color: UIColor,
-                     hasUnderline: Bool = false) -> NSAttributedString {
+                     underline: Bool = false) -> NSAttributedString {
         var attrs = [NSAttributedString.Key : Any]()
         attrs[.font] = font
         attrs[.foregroundColor] = color
-        if hasUnderline {
+        if underline {
             attrs[.underlineStyle] = 1
             attrs[.underlineColor] = color
         }
@@ -61,6 +62,17 @@ public extension ExtWrapper where Base == NSAttributedString {
     }
     
     
+    /// 富文本图片
+    /// - Parameters:
+    ///   - imageNamed: 图片
+    ///   - font: 字体
+    ///   - offsetY: Y 轴偏移
+    static func image(imageNamed: String?,
+                      font: UIFont,
+                      offsetY: CGFloat = 0) -> NSAttributedString? {
+        guard let imageNamed = imageNamed else { return nil }
+        return NSAttributedString.ext.image(UIImage(named: imageNamed), font: font, offsetY: offsetY)
+    }
     /// 富文本图片
     /// - Parameters:
     ///   - image: 图片
@@ -84,36 +96,6 @@ public extension ExtWrapper where Base == NSAttributedString {
         return NSAttributedString(attachment: attachment)
     }
     
-    /// 富文本图片
-    /// - Parameters:
-    ///   - imageNamed: 图片
-    ///   - font: 字体
-    ///   - offsetY: Y 轴偏移
-    static func image(imageNamed: String?,
-                      font: UIFont,
-                      offsetY: CGFloat = 0) -> NSAttributedString? {
-        guard let imageNamed = imageNamed else { return nil }
-        return NSAttributedString.ext.image(UIImage(named: imageNamed), font: font, offsetY: offsetY)
-    }
-    
-    /// 图片+文字 富文本
-    /// - Parameters:
-    ///   - image: 图片
-    ///   - text: 文字内容
-    ///   - font: 字体
-    ///   - color: 颜色
-    ///   - offsetY: Y 轴偏移
-    static func imageText(image: UIImage?,
-                          text: String,
-                          font: UIFont,
-                          color: UIColor,
-                          offsetY: CGFloat = 0) -> NSAttributedString {
-        return NSAttributedString.ext.attris([
-            NSAttributedString.ext.image(image, font: font, offsetY: offsetY),
-            NSAttributedString.ext.text(text, font: font, color: color)
-        ])
-    }
-    
     /// 图片+文字 富文本
     /// - Parameters:
     ///   - imageNamed: 图片名称
@@ -126,25 +108,23 @@ public extension ExtWrapper where Base == NSAttributedString {
                           font: UIFont,
                           color: UIColor,
                           offsetY: CGFloat = 0) -> NSAttributedString {
-        return imageText(image: UIImage(named: imageNamed),
-                         text: text, font: font, color: color, offsetY: offsetY)
+        imageText(image: UIImage(named: imageNamed), text: text, font: font, color: color, offsetY: offsetY)
     }
-    
-    /// 文字+图片 富文本
+    /// 图片+文字 富文本
     /// - Parameters:
-    ///   - text: 文字
     ///   - image: 图片
+    ///   - text: 文字内容
     ///   - font: 字体
     ///   - color: 颜色
     ///   - offsetY: Y 轴偏移
-    static func textImage(text: String,
-                          image: UIImage?,
+    static func imageText(image: UIImage?,
+                          text: String,
                           font: UIFont,
                           color: UIColor,
                           offsetY: CGFloat = 0) -> NSAttributedString {
-        return NSAttributedString.ext.attris([
-            NSAttributedString.ext.text(text, font: font, color: color),
-            NSAttributedString.ext.image(image, font: font, offsetY: offsetY)
+        NSAttributedString.ext.attris([
+            NSAttributedString.ext.image(image, font: font, offsetY: offsetY),
+            NSAttributedString.ext.text(text, font: font, color: color)
         ])
     }
     
@@ -160,21 +140,45 @@ public extension ExtWrapper where Base == NSAttributedString {
                           font: UIFont,
                           color: UIColor,
                           offsetY: CGFloat = 0) -> NSAttributedString {
-        return textImage(text: text, image: UIImage(named: imageNamed), font: font, color: color, offsetY: offsetY)
+        textImage(text: text, image: UIImage(named: imageNamed), font: font, color: color, offsetY: offsetY)
     }
-    
+    /// 文字+图片 富文本
+    /// - Parameters:
+    ///   - text: 文字
+    ///   - image: 图片
+    ///   - font: 字体
+    ///   - color: 颜色
+    ///   - offsetY: Y 轴偏移
+    static func textImage(text: String,
+                          image: UIImage?,
+                          font: UIFont,
+                          color: UIColor,
+                          offsetY: CGFloat = 0) -> NSAttributedString {
+        NSAttributedString.ext.attris([
+            NSAttributedString.ext.text(text, font: font, color: color),
+            NSAttributedString.ext.image(image, font: font, offsetY: offsetY)
+        ])
+    }
 }
 
 public extension ExtWrapper where Base == NSAttributedString {
+    
+    /**
+     HTML Encoded String
+     Reference:
+        - https://stackoverflow.com/questions/25607247/how-do-i-decode-html-entities-in-swift
+        - https://stackoverflow.com/questions/53954178/initialization-of-nsattributedstring-is-crashing-application
+     */
     
     /// HTML 富文本
     static func html(_ htmlText: String?) -> NSAttributedString? {
         guard let data = htmlText?.data(using: .unicode) else { return nil }
         do {
             return try NSAttributedString(data: data,
-                                          options: [NSAttributedString.DocumentReadingOptionKey.documentType: NSAttributedString.DocumentType.html],
+                                          options: [.documentType: NSAttributedString.DocumentType.html],
                                           documentAttributes: nil)
         } catch {
+            Ext.debug("html decoded failure", error: error)
             return nil
         }
     }
