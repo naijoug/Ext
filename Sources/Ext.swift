@@ -167,7 +167,7 @@ public extension Ext {
         }
     }
     
-    /// 调试函数
+    /// 调试日志
     ///
     /// - Parameters:
     ///   - message: 日志消息
@@ -179,6 +179,10 @@ public extension Ext {
     static func debug<T>(_ message: T, error: Swift.Error? = nil, tag: LogTag = .normal,
                          logEnabled: Bool = true, storeEnabled: Bool = false, locationEnabled: Bool = true,
                          file: String = #file, line: Int = #line, function: String = #function) {
+        /**
+         Reference:
+            - https://swift.gg/2016/08/03/swift-prettify-your-print-statements-pt-1/
+         */
         #if DEBUG
         guard logEnabled || storeEnabled else { return }
         

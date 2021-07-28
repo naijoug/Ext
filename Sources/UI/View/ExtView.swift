@@ -119,7 +119,7 @@ open class ExtCollectionReusableView: UICollectionReusableView {
 
 public extension Ext {
     
-    class WrapperTableCell<T: UIView>: ExtTableCell {
+    open class WrapperTableCell<T: UIView>: ExtTableCell {
         public private(set) var wrapperView: T!
         
         open override func setupUI() {

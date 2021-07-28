@@ -27,8 +27,8 @@ public extension ExtWrapper where Base == NSAttributedString {
     ///   - text: 文字内容
     ///   - fontSize: 字体大小
     ///   - color: 字体颜色
-    ///   - hasBold: 是否加粗
-    ///   - hasUnderline: 是否有下划线
+    ///   - bold: 是否加粗
+    ///   - underline: 是否有下划线
     static func text(_ text: String,
                      fontSize: CGFloat,
                      color: UIColor,
@@ -46,7 +46,7 @@ public extension ExtWrapper where Base == NSAttributedString {
     ///   - text: 文字内容
     ///   - font: 字体
     ///   - color: 字体颜色
-    ///   - hasUnderline: 是否有下划线
+    ///   - underline: 是否有下划线
     static func text(_ text: String,
                      font: UIFont,
                      color: UIColor,
