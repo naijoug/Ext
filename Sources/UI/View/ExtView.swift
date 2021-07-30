@@ -136,6 +136,23 @@ public extension Ext {
         }
     }
 
+    class WrapperTableHeaderFooterView<T: UIView>: ExtTableHeaderFooterView {
+        public private(set) var wrapperView: T!
+        
+        open override func setupUI() {
+            super.setupUI()
+            
+            wrapperView = contentView.ext.add(T())
+            wrapperView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                wrapperView.topAnchor.constraint(equalTo: contentView.topAnchor),
+                wrapperView.leftAnchor.constraint(equalTo: contentView.leftAnchor),
+                wrapperView.rightAnchor.constraint(equalTo: contentView.rightAnchor),
+                wrapperView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+            ])
+        }
+    }
+    
     class WrapperCollectionCell<T: UIView>: ExtCollectionCell {
         public private(set) var wrapperView: T!
         
