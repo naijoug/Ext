@@ -7,8 +7,14 @@
 
 import UIKit
 
+/// 指示器协议
+public protocol Indicatable {
+    /// 指示器状态
+    var isIndicating: Bool { get set }
+}
+
 /// 联网指示器按钮
-open class IndicatorButton: UIButton {
+open class IndicatorButton: UIButton, Indicatable {
     
     /// 指示器视图
     open lazy var indicatorView: UIActivityIndicatorView = {
@@ -21,17 +27,24 @@ open class IndicatorButton: UIButton {
         return indicatorView
     }()
     
-    /// 是否正在
-    open var isNetworking: Bool = false {
+    /// 指示器状态
+    public var isIndicating: Bool = false {
         didSet {
-            isEnabled = !isNetworking
+            isEnabled = !isIndicating
             /**
              UIButton's imageView property and hidden/alpha value:
              https://stackoverflow.com/questions/11673479/uibuttons-imageview-property-and-hidden-alpha-value
              */
-            imageView?.layer.transform = isNetworking ? CATransform3DMakeScale(0, 0, 0) : CATransform3DIdentity
-            titleLabel?.layer.transform = isNetworking ? CATransform3DMakeScale(0, 0, 0) : CATransform3DIdentity
-            isNetworking ? indicatorView.startAnimating() : indicatorView.stopAnimating()
+            imageView?.layer.transform = isIndicating ? CATransform3DMakeScale(0, 0, 0) : CATransform3DIdentity
+            titleLabel?.layer.transform = isIndicating ? CATransform3DMakeScale(0, 0, 0) : CATransform3DIdentity
+            isIndicating ? indicatorView.startAnimating() : indicatorView.stopAnimating()
+        }
+    }
+    
+    /// 是否正在
+    open var isNetworking: Bool = false {
+        didSet {
+            isIndicating = isNetworking
         }
     }
     
