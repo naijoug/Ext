@@ -198,3 +198,23 @@ public extension ExtWrapper where Base == NSAttributedString {
         return mAttri
     }
 }
+
+public extension ExtWrapper where Base == NSMutableAttributedString {
+    
+    
+    /// 为目标字符串添加特殊属性
+    /// - Parameters:
+    ///   - target: 目标字符串
+    ///   - font: 字体大小
+    ///   - color: 文字颜色
+    func add(_ target: String, font: UIFont, color: UIColor) -> NSMutableAttributedString {
+        let string = base.mutableString
+        let range = (string as NSString).range(of: target)
+        base.addAttributes([
+            NSAttributedString.Key.font: font,
+            NSAttributedString.Key.foregroundColor: color
+        ], range: range)
+        return base
+    }
+    
+}
