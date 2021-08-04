@@ -51,7 +51,7 @@ public extension ExtWrapper where Base == UIApplication {
             .filter({$0.isKeyWindow}).first {
             return window
         }
-        return UIApplication.shared.keyWindow
+        return UIApplication.shared.windows.filter { $0.isKeyWindow }.first ?? UIApplication.shared.keyWindow
     }
     
     /// 返回顶层控制器
