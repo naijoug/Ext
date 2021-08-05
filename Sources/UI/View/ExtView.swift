@@ -117,7 +117,7 @@ open class ExtCollectionReusableView: UICollectionReusableView {
 
 // MARK: - Wrapper
 
-public extension Ext {
+extension Ext {
     
     open class WrapperTableCell<T: UIView>: ExtTableCell {
         public private(set) var wrapperView: T!
@@ -136,7 +136,7 @@ public extension Ext {
         }
     }
 
-    class WrapperTableHeaderFooterView<T: UIView>: ExtTableHeaderFooterView {
+    open class WrapperTableHeaderFooterView<T: UIView>: ExtTableHeaderFooterView {
         public private(set) var wrapperView: T!
         
         open override func setupUI() {
@@ -153,7 +153,7 @@ public extension Ext {
         }
     }
     
-    class WrapperCollectionCell<T: UIView>: ExtCollectionCell {
+    open class WrapperCollectionCell<T: UIView>: ExtCollectionCell {
         public private(set) var wrapperView: T!
         
         open override func setupUI() {
@@ -170,7 +170,7 @@ public extension Ext {
         }
     }
 
-    class WrapperCollectionReusableView<T: UIView>: ExtCollectionReusableView {
+    open class WrapperCollectionReusableView<T: UIView>: ExtCollectionReusableView {
         public private(set) var wrapperView: T!
         
         open override func setupUI() {
