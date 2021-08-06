@@ -39,6 +39,13 @@ public extension ExtWrapper where Base == NSAttributedString {
 
 public extension ExtWrapper where Base == String {
     
+    func widthFitTextField(_ height: CGFloat, font: UIFont) -> CGFloat {
+        let textField = UITextField()
+        textField.text = base
+        textField.font = font
+        return textField.ext.widthFit(height)
+    }
+    
     func heightFitLabel(_ width: CGFloat, font: UIFont, numberOfLines: Int = 0) -> CGFloat {
         let label = UILabel()
         label.text = base
@@ -53,13 +60,6 @@ public extension ExtWrapper where Base == String {
         textView.font = font
         return textView.ext.heightFit(width)
     }
-    
-    func widthFitTextField(_ height: CGFloat, font: UIFont) -> CGFloat {
-        let textField = UITextField()
-        textField.text = base
-        textField.font = font
-        return textField.ext.widthFit(height)
-    }
 }
 public extension ExtWrapper where Base == NSAttributedString {
     
@@ -67,6 +67,13 @@ public extension ExtWrapper where Base == NSAttributedString {
         let field = UITextField()
         field.attributedText = base
         return field.ext.widthFit(height)
+    }
+    
+    func heightFitLabel(_ width: CGFloat, numberOfLines: Int = 0) -> CGFloat {
+        let label = UILabel()
+        label.attributedText = base
+        label.numberOfLines = numberOfLines
+        return label.ext.heightFit(width)
     }
     
     func heightFitTextView(_ width: CGFloat) -> CGFloat {
