@@ -221,8 +221,12 @@ public extension ExtWrapper where Base: UIView {
                     radius: CGFloat = 5,
                     spread: UIEdgeInsets = .zero,
                     scale: Bool = true) {
-        // Reference: https://stackoverflow.com/questions/39624675/add-shadow-on-uiview-using-swift-3
-        
+        /**
+         Reference:
+            - https://stackoverflow.com/questions/39624675/add-shadow-on-uiview-using-swift-3
+            - https://stackoverflow.com/questions/4754392/uiview-with-rounded-corners-and-drop-shadow
+            - https://www.advancedswift.com/corners-borders-shadows
+        */
         let shadowSpreadRect = CGRect(x: -spread.left,
                                       y: -spread.top,
                                       width: base.bounds.size.width + spread.left + spread.right,
@@ -230,14 +234,15 @@ public extension ExtWrapper where Base: UIView {
         let shadowSpreadRadius =  base.layer.cornerRadius == 0 ? 0 : base.layer.cornerRadius;
         let shadowPath = UIBezierPath(roundedRect: shadowSpreadRect, cornerRadius: shadowSpreadRadius)
         
-        base.layer.shadowOffset = offset
-        base.layer.shadowRadius = radius
-        base.layer.shadowOpacity = opacity
-        base.layer.shadowColor = color.cgColor
-        base.layer.shadowPath = shadowPath.cgPath
-        base.layer.masksToBounds = false
-        base.layer.shouldRasterize = true
-        base.layer.rasterizationScale = scale ? UIScreen.main.scale : 1
+        base.layer.shadowOffset         = offset
+        base.layer.shadowRadius         = radius
+        base.layer.shadowOpacity        = opacity
+        base.layer.shadowColor          = color.cgColor
+        base.layer.shadowPath           = shadowPath.cgPath
+        
+        base.layer.masksToBounds        = false
+        base.layer.shouldRasterize      = true
+        base.layer.rasterizationScale   = scale ? UIScreen.main.scale : 1
     }
 }
 

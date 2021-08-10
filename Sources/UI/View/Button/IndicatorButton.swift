@@ -8,7 +8,7 @@
 import UIKit
 
 /// 指示器协议
-public protocol Indicatable {
+public protocol Indicatable: AnyObject {
     /// 指示器状态
     var isIndicating: Bool { get set }
 }
