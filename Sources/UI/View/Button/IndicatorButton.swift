@@ -41,13 +41,6 @@ open class IndicatorButton: UIButton, Indicatable {
         }
     }
     
-    /// 是否正在
-    open var isNetworking: Bool = false {
-        didSet {
-            isIndicating = isNetworking
-        }
-    }
-    
     open override func layoutSubviews() {
         super.layoutSubviews()
         bringSubviewToFront(indicatorView)

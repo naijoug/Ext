@@ -69,7 +69,7 @@ public extension ExtWrapper where Base == NSAttributedString {
     ///   - offsetY: Y 轴偏移
     static func image(imageNamed: String?,
                       font: UIFont,
-                      offsetY: CGFloat = 0) -> NSAttributedString? {
+                      offsetY: CGFloat = 2) -> NSAttributedString? {
         guard let imageNamed = imageNamed else { return nil }
         return NSAttributedString.ext.image(UIImage(named: imageNamed), font: font, offsetY: offsetY)
     }
@@ -80,7 +80,7 @@ public extension ExtWrapper where Base == NSAttributedString {
     ///   - offsetY: Y 轴偏移
     static func image(_ image: UIImage?,
                       font: UIFont,
-                      offsetY: CGFloat = 0) -> NSAttributedString? {
+                      offsetY: CGFloat = 2) -> NSAttributedString? {
         guard let image = image else { return nil }
         let attachment = NSTextAttachment()
         var attachH = image.size.height
@@ -107,7 +107,7 @@ public extension ExtWrapper where Base == NSAttributedString {
                           text: String,
                           font: UIFont,
                           color: UIColor,
-                          offsetY: CGFloat = 0) -> NSAttributedString {
+                          offsetY: CGFloat = 2) -> NSAttributedString {
         imageText(image: UIImage(named: imageNamed), text: text, font: font, color: color, offsetY: offsetY)
     }
     /// 图片+文字 富文本
@@ -121,7 +121,7 @@ public extension ExtWrapper where Base == NSAttributedString {
                           text: String,
                           font: UIFont,
                           color: UIColor,
-                          offsetY: CGFloat = 0) -> NSAttributedString {
+                          offsetY: CGFloat = 2) -> NSAttributedString {
         NSAttributedString.ext.attris([
             NSAttributedString.ext.image(image, font: font, offsetY: offsetY),
             NSAttributedString.ext.text(text, font: font, color: color)
@@ -139,7 +139,7 @@ public extension ExtWrapper where Base == NSAttributedString {
                           imageNamed: String,
                           font: UIFont,
                           color: UIColor,
-                          offsetY: CGFloat = 0) -> NSAttributedString {
+                          offsetY: CGFloat = 2) -> NSAttributedString {
         textImage(text: text, image: UIImage(named: imageNamed), font: font, color: color, offsetY: offsetY)
     }
     /// 文字+图片 富文本
@@ -153,7 +153,7 @@ public extension ExtWrapper where Base == NSAttributedString {
                           image: UIImage?,
                           font: UIFont,
                           color: UIColor,
-                          offsetY: CGFloat = 0) -> NSAttributedString {
+                          offsetY: CGFloat = 2) -> NSAttributedString {
         NSAttributedString.ext.attris([
             NSAttributedString.ext.text(text, font: font, color: color),
             NSAttributedString.ext.image(image, font: font, offsetY: offsetY)
