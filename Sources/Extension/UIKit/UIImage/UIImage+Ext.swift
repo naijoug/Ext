@@ -60,6 +60,28 @@ public extension ExtWrapper where Base == UIImage {
         UIGraphicsEndImageContext()
         return UIImage(cgImage: (image?.cgImage)!)
     }
+    
+    
+    /// 创建文字图片
+    /// - Parameters:
+    ///   - title: 文字
+    ///   - font: 字体大小
+    ///   - color: 文字颜色
+    static func title(_ title: String, font: UIFont, color: UIColor) -> UIImage {
+        let nsTitle = title as NSString
+        let imageH = font.lineHeight
+        let imageW = nsTitle.size(withAttributes: [.font: font]).width
+        
+        UIGraphicsBeginImageContext(CGSize(width: imageW, height: imageH))
+        nsTitle.draw(in: CGRect(x: 0, y: 0, width: imageW, height: imageH),
+                     withAttributes: [
+                        .font: font,
+                        .foregroundColor: color
+                     ])
+        let image = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        return UIImage(cgImage: (image?.cgImage)!)
+    }
 }
 
 public extension ExtWrapper where Base: UIImage {
