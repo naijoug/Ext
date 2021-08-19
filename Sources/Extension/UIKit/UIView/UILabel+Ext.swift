@@ -15,9 +15,7 @@ public extension ExtWrapper where Base == UILabel {
      */
     
     func isTap(_ gesture: UITapGestureRecognizer, target: String, in text: String) -> Bool {
-        guard let attributedText = base.attributedText else {
-            return false
-        }
+        guard let attributedText = base.attributedText else { return false }
         
         let labelSize = base.bounds.size
         let textContainer   = NSTextContainer(size: labelSize)

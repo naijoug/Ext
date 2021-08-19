@@ -57,10 +57,20 @@ public final class NetworkManager: NSObject {
 }
 public extension NetworkManager {
     
-    private func url(_ urlString: String, method: HttpMethod, params: Any?) -> URL? {
+    private func url(_ urlString: String, method: HttpMethod, params: Any?, urlEncoded: Bool = true) -> URL? {
         guard let url = URL(string: urlString) else { return nil }
-        guard method == .get, let params = params as? [String: Any],
-              var urlComponets = URLComponents(url: url, resolvingAgainstBaseURL: false) else { return url }
+        guard method == .get, let params = params as? [String: Any] else { return url }
+        
+        guard urlEncoded, var urlComponets = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            var string = urlString
+            let keys = params.keys.map({ $0 })
+            for i in 0..<keys.count {
+                let key = keys[i]
+                string.append(i == 0 ? "?" : "&")
+                string.append("\(key)=\(params[key] ?? "")")
+            }
+            return URL(string: string) ?? url
+        }
         // GET请求，添加查询参数
         urlComponets.queryItems = params.map({ URLQueryItem(name: $0.key, value: "\($0.value)") })
         return urlComponets.url ?? url

@@ -35,7 +35,8 @@ open class PlaceholderTextView: UITextView {
         NotificationCenter.default.removeObserver(self)
     }
     
-    @objc fileprivate func textChange() { setNeedsDisplay() }
+    @objc
+    private func textChange() { setNeedsDisplay() }
     
     override open func layoutSubviews() {
         super.layoutSubviews()
@@ -49,13 +50,17 @@ open class PlaceholderTextView: UITextView {
         style.lineSpacing = 3
         let offsetX: CGFloat = placeholderOffset.x
         let offsetY: CGFloat = placeholderOffset.y
-        (placeholder as NSString).draw(in: CGRect(x: textContainerInset.left + offsetX,
-                                                  y: textContainerInset.top + offsetY,
-                                                  width: rect.size.width - textContainerInset.left - offsetX - textContainerInset.right,
-                                                  height: rect.size.height - textContainerInset.top - offsetY - textContainerInset.bottom),
-                                        withAttributes: [NSAttributedString.Key.font: placeholderFont ?? (font ?? UIFont.systemFont(ofSize: UIFont.systemFontSize)),
-                                                         NSAttributedString.Key.foregroundColor: placeholderColor,
-                                                         NSAttributedString.Key.paragraphStyle: style])
+        (placeholder as NSString).draw(
+            in: CGRect(x: textContainerInset.left + offsetX,
+                       y: textContainerInset.top + offsetY,
+                       width: rect.size.width - textContainerInset.left - offsetX - textContainerInset.right,
+                       height: rect.size.height - textContainerInset.top - offsetY - textContainerInset.bottom),
+            withAttributes: [
+                .font: placeholderFont ?? (font ?? UIFont.systemFont(ofSize: UIFont.systemFontSize)),
+                .foregroundColor: placeholderColor,
+                .paragraphStyle: style
+            ]
+        )
     }
     
 
