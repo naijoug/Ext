@@ -254,18 +254,22 @@ public extension ExtPlayer {
     ///   - time: 需要调整到的时间
     ///   - handler: 调整完成回调
     func seek(_ time: TimeInterval?, handler: Ext.ResultVoidHandler?) {
-        guard let time = time, time > 0 else {
-            handler?(.failure(Ext.Error.inner("seek time is invalid.")))
+        guard let time = time else {
+            Ext.debug("ext player not need to seek", logEnabled: self.logEnabled)
+            handler?(.success(()))
             return
         }
-        self.pause()
-        let newTime = CMTimeMakeWithSeconds(time, preferredTimescale: playerItem?.asset.duration.timescale ?? 600)
-        Ext.debug("begin seeking newTime: \(newTime) | \(newTime.seconds) | \(time)", tag: .custom("📌"), logEnabled: logEnabled)
+        if isPlaying {
+            avPlayer.pause()
+            Ext.debug("before seeking, player is playing to pause")
+        }
+        let newTime = CMTimeMakeWithSeconds(max(0, time), preferredTimescale: playerItem?.asset.duration.timescale ?? 600)
+        Ext.debug("begin seeking newTime: \(newTime) | \(newTime.seconds) | \(time)", tag: .launch, logEnabled: logEnabled)
         isSeeking = true
         avPlayer.seek(to: newTime, toleranceBefore: .zero, toleranceAfter: .zero) { [weak self] completion in
             guard let `self` = self else { return }
             self.isSeeking = false
-            Ext.debug("end player seeking \(completion) | \(self.currentTime)", tag: .custom("🚩"), logEnabled: self.logEnabled)
+            Ext.debug("end player seeking \(completion) | \(self.currentTime)", error: self.avPlayer.error, tag: .bingo, logEnabled: self.logEnabled)
             guard completion else {
                 handler?(.failure(Ext.Error.inner("seek time failure.")))
                 return

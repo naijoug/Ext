@@ -7,6 +7,8 @@
 
 import AVFoundation
 
+// - https://stackoverflow.com/questions/11090760/progress-bar-for-avassetexportsession
+
 public extension ExtWrapper where Base == UIDevice {
     /**
      Reference:

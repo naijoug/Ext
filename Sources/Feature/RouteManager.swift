@@ -148,6 +148,7 @@ public extension RouteManager {
                 return
             }
             handler?(.success(type?.rawValue ?? ""))
+            vc.dismiss(animated: true, completion: nil)
         }
         modal(vc, wrapped: false)
     }

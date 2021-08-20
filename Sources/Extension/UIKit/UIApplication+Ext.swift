@@ -77,9 +77,21 @@ public extension ExtWrapper where Base == UIApplication {
 }
 
 public extension ExtWrapper where Base == UIApplication {
-    /// 打开 App 设置
-    func openSettings() {
-        guard let url = URL(string: UIApplication.openSettingsURLString) else { return }
+    /// 系统功能页面
+    enum SystemFeature {
+        case album
+        case setting
+    }
+    
+    func open(_ feature: SystemFeature) {
+        var url: URL?
+        switch feature {
+        case .album:
+            url = URL(string:"photos-redirect://")
+        case .setting:
+            url = URL(string: UIApplication.openSettingsURLString)
+        }
+        guard let url = url else { return }
         base.open(url, options: [:], completionHandler: nil)
     }
     
