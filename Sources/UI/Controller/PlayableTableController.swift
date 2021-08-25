@@ -15,6 +15,8 @@ public protocol Visible: AnyObject {
 
 /// 可播放协议
 public protocol Playable: AnyObject {
+    /// 是否正在播放
+    var isPlaying: Bool { get }
     /// 是否可以进行播放
     var isPlayable: Bool { get set }
     /// 播放
@@ -25,7 +27,7 @@ public protocol Playable: AnyObject {
 
 // MARK: - Playable Table
 
-open class PlayableTableController: TableController, Playable {
+open class PlayableTableController: TableController {
     
     /// 标签
     public var playableTag: String = ""
@@ -40,6 +42,9 @@ open class PlayableTableController: TableController, Playable {
         guard self.playableLog else { return "" }
         return "\(self.playableTag) : isPlayable: \(isPlayable) | playableIndex: \(playableIndex) | \(msg) | \(self)"
     }
+    
+    /// 自动播放▶️: 进入页面最佳可播放 Cell 进行播放
+    public var autoPlay: Bool = true
     
     /// 可播放状态
     open var isPlayable: Bool = true {
@@ -125,6 +130,10 @@ open class PlayableTableController: TableController, Playable {
     open override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         Ext.debug(playableLog())
+        
+        if autoPlay {
+            self.start()
+        }
     }
     open override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
@@ -161,11 +170,18 @@ public extension PlayableTableController {
     }
     
     /// 播放指定索引
-    func play(at index: Int?) {
-        guard let index = index, index != playableIndex else { return }
+    private func play(at index: Int?) {
+        guard let index = index else { return }
         Ext.debug("play \(index)", logEnabled: playableLog)
-        playableIndex = index
-        play()
+        if playableIndex != index {
+            playableIndex = index
+            play()
+        } else {
+            if !(playableFor(index)?.isPlaying ?? false) {
+                Ext.debug("当前播放索引未开始播放，play")
+                play()
+            }
+        }
     }
     /// 播放最佳
     func playBest() {

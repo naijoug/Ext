@@ -96,6 +96,13 @@ public extension ExtWrapper where Base: UIViewController {
 
 public extension ExtWrapper where Base: UINavigationController {
 
+    /**
+     导航控制器的根控制器
+     Reference:
+        - https://stackoverflow.com/questions/1792858/how-do-i-get-the-rootviewcontroller-from-a-pushed-controller
+     */
+    var rootViewController: UIViewController? { base.viewControllers.first }
+    
     /// 删除导航 stack 控制器
     ///
     /// - Parameter cls: 控制器类型

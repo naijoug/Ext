@@ -77,6 +77,12 @@ public extension ExtWrapper where Base == UIApplication {
 }
 
 public extension ExtWrapper where Base == UIApplication {
+    
+    /**
+     Reference:
+        - https://stackoverflow.com/questions/22115319/how-to-open-photo-app-from-uiviewcontroller
+     */
+    
     /// 系统功能页面
     enum SystemFeature {
         case album
