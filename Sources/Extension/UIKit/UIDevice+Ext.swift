@@ -9,6 +9,9 @@ import UIKit
  
 public extension ExtWrapper where Base == UIDevice {
     
+    /// UDID
+    static let UDID = { UIDevice.current.identifierForVendor?.uuidString }
+    
     // Reference : https://stackoverflow.com/questions/26028918/how-to-determine-the-current-iphone-device-model
     
     static let modelName: String = {

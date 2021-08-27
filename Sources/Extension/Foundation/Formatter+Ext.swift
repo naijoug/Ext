@@ -31,6 +31,6 @@ public extension ExtWrapper where Base == Formatter {
             if i != 0 { string += String(connector) }
             string += array[i]
         }
-        return string
+        return string.isEmpty ? nil : string
     }
 }
