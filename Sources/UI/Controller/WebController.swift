@@ -9,11 +9,6 @@ import UIKit
 import WebKit
 
 open class WebController: UIViewController {
-
-    public private(set) var webView: WKWebView!
-    private var userContentController: WKUserContentController!
-    private var refreshControl: UIRefreshControl!
-    private let indicator = UIActivityIndicatorView(style: .gray)
     
     /// JS MessageHandler 交互名字 (默认: native)
     public var messageHandlerName = "native"
@@ -22,14 +17,61 @@ open class WebController: UIViewController {
     /// Web 页面 URL
     public var urlString: String?
     
-    /// Web 加载成功时间 (秒数)
-    open var loadingSeconds: TimeInterval = 0
+// MARK: - Status
     
     /// 开始加载时间
     private var startDate = Date()
+    /// Web 加载成功时间 (秒数)
+    public private(set) var loadingSeconds: TimeInterval = 0
+    
+// MARK: - UI
+    
+    private lazy var userContentController: WKUserContentController = {
+        let userContentController = WKUserContentController()
+        userContentController.add(self, name: messageHandlerName)
+        return userContentController
+    }()
+    private lazy var refreshControl: UIRefreshControl = {
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(reloadWebView), for: .valueChanged)
+        return refreshControl
+    }()
+    
+    public lazy private(set) var webView: WKWebView = {
+        let preferences = WKPreferences()
+        preferences.javaScriptEnabled = true
+        let configuration = WKWebViewConfiguration()
+        configuration.preferences = preferences
+        configuration.userContentController = userContentController
+        
+        let webView = WKWebView(frame: CGRect.zero, configuration: configuration)
+        view.addSubview(webView)
+        webView.scrollView.alwaysBounceVertical = true
+        webView.scrollView.bounces = true
+        webView.navigationDelegate = self
+        webView.uiDelegate = self
+        
+        webView.translatesAutoresizingMaskIntoConstraints = false
+        webView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
+        webView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
+        webView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
+        webView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
+        
+        return webView
+    }()
+    
+    private lazy var indicator: UIActivityIndicatorView = {
+        let indicator = UIActivityIndicatorView(style: .gray)
+        webView.addSubview(indicator)
+        indicator.center = webView.center
+        return indicator
+    }()
     
 // MARK: - Lifecycle
     
+    deinit {
+        userContentController.removeScriptMessageHandler(forName: messageHandlerName)
+    }
     override open func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -43,50 +85,14 @@ open class WebController: UIViewController {
             }
         }
         
-        setupWebView()
-        
-        view.addSubview(indicator)
-        indicator.center = webView.center
+        webView.scrollView.addSubview(refreshControl)
         
         reloadWebView()
     }
     
-    /// 初始化 WebView
-    fileprivate func setupWebView() {
-        let preferences = WKPreferences()
-        preferences.javaScriptEnabled = true
-        
-        userContentController = WKUserContentController()
-        userContentController.add(self, name: messageHandlerName)
-        
-        let configuration = WKWebViewConfiguration()
-        configuration.preferences = preferences
-        configuration.userContentController = userContentController
-        
-        webView = WKWebView(frame: CGRect.zero, configuration: configuration)
-        view.addSubview(webView)
-        webView.scrollView.alwaysBounceVertical = true
-        webView.scrollView.bounces = true
-        webView.navigationDelegate = self
-        webView.uiDelegate = self
-        
-        webView.translatesAutoresizingMaskIntoConstraints = false
-        webView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
-        webView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
-        webView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
-        webView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
-        
-        refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(reloadWebView), for: .valueChanged)
-        webView.scrollView.addSubview(refreshControl)
-    }
-    
-    deinit {
-        userContentController.removeScriptMessageHandler(forName: messageHandlerName)
-    }
-    
     /// 刷新网页
-    @objc open func reloadWebView() {
+    @objc
+    open func reloadWebView() {
         guard let urlString = urlString, let url = URL(string: urlString) else { return }
         Ext.debug("open url: \(url.absoluteString)")
         startDate = Date()
@@ -94,7 +100,8 @@ open class WebController: UIViewController {
         beginNetworking()
     }
     
-    @objc fileprivate func closeAction() {
+    @objc
+    private func closeAction() {
         dismiss(animated: true, completion: nil)
     }
 }
@@ -132,11 +139,11 @@ extension WebController: WKNavigationDelegate {
         endNetworking()
     }
     
-    fileprivate func beginNetworking() {
+    private func beginNetworking() {
         refreshControl.beginRefreshing()
         indicator.startAnimating()
     }
-    fileprivate func endNetworking() {
+    private func endNetworking() {
         indicator.stopAnimating()
         refreshControl.endRefreshing()
     }
@@ -155,12 +162,12 @@ extension WebController: WKScriptMessageHandler {
     
 }
 
-// MARK: - JS Method Route
+// MARK: - JS Method Router
 
 extension WebController {
     
     /// 解析 JS 发送的消息体
-    fileprivate func parseJSMessage(_ body: Any) {
+    private func parseJSMessage(_ body: Any) {
         if body is NSString, let string = body as? String {
             var json: Dictionary<String, Any>?
             do {
@@ -197,7 +204,7 @@ extension WebController {
     }
     
     /// 打开新的网页页面
-    fileprivate func openWeb(_ title: String?, urlString: String?) {
+    private func openWeb(_ title: String?, urlString: String?) {
         guard let urlString = urlString else { return }
         let vc = WebController()
         vc.title = title
@@ -207,8 +214,7 @@ extension WebController {
     }
     
     /// 回到根控制器
-    fileprivate func toRoot() {
+    private func toRoot() {
         navigationController?.popToRootViewController(animated: true)
     }
-    
 }

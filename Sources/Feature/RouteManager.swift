@@ -162,7 +162,8 @@ public extension RouteManager {
         vc.title = title
         vc.urlString = urlString
         switch mode {
-        case .push: push(vc)
+        case .push:
+            push(vc)
         case .modal:
             vc.isModal = true
             modal(vc)

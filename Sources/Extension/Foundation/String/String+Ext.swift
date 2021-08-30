@@ -75,6 +75,12 @@ public extension ExtWrapper where Base == String {
 
 public extension ExtWrapper where Base == String {
     
+    /// test swift format
+    func test() {
+        // https://stackoverflow.com/questions/52332747/what-are-the-supported-swift-string-format-specifiers
+        Ext.debug("\(String(format: "%2$@ %1$@", "world", "Hello"))")
+    }
+    
     /**
      首字符大写
 
