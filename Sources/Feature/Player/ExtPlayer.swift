@@ -261,7 +261,7 @@ public extension ExtPlayer {
         }
         if isPlaying {
             avPlayer.pause()
-            Ext.debug("before seeking, player is playing to pause")
+            Ext.debug("before seeking, player is playing to pause", logEnabled: self.logEnabled)
         }
         let newTime = CMTimeMakeWithSeconds(max(0, time), preferredTimescale: playerItem?.asset.duration.timescale ?? 600)
         Ext.debug("begin seeking newTime: \(newTime) | \(newTime.seconds) | \(time)", tag: .launch, logEnabled: logEnabled)
