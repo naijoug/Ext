@@ -114,6 +114,7 @@ extension NestedScrollController: UIScrollViewDelegate {
     
     /// 外部滚动视图，滚动回调
     open func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        Ext.debug("xxx----")
         guard scrollView == self.nestedScrollView else { return }
         
         let offsetY = scrollView.contentOffset.y
@@ -134,7 +135,7 @@ extension NestedScrollController: UIScrollViewDelegate {
     /// 内部滚动视图，滚动回调
     private func innerScrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
-        Ext.debug("innser scroll | offsetY: \(offsetY) | outerScrollable \(outerScrollable) | innerScrollable: \(innerScrollable) | outerMaxOffsetY: \(outerMaxOffsetY)", logEnabled: logEnabled)
+        Ext.debug("inner scroll | offsetY: \(offsetY) | outerScrollable \(outerScrollable) | innerScrollable: \(innerScrollable) | outerMaxOffsetY: \(outerMaxOffsetY)", logEnabled: logEnabled)
         guard innerScrollable else {
             Ext.debug("内部视图不能滚动", logEnabled: logEnabled)
             scrollView.contentOffset.y = 0

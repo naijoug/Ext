@@ -30,33 +30,6 @@ public extension ExtWrapper where Base: UIViewController {
 // MARK: -
 
 public extension ExtWrapper where Base: UIViewController {
-    
-    /// 控制类名
-    var className: String { "\(type(of: base))" }
-    
-    /// 控制器生命周期
-    enum Lifecycle: String {
-        case viewDidLoad
-        case viewWillAppear
-        case viewDidAppear
-        case viewWillDisappear
-        case viewDidDisappear
-        
-        public var tag: String {
-            switch self {
-            case .viewDidLoad:          return "🌞"
-            case .viewWillAppear:       return "🌖"
-            case .viewDidAppear:        return "🌕"
-            case .viewWillDisappear:    return "🌒"
-            case .viewDidDisappear:     return "🌑"
-            }
-        }
-    }
-    
-    func log(_ lifecycle: Lifecycle) {
-        Ext.debug("\(lifecycle.rawValue) \t | \(className)", tag: .custom(lifecycle.tag), locationEnabled: false)
-    }
-    
     /// 控制器是否可见
     var isVisible: Bool {
         // Refrence: https://stackoverflow.com/questions/2777438/how-to-tell-if-uiviewcontrollers-view-is-visible
@@ -67,7 +40,6 @@ public extension ExtWrapper where Base: UIViewController {
     func backTitle(_ title: String = "") {
         base.navigationItem.backBarButtonItem = UIBarButtonItem(title: title, style: .plain, target: nil, action: nil)
     }
-    
 }
 
 // MARK: - Child Controller
@@ -132,5 +104,103 @@ public extension ExtWrapper where Base: UINavigationController {
         for vc in base.viewControllers.reversed() {
             print("\(vc)")
         }
+    }
+}
+
+// MARK: - Lifecycle
+
+public extension ExtWrapper where Base: UIViewController {
+    
+    /// 控制类名
+    var className: String { "\(type(of: base))" }
+    
+    /// 控制器生命周期
+    enum Lifecycle: String {
+        case viewDidLoad
+        case viewWillAppear
+        case viewDidAppear
+        case viewWillDisappear
+        case viewDidDisappear
+        
+        public var tag: String {
+            switch self {
+            case .viewDidLoad:          return "🌞"
+            case .viewWillAppear:       return "🌖"
+            case .viewDidAppear:        return "🌕"
+            case .viewWillDisappear:    return "🌒"
+            case .viewDidDisappear:     return "🌑"
+            }
+        }
+    }
+    
+    func log(_ lifecycle: Lifecycle) {
+        Ext.debug("\(lifecycle.rawValue) \t | \(className)", tag: .custom(lifecycle.tag), locationEnabled: false)
+    }
+    
+    /// Debug UIViewController Lifecycle
+    static func debug() {
+        guard Ext.isDebug else { return }
+        Ext.debug("UIViewController Lifecycle debugging", tag: .recycle, locationEnabled: false)
+        UIViewController.swizzle()
+    }
+}
+
+// Reference: https://stackoverflow.com/questions/40647504/is-it-possible-to-swizzle-deinit-using-swift-if-yes-then-how-to-achieve-this
+
+final class Deallocator {
+
+    var closure: () -> Void
+
+    init(_ closure: @escaping () -> Void) {
+        self.closure = closure
+    }
+
+    deinit {
+        closure()
+    }
+}
+
+private var associatedObjectAddr = ""
+
+private extension UIViewController {
+
+    static func swizzle() {
+        ext.swizzlingInstanceMethod(self, original: #selector(viewDidLoad), swizzled: #selector(swizzled_viewDidLoad))
+        ext.swizzlingInstanceMethod(self, original: #selector(viewWillAppear(_:)), swizzled: #selector(swizzled_viewWillAppear(_:)))
+        ext.swizzlingInstanceMethod(self, original: #selector(viewDidAppear(_:)), swizzled: #selector(swizzled_viewDidAppear(_:)))
+        ext.swizzlingInstanceMethod(self, original: #selector(viewWillDisappear(_:)), swizzled: #selector(swizzled_viewWillDisappear(_:)))
+        ext.swizzlingInstanceMethod(self, original: #selector(viewDidDisappear(_:)), swizzled: #selector(swizzled_viewDidDisappear(_:)))
+    }
+    
+    @objc
+    func swizzled_viewDidLoad() {
+        let deallocator = Deallocator { [weak self] in
+            guard let `self` = self else { return }
+            Ext.debug("Deallocated: \(self.ext.className)", tag: .recycle)
+        }
+        objc_setAssociatedObject(self, &associatedObjectAddr, deallocator, .OBJC_ASSOCIATION_RETAIN)
+        
+        swizzled_viewDidLoad()
+        ext.log(.viewDidLoad)
+    }
+    @objc
+    func swizzled_viewWillAppear(_ animated: Bool) {
+        swizzled_viewWillAppear(animated)
+        ext.log(.viewWillAppear)
+    }
+    @objc
+    func swizzled_viewDidAppear(_ animated: Bool) {
+        swizzled_viewDidAppear(animated)
+        ext.log(.viewDidAppear)
+    }
+    @objc
+    func swizzled_viewWillDisappear(_ animated: Bool) {
+        swizzled_viewWillDisappear(animated)
+        ext.log(.viewWillDisappear)
+    }
+    @objc
+    func swizzled_viewDidDisappear(_ animated: Bool) {
+        swizzled_viewDidDisappear(animated)
+        ext.log(.viewDidDisappear)
     }
 }
