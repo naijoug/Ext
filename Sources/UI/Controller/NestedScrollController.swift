@@ -114,7 +114,6 @@ extension NestedScrollController: UIScrollViewDelegate {
     
     /// 外部滚动视图，滚动回调
     open func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        Ext.debug("xxx----")
         guard scrollView == self.nestedScrollView else { return }
         
         let offsetY = scrollView.contentOffset.y
