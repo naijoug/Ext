@@ -55,6 +55,7 @@ public extension RouteManager {
     }
 }
 
+@available(iOSApplicationExtension, unavailable)
 public extension RouteManager {
     
     /// 页面跳转模式
@@ -105,6 +106,7 @@ public extension RouteManager {
 
 // MARK: - System
 
+@available(iOSApplicationExtension, unavailable)
 public extension RouteManager {
     
     /// 系统打开 url
@@ -114,11 +116,7 @@ public extension RouteManager {
         Ext.debug("open url: \(url.absoluteString)")
         guard UIApplication.shared.canOpenURL(url) else { return }
         
-        if #available(iOS 10.0, *) {
-            UIApplication.shared.open(url, options: [:], completionHandler: nil)
-        } else {
-            UIApplication.shared.openURL(url)
-        }
+        UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
     
     /// 系统分享

@@ -9,33 +9,26 @@ import UIKit
 
 public extension ExtWrapper where Base == UIApplication {
     /// 当前版本号
-    static var version: String { return (Bundle.main.infoDictionary!["CFBundleShortVersionString"] as? String) ?? "0" }
+    static var version: String { (Bundle.main.infoDictionary!["CFBundleShortVersionString"] as? String) ?? "0" }
     /// 构建版本号
-    static var build: String { return (Bundle.main.infoDictionary!["CFBundleVersion"] as? String) ?? "" }
+    static var build: String { (Bundle.main.infoDictionary!["CFBundleVersion"] as? String) ?? "" }
 }
 
+@available(iOSApplicationExtension, unavailable)
 public extension ExtWrapper where Base == UIApplication {
     
     /// 状态栏高
-    var statusBarHeight: CGFloat { return base.statusBarFrame.size.height }
+    var statusBarHeight: CGFloat { base.statusBarFrame.size.height }
     /// 安全区域 Insets
-    var safeAreaInsets: UIEdgeInsets {
-        if #available(iOS 11.0, *), let insets = mainWindow?.safeAreaInsets {
-            return insets
-        } else {
-            return UIEdgeInsets(top: statusBarHeight, left: 0, bottom: 0, right: 0)
-        }
-    }
+    var safeAreaInsets: UIEdgeInsets { mainWindow?.safeAreaInsets ?? UIEdgeInsets(top: statusBarHeight, left: 0, bottom: 0, right: 0) }
     
     /// 安全的底部间隙 safeAreaInsets.bottom > 0 ? safeAreaInsets.bottom : bottom
-    func safeBottom(_ bottom: CGFloat) -> CGFloat {
-        return safeAreaInsets.bottom > 0 ? safeAreaInsets.bottom : bottom
-    }
+    func safeBottom(_ bottom: CGFloat) -> CGFloat { safeAreaInsets.bottom > 0 ? safeAreaInsets.bottom : bottom }
     
     /// 顶部高度 = (安全区域顶部偏移 + 导航栏高度)
-    var topHeight: CGFloat  { return safeAreaInsets.top + 44 }
+    var topHeight: CGFloat  { safeAreaInsets.top + 44 }
     /// 底部高度 = (工具栏高度 + 安全区域底部偏移)
-    var bottomHeight: CGFloat { return 49 + safeAreaInsets.bottom }
+    var bottomHeight: CGFloat { 49 + safeAreaInsets.bottom }
     
     /// 主窗口
     var mainWindow: UIWindow? {
@@ -76,6 +69,7 @@ public extension ExtWrapper where Base == UIApplication {
     }
 }
 
+@available(iOSApplicationExtension, unavailable)
 public extension ExtWrapper where Base == UIApplication {
     
     /**
@@ -89,6 +83,8 @@ public extension ExtWrapper where Base == UIApplication {
         case setting
     }
     
+    /// 打开系统功能页面
+    /// - Parameter feature: 功能页面
     func open(_ feature: SystemFeature) {
         var url: URL?
         switch feature {
