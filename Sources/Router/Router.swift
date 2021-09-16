@@ -1,62 +1,67 @@
 //
-//  RouteManager.swift
+//  Router.swift
 //  Ext
 //
-//  Created by naijoug on 2021/3/29.
+//  Created by guojian on 2021/9/16.
 //
 
-import UIKit
+import Foundation
 
-/// 可进行路由注册协议
-public protocol Routable {
+/// 路由键值协议
+public protocol RouterKey {
     /// 路由键
-    var routeKey: String { get }
+    var key: String { get }
+}
+private extension RouterKey {
+    var url: String { "\(Router.shared.scheme)\(key)" }
 }
 
-/// 页面跳转路由管理
-public final class RouteManager {
-    public static let shared = RouteManager()
+/// 路由参数协议
+public protocol RouterParam {}
+
+/// 简单路由
+public final class Router {
+    public static let shared = Router()
     private init() {}
     
+    /// 路由表
+    private var routerMap = [String: ParamController]()
+    
+    /// 路由 scheme
+    public var scheme: String = "app://"
+    
+    /// modal 模式导航控制器包装
     public lazy var modalWrapper: Ext.FuncHandler<UIViewController, UINavigationController> = {
         { NavigationController(rootViewController: $0) }
     }()
-    
-    /// 路由表
-    private var routeMap = [String: Ext.VoidHandler]()
 }
 
-public extension RouteManager {
+public extension Router {
     
-    /// 注册页面路由
-    /// - Parameters:
-    ///   - key: 指定路由 key
-    ///   - handler: 路由跳转实现
-    func register(_ key: String, handler: @escaping Ext.VoidHandler) {
-        routeMap[key] = handler
-    }
-    /// 路由到指定页面
-    @discardableResult
-    func route(to key: String) -> Bool {
-        guard let handler = routeMap[key] else { return false }
-        handler()
-        return true
+    typealias VoidController = () -> UIViewController?
+    typealias ParamController = (_ param: RouterParam?) -> UIViewController?
+    
+    func register(key: RouterKey, controller: @escaping VoidController) {
+        register(key: key) { _ in return controller() }
     }
     
-    /// 注册路由
-    func register(_ router: Routable, handler: @escaping Ext.VoidHandler) {
-        register(router.routeKey, handler: handler)
+    func register(key: RouterKey, controller: @escaping ParamController) {
+        routerMap[key.url] = controller
     }
     
-    /// 跳转到指定路由
-    @discardableResult
-    func route(to router: Routable) -> Bool {
-        return route(to: router.routeKey)
+    func controller(for key: RouterKey, param: RouterParam? = nil) -> UIViewController? {
+        return routerMap[key.url]?(param)
     }
 }
 
-@available(iOSApplicationExtension, unavailable)
-public extension RouteManager {
+public extension Router {
+    
+    static weak var window: UIWindow?
+    
+    func launch(key: RouterKey, param: RouterParam? = nil) {
+        guard let controller = controller(for: key, param: param) else { return }
+        Router.window?.rootViewController = controller
+    }
     
     /// 页面跳转模式
     enum Mode {
@@ -64,6 +69,35 @@ public extension RouteManager {
         case modal
     }
     
+    /// 跳转到指定路由
+    /// - Parameters:
+    ///   - key: 路由键
+    ///   - param: 路由参数
+    ///   - mode: 跳转模式
+    func goto(key: RouterKey, param: RouterParam? = nil, mode: Mode = .push) {
+        guard let controller = controller(for: key, param: param) else { return }
+        var log = "route to \(key.url)"
+        if let param = param { log += " | \(param)" }
+        Ext.debug(log, tag: .custom("🐉✈️☄️"), locationEnabled: false)
+        
+        goto(controller, mode: mode)
+    }
+    
+    /// 跳转到指定控制器
+    /// - Parameters:
+    ///   - vc: 控制器
+    ///   - mode: 跳转模式
+    func goto(_ controller: UIViewController, mode: Mode = .push) {
+        switch mode {
+        case .push:
+            push(controller)
+        case .modal:
+            modal(controller)
+        }
+    }
+}
+
+private extension Router {
     /// 顶层显示控制器
     private var topController: UIViewController? { UIApplication.shared.ext.topViewController() }
     
@@ -83,31 +117,16 @@ public extension RouteManager {
     /// - Parameter fullScreen: 是否全屏展示
     /// - Parameter animated: 是否需要动画
     func modal(_ controller: UIViewController,
-               wrapped: Bool = true,
+               wrapped: Bool = false,
                fullScreen: Bool = false,
                animated: Bool = true) {
         let vc = wrapped ? self.modalWrapper(controller) : controller
         if fullScreen { vc.modalPresentationStyle = .fullScreen }
         topController?.present(vc, animated: animated, completion: nil)
     }
-    
-    
-    /// 页面跳转
-    /// - Parameter controller: 页面控制器
-    /// - Parameter mode: 跳转模式
-    /// - Parameter wrapped: modal 模式是否需要包装导航控制器
-    func goto(_ controller: UIViewController, mode: Mode, wrapped: Bool) {
-        switch mode {
-        case .push:     push(controller)
-        case .modal:    modal(controller, wrapped: wrapped)
-        }
-    }
 }
 
-// MARK: - System
-
-@available(iOSApplicationExtension, unavailable)
-public extension RouteManager {
+public extension Router {
     
     /// 系统打开 url
     /// - Parameter url: url
@@ -116,16 +135,20 @@ public extension RouteManager {
         Ext.debug("open url: \(url.absoluteString)")
         guard UIApplication.shared.canOpenURL(url) else { return }
         
-        UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        if #available(iOS 10.0, *) {
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        } else {
+            UIApplication.shared.openURL(url)
+        }
     }
     
     /// 系统分享
     /// - Parameter items: 分享数据
     /// - Parameter handler: 分享完成回调
-    func systemShare(_ activityItems: [Any]?, activities: [UIActivity]? = nil, handler: Ext.ResultDataHandler<String>? = nil) {
+    func systemShare(_ activityItems: [Any]?, activities: [UIActivity]? = nil, handler: Ext.ResultDataHandler<String>? = nil) -> UIActivityViewController? {
         guard let activityItems = activityItems else {
             handler?(.failure(Ext.Error.inner("share activity items is nil.")))
-            return
+            return nil
         }
         
         let vc = UIActivityViewController(activityItems: activityItems, applicationActivities: activities)
@@ -148,7 +171,7 @@ public extension RouteManager {
             handler?(.success(type?.rawValue ?? ""))
             vc.dismiss(animated: true, completion: nil)
         }
-        modal(vc, wrapped: false)
+        return vc
     }
     
     /// 进入内嵌浏览器

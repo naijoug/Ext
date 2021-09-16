@@ -293,19 +293,19 @@ public extension NetworkManager {
     ///   - handler: 下载数据回调
     @discardableResult func download(urlString: String, saveUrl: URL, stamp: String = "", progress: ProgressHandler? = nil, handler: @escaping DownloadHandler) -> URLSessionDownloadTask? {
         guard let url = URL(string: urlString) else {
-            Ext.debug("Download HTTP url create failed. \(urlString)", tag: .failure, locationEnabled: false)
+            Ext.debug("Download HTTP url create failed. \(urlString)", tag: .failure, logEnabled: downloadLogged, locationEnabled: false)
             handler((nil, Ext.Error.inner("download url create failed.")))
             return nil
         }
         
         let downloadTask = DownloadTask(url: url, saveUrl: saveUrl, stamp: stamp, progress: progress, handler: handler)
         guard append(downloadTask) else {
-            Ext.debug("\(url.absoluteString) is downloading...", locationEnabled: false)
+            Ext.debug("\(url.absoluteString) is downloading...", logEnabled: downloadLogged, locationEnabled: false)
             return nil
         }
         
         Ext.debug("Download Request | \(url.absoluteString)", tag: .network, logEnabled: downloadLogged, locationEnabled: false)
-        let request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 60*10)
+        let request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 60 * 5)
         let task = downloadSession.downloadTask(with: request)
         task.resume()
         return task
@@ -350,12 +350,12 @@ private extension NetworkManager {
         let key = task.url.absoluteString
         var tasks = downloadTasks[key] ?? [DownloadTask]()
         if !tasks.isEmpty, tasks.contains(where: { $0.stamp == task.stamp }) {
-            Ext.debug("已经包含该 \(task.stamp) 任务")
+            Ext.debug("已经包含该 \(task.stamp) 任务", logEnabled: downloadLogged, locationEnabled: false)
             return false
         }
         tasks.append(task)
         downloadTasks[key] = tasks
-        Ext.debug("添加下载任务: \(task.stamp) | \(task.startTime) | \(key)")
+        Ext.debug("添加下载任务: \(task.stamp) | \(task.startTime) | \(key)", logEnabled: downloadLogged, locationEnabled: false)
         return true
     }
     private func tasks(for url: URL?) -> [DownloadTask]? {
@@ -374,18 +374,20 @@ private extension NetworkManager.DownloadTask {
         let elapsed = date.timeIntervalSince(startTime)
         let progress = Double(totalBytesWritten)/Double(totalBytesExpectedToWrite)
         let speed = Double(totalBytesWritten) / elapsed / 1024
-        Ext.debug("Download start \(startTime) progress: \(progress) | speed: \(speed)", locationEnabled: false)
+        //Ext.debug("Download start \(startTime) progress: \(progress) | speed: \(speed)", locationEnabled: false)
         self.progress?((progress, speed))
     }
     func successHandler(_ date: Date, session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         let downloadUrlString = downloadTask.currentRequest?.url?.absoluteString ?? ""
         let elapsed = date.timeIntervalSince(startTime)
         guard let httpResponse = downloadTask.response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-            Ext.debug("Download failure. \(elapsed) | \(downloadUrlString) | statusCode != 200, \((downloadTask.response as? HTTPURLResponse)?.statusCode ?? -110)", tag: .failure, locationEnabled: false)
+            Ext.debug("Download failure. \(elapsed) | \(downloadUrlString) | statusCode != 200, \((downloadTask.response as? HTTPURLResponse)?.statusCode ?? -110)",
+                      tag: .failure, logEnabled: NetworkManager.shared.downloadLogged, locationEnabled: false)
             self.handler?((nil, nil))
             return
         }
-        Ext.debug("Download success. \(elapsed) | \(downloadUrlString)", tag: .success, locationEnabled: false)
+        Ext.debug("Download success. \(elapsed) | \(downloadUrlString)",
+                  tag: .success, logEnabled: NetworkManager.shared.downloadLogged, locationEnabled: false)
         FileManager.default.ext.save(location, to: saveUrl)
         guard let data = try? Data(contentsOf: saveUrl) else {
             self.handler?((nil, nil))
@@ -395,7 +397,8 @@ private extension NetworkManager.DownloadTask {
     }
     func errorHandler(_ date: Date, session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         let elapsed = date.timeIntervalSince(startTime)
-        Ext.debug("Download error. \(elapsed) | \(task.currentRequest?.url?.absoluteString ?? "") | \((task.response as? HTTPURLResponse)?.statusCode ?? -110)", error: error, tag: .failure, locationEnabled: false)
+        Ext.debug("Download error. \(elapsed) | \(task.currentRequest?.url?.absoluteString ?? "") | \((task.response as? HTTPURLResponse)?.statusCode ?? -110)", error: error,
+                  tag: .failure, logEnabled: NetworkManager.shared.downloadLogged, locationEnabled: false)
         self.handler?((nil, error))
     }
     

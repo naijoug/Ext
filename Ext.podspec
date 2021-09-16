@@ -15,22 +15,34 @@ Pod::Spec.new do |spec|
   spec.swift_version = "5.0"
   spec.requires_arc = true
   spec.source_files = "Sources"
-  spec.default_subspecs = 'Extension', 'UI', 'Feature'
+  spec.default_subspecs = 'Core', 'Extension', 'UI', 'Router', 'Feature'
     
+  spec.subspec 'Core' do |ss|
+    ss.source_files = 'Sources/Core/*.swift'
+  end
+  
   spec.subspec 'Extension' do |ss|
     ss.source_files = 'Sources/*.swift', 'Sources/Extension/**/*'
     ss.frameworks = 'UIKit', 'AVKit'
+    
+    ss.dependency 'Ext/Core'
   end
   
   spec.subspec 'UI' do |ss|
     ss.source_files = 'Sources/UI/**/*'
     ss.frameworks = 'UIKit', 'WebKit'
+    
     ss.dependency 'Ext/Extension'
+  end
+  
+  spec.subspec 'Router' do |ss|
+    ss.source_files = 'Sources/Router/**/*'
+    ss.dependency 'Ext/UI'
   end
   
   spec.subspec 'Feature' do |ss|
     ss.source_files = 'Sources/Feature/**/*'
-    ss.dependency 'Ext/Extension'
+    
     ss.dependency 'Ext/UI'
   end
   

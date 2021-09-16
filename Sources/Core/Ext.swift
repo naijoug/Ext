@@ -36,11 +36,11 @@ public extension Ext {
      */
     
     /// 无参闭包
-    typealias VoidHandler = (() -> Void)
+    typealias VoidHandler = () -> Void
     /// 数据闭包
-    typealias DataHandler<T> = ((_ data: T) -> Void)
+    typealias DataHandler<T> = (_ data: T) -> Void
     /// 函数闭包
-    typealias FuncHandler<X, Y> = ((_ x: X) -> Y)
+    typealias FuncHandler<X, Y> = (_ x: X) -> Y
     
     /// 结果闭包
     typealias ResultHandler<T, E: Swift.Error> = ((Result<T, E>) -> Void)

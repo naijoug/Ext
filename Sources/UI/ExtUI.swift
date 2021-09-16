@@ -7,133 +7,119 @@
 
 import UIKit
 
-// MARK: - Ext UI
+// MARK: - View
 
-public extension Ext {
-    /// Ext UI Module
-    enum UI {}
-}
-
-extension Ext.UI {
-    
-    /// 自定义视图
-    open class View: UIView {
-        public required init?(coder: NSCoder) {
-            fatalError("init(coder:) has not been implemented")
-        }
-        public override init(frame: CGRect) {
-            super.init(frame: frame)
-            setupUI()
-        }
-        
-        @objc
-        open func setupUI() {}
+/// 自定义视图
+open class ExtView: UIView {
+    public required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
-
-    /// 自定义控件
-    open class Control: UIControl {
-        public required init?(coder: NSCoder) {
-            fatalError("init(coder:) has not been implemented")
-        }
-        public override init(frame: CGRect) {
-            super.init(frame: frame)
-            setupUI()
-        }
-        
-        @objc
-        open func setupUI() {}
-    }
-
-    /// 自定义图片
-    open class ImageView: UIImageView {
-        public required init?(coder: NSCoder) {
-            fatalError("init(coder:) has not been implemented")
-        }
-        public override init(frame: CGRect) {
-            super.init(frame: frame)
-            setupUI()
-        }
-        public override init(image: UIImage?) {
-            super.init(image: image)
-            setupUI()
-        }
-        public init() {
-            super.init(image: nil)
-            setupUI()
-        }
-        
-        @objc
-        open func setupUI() {}
-    }
-
-    // MARK: Cell
-
-    /// 自定义 TableViewCell (基类)
-    open class TableCell: UITableViewCell {
-        public required init?(coder aDecoder: NSCoder) {
-            fatalError("init(coder:) has not been implemented")
-        }
-        public override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-            super.init(style: style, reuseIdentifier: reuseIdentifier)
-            setupUI()
-        }
-        
-        @objc
-        open func setupUI() {}
-    }
-    /// 自定义 TableHeaderFooterView (基类)
-    open class TableHeaderFooterView: UITableViewHeaderFooterView {
-        public required init?(coder: NSCoder) {
-            fatalError("init(coder:) has not been implemented")
-        }
-        public override init(reuseIdentifier: String?) {
-            super.init(reuseIdentifier: reuseIdentifier)
-            setupUI()
-        }
-        
-        @objc
-        open func setupUI() {}
-    }
-
-    /// 自定义 CollectionViewCell (基类)
-    open class CollectionCell: UICollectionViewCell {
-        public required init?(coder aDecoder: NSCoder) {
-            fatalError("init(coder:) has not been implemented")
-        }
-        public override init(frame: CGRect) {
-            super.init(frame: frame)
-            setupUI()
-        }
-        
-        @objc
-        open func setupUI() {}
-    }
-    /// 自定义 CollectionReusableView (基类)
-    open class CollectionReusableView: UICollectionReusableView {
-        public required init?(coder: NSCoder) {
-            fatalError("init(coder:) has not been implemented")
-        }
-        public override init(frame: CGRect) {
-            super.init(frame: frame)
-            setupUI()
-        }
-        
-        @objc
-        open func setupUI() {}
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupUI()
     }
     
+    @objc
+    open func setupUI() {}
 }
 
-// MARK: - Ext UI Wrapper
-
-public extension Ext.UI {
-    /// Ext UI Wrapper Module
-    enum Wrapper {}
-}
-
-extension Ext.UI.Wrapper {
+/// 自定义控件
+open class ExtControl: UIControl {
+    public required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupUI()
+    }
     
-    open class TableCell<T: UIView>: Ext.UI.TableCell {
+    @objc
+    open func setupUI() {}
+}
+
+/// 自定义图片
+open class ExtImageView: UIImageView {
+    public required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupUI()
+    }
+    public override init(image: UIImage?) {
+        super.init(image: image)
+        setupUI()
+    }
+    public init() {
+        super.init(image: nil)
+        setupUI()
+    }
+    
+    @objc
+    open func setupUI() {}
+}
+
+// MARK: - Cell
+
+/// 自定义 TableViewCell (基类)
+open class ExtTableCell: UITableViewCell {
+    public required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    public override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        setupUI()
+    }
+    
+    @objc
+    open func setupUI() {}
+}
+/// 自定义 TableHeaderFooterView (基类)
+open class ExtTableHeaderFooterView: UITableViewHeaderFooterView {
+    public required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    public override init(reuseIdentifier: String?) {
+        super.init(reuseIdentifier: reuseIdentifier)
+        setupUI()
+    }
+    
+    @objc
+    open func setupUI() {}
+}
+
+/// 自定义 CollectionViewCell (基类)
+open class ExtCollectionCell: UICollectionViewCell {
+    public required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupUI()
+    }
+    
+    @objc
+    open func setupUI() {}
+}
+/// 自定义 CollectionReusableView (基类)
+open class ExtCollectionReusableView: UICollectionReusableView {
+    public required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupUI()
+    }
+    
+    @objc
+    open func setupUI() {}
+}
+
+// MARK: - Wrapper
+
+extension Ext {
+    
+    open class WrapperTableCell<T: UIView>: ExtTableCell {
         public private(set) var wrapperView: T!
         
         open override func setupUI() {
@@ -150,7 +136,7 @@ extension Ext.UI.Wrapper {
         }
     }
 
-    open class TableHeaderFooterView<T: UIView>: Ext.UI.TableHeaderFooterView {
+    open class WrapperTableHeaderFooterView<T: UIView>: ExtTableHeaderFooterView {
         public private(set) var wrapperView: T!
         
         open override func setupUI() {
@@ -167,7 +153,7 @@ extension Ext.UI.Wrapper {
         }
     }
     
-    open class CollectionCell<T: UIView>: Ext.UI.CollectionCell {
+    open class WrapperCollectionCell<T: UIView>: ExtCollectionCell {
         public private(set) var wrapperView: T!
         
         open override func setupUI() {
@@ -184,7 +170,7 @@ extension Ext.UI.Wrapper {
         }
     }
 
-    open class CollectionReusableView<T: UIView>: Ext.UI.CollectionReusableView {
+    open class WrapperCollectionReusableView<T: UIView>: ExtCollectionReusableView {
         public private(set) var wrapperView: T!
         
         open override func setupUI() {
