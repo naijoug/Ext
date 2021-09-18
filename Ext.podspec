@@ -22,7 +22,7 @@ Pod::Spec.new do |spec|
   end
   
   spec.subspec 'Extension' do |ss|
-    ss.source_files = 'Sources/*.swift', 'Sources/Extension/**/*'
+    ss.source_files = 'Sources/Extension/**/*'
     ss.frameworks = 'UIKit', 'AVKit'
     
     ss.dependency 'Ext/Core'

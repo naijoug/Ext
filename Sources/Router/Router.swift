@@ -78,7 +78,7 @@ public extension Router {
         guard let controller = controller(for: key, param: param) else { return }
         var log = "route to \(key.url)"
         if let param = param { log += " | \(param)" }
-        Ext.debug(log, tag: .custom("🐉✈️☄️"), locationEnabled: false)
+        Ext.debug(log, tag: .custom("✈️"), locationEnabled: false)
         
         goto(controller, mode: mode)
     }
@@ -187,7 +187,7 @@ public extension Router {
             push(vc)
         case .modal:
             vc.isModal = true
-            modal(vc)
+            modal(vc, wrapped: true)
         }
     }
 }
