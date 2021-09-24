@@ -50,23 +50,6 @@ public class ExtPlayer: NSObject {
     }
     public weak var delegate: ExtPlayerDelegate?
     
-    /// 时间监听
-    private var timeHandlers = [Ext.DataHandler<TimeStatus>]()
-    
-    private func handleTime(_ status: TimeStatus) {
-        Ext.debug("\(status)", logEnabled: timeLogEnabled)
-        delegate?.extPlayer(self, timeStatus: status)
-        
-        for handler in timeHandlers {
-            handler(status)
-        }
-    }
-    
-    /// 添加是时间状态监听者
-    public func addTimeHandler(_ handler: @escaping Ext.DataHandler<TimeStatus>) {
-        timeHandlers.append(handler)
-    }
-    
 // MARK: - Status
     
     /// 日志标识
@@ -180,6 +163,40 @@ public class ExtPlayer: NSObject {
     /// KVO 监听
     private var playerObservers = [NSKeyValueObservation?]()
     private var itemObservers = [NSKeyValueObservation?]()
+    
+// MARK: - Handler
+    
+    /// 时间状态回调
+    private var timeHandlers = [Ext.DataHandler<TimeStatus>]()
+    /// 播放状态回调
+    private var playHandlers = [Ext.DataHandler<Bool>]()
+}
+
+extension ExtPlayer {
+    /// 添加时间状态回调
+    public func addTimeHandler(_ handler: @escaping Ext.DataHandler<TimeStatus>) {
+        timeHandlers.append(handler)
+    }
+    private func handleTime(_ status: TimeStatus) {
+        Ext.debug("\(status)", logEnabled: timeLogEnabled)
+        delegate?.extPlayer(self, timeStatus: status)
+        
+        for handler in timeHandlers {
+            handler(status)
+        }
+    }
+    
+    /// 添加播放状态回调
+    public func addPlayHandler(_ handler: @escaping Ext.DataHandler<Bool>) {
+        playHandlers.append(handler)
+    }
+    private func handlePlay(_ isPlaying: Bool) {
+        Ext.debug("avPlayer isPlaying: \(isPlaying) | status: \(self.status) | timeControlStatus: \(avPlayer.timeControlStatus) | \(playHandlers)")
+        
+        for handler in playHandlers {
+            handler(isPlaying)
+        }
+    }
 }
 
 //MARK: - Public
@@ -203,12 +220,12 @@ public extension ExtPlayer {
     /// 当前时间 (单位: 秒)
     var currentTime: TimeInterval {
         let time = CMTimeGetSeconds(avPlayer.currentTime())
-        return (time.isNaN || time.isInfinite) ? 0 : time
+        return (time.isNaN || time.isInfinite || time < 0) ? 0.0 : time
     }
     /// 当前播放资源总时长
     var duration: TimeInterval? {
         guard let time = avPlayer.currentItem?.duration.seconds else { return nil }
-        return (time.isNaN || time.isInfinite) ? nil : time
+        return (time.isNaN || time.isInfinite || time < 0) ? nil : time
     }
     /// 播放进度
     var progress: Double {
@@ -219,8 +236,7 @@ public extension ExtPlayer {
 
 public extension ExtPlayer {
     
-    /// 清理
-    func clear() {
+    func clearData() {
         avPlayer.pause()
         /// 资源清理
         periodicTime = nil
@@ -233,7 +249,16 @@ public extension ExtPlayer {
         isSeeking = false
         status = .unknown
         bufferStatus = .unknown
+    }
+    
+    /// 清理
+    func clear() {
+        // 数据清理
+        clearData()
+        
+        // 回调清理
         timeHandlers.removeAll()
+        playHandlers.removeAll()
     }
     
     /// 播放
@@ -364,13 +389,17 @@ private extension ExtPlayer {
         // timeControlStatus : 播放器时间控制状态
         playerObservers.append(avPlayer.observe(\.timeControlStatus, options: [.initial, .new], changeHandler: { [weak self] player, change in
             guard let `self` = self else { return }
-            Ext.debug("player timeControlStatus: \(player.timeControlStatus)", logEnabled: self.logEnabled)
+            Ext.debug("player timeControlStatus: \(player.timeControlStatus) | currentTime: \(self.currentTime)", logEnabled: self.logEnabled)
             switch player.timeControlStatus {
             case .waitingToPlayAtSpecifiedRate:
                 // 缓冲区域内容不够播放时，变为缓冲状态
                 guard !(player.currentItem?.isPlaybackLikelyToKeepUp ?? false) else { return }
                 self.bufferStatus = .buffering
-            default: break
+            case .playing:
+                self.handlePlay(true)
+            case .paused:
+                self.handlePlay(false)
+            default: ()
             }
         }))
     }
@@ -433,7 +462,7 @@ private extension ExtPlayer {
 extension ExtPlayer {
     public override var description: String {
         var msg = super.description
-        msg += " | status: \(status) \t| bufferStatus: \(bufferStatus) | \(playerItem?.asset.ext.urlString ?? "nil")"
+        msg += " | status: \(status) | bufferStatus: \(bufferStatus) | \(playerItem?.asset.ext.urlString ?? "nil")"
         return msg
     }
 }
