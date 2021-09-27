@@ -9,6 +9,16 @@ import Foundation
 
 public extension ExtWrapper where Base == Bundle {
     
+    /*
+     Reference:
+        - https://stackoverflow.com/questions/31316325/how-to-get-bundle-for-a-struct
+     */
+    
+    /// Bundle
+    /// - Parameters:
+    ///   - cls: bundle Class
+    ///   - bundleName: bundle 名
+    /// - Returns: 如果 bundle 不存在，返回 mainBundle
     static func bundle(for cls: AnyClass? = nil, bundleName: String) -> Bundle {
         var bundle = Bundle.main
         if let cls = cls { bundle = Bundle(for: cls) }
@@ -18,8 +28,17 @@ public extension ExtWrapper where Base == Bundle {
         return Bundle(path: path) ?? .main
     }
     
-    static func path(for cls: AnyClass? = nil, bundleName: String, fileName: String) -> String? {
-        return bundle(for: cls, bundleName: bundleName).path(forResource: fileName, ofType: nil)
+    
+    /// Bundle 文件路径
+    /// - Parameters:
+    ///   - cls: bundle Class
+    ///   - bundleName: bundle 名
+    ///   - filePath: bundle 文件路径
+    /// - Returns: 文件路径
+    static func path(for cls: AnyClass? = nil, bundleName: String, filePath: String) -> String? {
+        return bundle(for: cls, bundleName: bundleName).path(forResource: filePath, ofType: nil)
     }
     
+    /// 获取 Bundle 文件路径
+    func filePath(_ filePath: String) -> String { (base.bundlePath as NSString).appendingPathComponent(filePath) }
 }
