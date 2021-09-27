@@ -40,6 +40,12 @@ public extension ExtWrapper where Base: UIViewController {
     func backTitle(_ title: String = "") {
         base.navigationItem.backBarButtonItem = UIBarButtonItem(title: title, style: .plain, target: nil, action: nil)
     }
+    
+    /// 是否使用导航栏大标题
+    func largeTitle(_ enabled: Bool) {
+        base.navigationController?.navigationBar.prefersLargeTitles = enabled
+        base.navigationItem.largeTitleDisplayMode = enabled ? .always : .never
+    }
 }
 
 // MARK: - Child Controller
@@ -67,7 +73,7 @@ public extension ExtWrapper where Base: UIViewController {
 // MARK: - Navigation
 
 public extension ExtWrapper where Base: UINavigationController {
-
+    
     /**
      导航控制器的根控制器
      Reference:
