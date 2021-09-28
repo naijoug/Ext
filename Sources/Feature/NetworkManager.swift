@@ -179,7 +179,19 @@ public struct FormData {
     public var name: String?
     /// 文件名
     public var filename: String?
-    /// 文件 MIME 类型
+    /**
+     文件 MIME 类型
+     Reference: https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_types
+     
+      - text/plain
+      - text/html
+      - image/jpeg
+      - image/png
+      - audio/m4a
+      - video/mp4
+      - application/json
+      - application/javascript
+    */
     public var mimeType: String?
     /// 文件数据
     public var data: Data?
