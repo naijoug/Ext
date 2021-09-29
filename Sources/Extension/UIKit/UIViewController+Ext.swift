@@ -14,10 +14,11 @@ public extension ExtWrapper where Base: UIViewController {
     /// 从指定 Storyboard 创建控制器
     ///
     /// - Parameter sbName: Storyboard 名称
+    /// - Parameter bundle: Storyboard 所在 Bundle
     /// - Returns: 当前控制器类型实例
-    static func instantiateFromStoryboard(sbName: String) -> Base {
+    static func instantiateFromStoryboard(sbName: String, bundle: Bundle? = nil) -> Base {
         func instanceFromStoryboard<T>(sbName: String) -> T where T: UIViewController {
-            if let vc = UIStoryboard(name: sbName, bundle: nil).instantiateViewController(withIdentifier: "\(Base.self)") as? T {
+            if let vc = UIStoryboard(name: sbName, bundle: bundle).instantiateViewController(withIdentifier: "\(Base.self)") as? T {
                 return vc
             }
             fatalError("Load storyboard controller failure \(self)")

@@ -36,6 +36,7 @@ open class TableController: UIViewController, ControllerScrollable {
         tableView.delegate = self
         tableView.dataSource = self
         tableView.tableFooterView = UIView()
+        self.configTable(tableView)
         return tableView
     }()
     
@@ -58,8 +59,18 @@ open class TableController: UIViewController, ControllerScrollable {
     
     open override func viewDidLoad() {
         super.viewDidLoad()
-        
         view.addSubview(tableView)
+        
+        layoutTable()
+    }
+    
+    /// 配置 TableView
+    open func configTable(_ tableView: UITableView) {
+        
+    }
+    
+    /// 布局 TableView
+    open func layoutTable() {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),

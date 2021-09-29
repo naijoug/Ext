@@ -16,6 +16,12 @@ private extension RouterKey {
     var url: String { "\(Router.shared.scheme)\(key)" }
 }
 
+/// 路由处理者键值协议
+public protocol RouterHandlerKey: RouterKey {}
+private extension RouterHandlerKey {
+    var handlerKey: String { "handler://\(key)" }
+}
+
 /// 路由参数协议
 public protocol RouterParam {}
 
@@ -24,8 +30,10 @@ public final class Router {
     public static let shared = Router()
     private init() {}
     
-    /// 路由表
-    private var routerMap = [String: ParamController]()
+    /// 控制器路由表
+    private var controllerMap = [String: ParamController]()
+    /// 处理者路由表
+    private var handlerMap = [String: ParamHandler]()
     
     /// 路由 scheme
     public var scheme: String = "app://"
@@ -44,13 +52,33 @@ public extension Router {
     func register(key: RouterKey, controller: @escaping VoidController) {
         register(key: key) { _ in return controller() }
     }
-    
     func register(key: RouterKey, controller: @escaping ParamController) {
-        routerMap[key.url] = controller
+        controllerMap[key.url] = controller
     }
     
     func controller(for key: RouterKey, param: RouterParam? = nil) -> UIViewController? {
-        return routerMap[key.url]?(param)
+        return controllerMap[key.url]?(param)
+    }
+}
+
+public extension Router {
+    
+    typealias ParamHandler = (_ param: RouterParam?) -> Void
+    
+    func register(key: RouterHandlerKey, handler: @escaping Ext.VoidHandler) {
+        handlerMap[key.handlerKey] = { _ in handler() }
+    }
+    func register(key: RouterHandlerKey, handler: @escaping ParamHandler) {
+        handlerMap[key.handlerKey] = handler
+    }
+    
+    func handler(for key: RouterHandlerKey) -> ParamHandler? {
+        return handlerMap[key.url]
+    }
+    
+    func handle(key: RouterHandlerKey, param: RouterParam? = nil) {
+        guard let handler = self.handler(for: key) else { return }
+        handler(param)
     }
 }
 
