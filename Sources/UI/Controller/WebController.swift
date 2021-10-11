@@ -10,27 +10,56 @@ import WebKit
 
 open class WebController: UIViewController {
     
-    /// JS MessageHandler 交互名字 (默认: native)
-    public var messageHandlerName = "native"
     /// 是否 modal 方式显示
     public var isModal: Bool = false
     /// Web 页面 URL
     public var urlString: String?
     
+    
+    
 // MARK: - Status
+    
+    /// 进度监听员
+    private var progressObserver: NSKeyValueObservation?
+    /// 网页加载进度
+    public private(set) var progress: Double = 0 {
+        didSet {
+            guard oldValue != progress else { return }
+            Ext.debug("web progress: \(oldValue) -> \(progress)")
+        }
+    }
     
     /// 开始加载时间
     private var startDate = Date()
     /// Web 加载成功时间 (秒数)
     public private(set) var loadingSeconds: TimeInterval = 0
     
+    /**
+     Reference:
+        - https://developer.apple.com/documentation/webkit/wkusercontentcontroller
+     */
+    
+    /**
+     默认 handler 名字: native
+       - 实现功能 body 中 JSON 参数
+        * toWeb : 打开内嵌网页 { "method": "toWeb", "title": "xxx", "url": "http://xxx" }
+        * toRoot : 回到根页面 { "method": "toRoot" }
+     */
+    private let defaultJSHandlerName = "native"
+    public var defaultJSHandlerEnabled: Bool = true {
+        didSet {
+            let names = [defaultJSHandlerName]
+            defaultJSHandlerEnabled ? addJSHandlerNames(names) : removeJSHandlerNames(names)
+        }
+    }
+    
+    /// JS 交互函数名列表
+    public private(set) var jsHandlerNames = [String]()
+    
 // MARK: - UI
     
-    private lazy var userContentController: WKUserContentController = {
-        let userContentController = WKUserContentController()
-        userContentController.add(self, name: messageHandlerName)
-        return userContentController
-    }()
+    private lazy var userContentController: WKUserContentController = { WKUserContentController() }()
+    
     private lazy var refreshControl: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(reloadWebView), for: .valueChanged)
@@ -62,15 +91,17 @@ open class WebController: UIViewController {
     
     private lazy var indicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .gray)
-        webView.addSubview(indicator)
-        indicator.center = webView.center
+        view.addSubview(indicator)
+        indicator.center = view.center
         return indicator
     }()
     
 // MARK: - Lifecycle
     
     deinit {
-        userContentController.removeScriptMessageHandler(forName: messageHandlerName)
+        removeJSHandlerNames(jsHandlerNames)
+        progressObserver?.invalidate()
+        progressObserver = nil
     }
     override open func viewDidLoad() {
         super.viewDidLoad()
@@ -85,7 +116,12 @@ open class WebController: UIViewController {
             }
         }
         
+        defaultJSHandlerEnabled = true
         webView.scrollView.addSubview(refreshControl)
+        progressObserver = webView.observe(\.estimatedProgress, options: [.initial, .new], changeHandler: { [weak self] _, change in
+            guard let `self` = self else { return }
+            self.progress = change.newValue ?? 0
+        })
         
         reloadWebView()
     }
@@ -154,10 +190,10 @@ extension WebController: WKNavigationDelegate {
 extension WebController: WKScriptMessageHandler {
     
     public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        Ext.debug("\(message.name) | \(message.body) | \(message.frameInfo)")
-        if message.name == messageHandlerName {
-            parseJSMessage(message.body)
-        }
+        Ext.debug("names: \(jsHandlerNames) | name: \(message.name) | body: \(message.body) | \(message.frameInfo)")
+        guard jsHandlerNames.contains(message.name) else { return }
+        
+        jsHandler(message.name, body: message.body)
     }
     
 }
@@ -166,26 +202,43 @@ extension WebController: WKScriptMessageHandler {
 
 extension WebController {
     
-    /// 解析 JS 发送的消息体
-    private func parseJSMessage(_ body: Any) {
-        if body is NSString, let string = body as? String {
-            var json: Dictionary<String, Any>?
-            do {
-                json = try JSONSerialization.jsonObject(with: Data(string.utf8), options: [.allowFragments, .mutableLeaves]) as? Dictionary<String, Any>
-            } catch {
-                Ext.debug("JSON 解析错误", error: error)
-            }
-            routeJSMethod(json)
-        } else if body is NSDictionary, let json = body as? Dictionary<String, Any> {
-            routeJSMethod(json)
+    /// 添加 JS 交互函数名
+    /// - Parameter names: 函数名列表
+    public func addJSHandlerNames(_ names: [String]) {
+        for name in names {
+            guard !jsHandlerNames.contains(where: { $0 == name }) else { continue }
+            userContentController.add(self, name: name)
+            jsHandlerNames.append(name)
         }
     }
     
-    /// JS 方法路由分发
-    /// - Parameter json: JS 方法数据字典
-    open func routeJSMethod(_ json: Dictionary<String, Any>?) {
+    /// 移除 JS 交互函数名
+    /// - Parameter names: 函数名列表
+    public func removeJSHandlerNames(_ names: [String]) {
+        for name in names {
+            guard jsHandlerNames.contains(where: { $0 == name }) else { continue }
+            userContentController.removeScriptMessageHandler(forName: name)
+            jsHandlerNames.removeAll(where: { $0 == name })
+        }
+    }
+    
+    /// JS 方法处理者 (子类重载实现)
+    /// - Parameter name: 方法名
+    /// - Parameter body: 消息体
+    @objc
+    open func jsHandler(_ name: String, body: Any) {
+        if name == defaultJSHandlerName {
+            defaultJSHandler(body)
+        }
+    }
+    
+}
+
+private extension WebController {
+    
+    func defaultJSHandler(_ body: Any) {
+        guard let json = parseJSMessage(body) else { return }
         Ext.debug("\(String(describing: json))")
-        guard let json = json else { return }
         guard let method = json["method"] as? String else {
             Ext.debug("method not exist.")
             return
@@ -202,6 +255,22 @@ extension WebController {
             break
         }
     }
+
+    /// 解析 JS 发送的消息体 -> JSON
+    private func parseJSMessage(_ body: Any) -> [String: Any]? {
+        if body is String, let string = body as? String {
+            var json: [String: Any]?
+            do {
+                json = try JSONSerialization.jsonObject(with: Data(string.utf8), options: [.allowFragments, .mutableLeaves]) as? Dictionary<String, Any>
+            } catch {
+                Ext.debug("JSON parse error.", error: error)
+            }
+            return json
+        } else if body is [String: Any], let json = body as? [String: Any] {
+            return json
+        }
+        return nil
+    }
     
     /// 打开新的网页页面
     private func openWeb(_ title: String?, urlString: String?) {
@@ -217,4 +286,5 @@ extension WebController {
     private func toRoot() {
         navigationController?.popToRootViewController(animated: true)
     }
+    
 }
