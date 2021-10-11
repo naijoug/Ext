@@ -32,6 +32,9 @@ public final class Router {
     
     /// 控制器路由表
     private var controllerMap = [String: ParamController]()
+    /// 跳转模式表
+    private var modeMap = [String: Router.Mode]()
+    
     /// 处理者路由表
     private var handlerMap = [String: ParamHandler]()
     
@@ -52,12 +55,18 @@ public extension Router {
     func register(key: RouterKey, controller: @escaping VoidController) {
         register(key: key) { _ in return controller() }
     }
-    func register(key: RouterKey, controller: @escaping ParamController) {
+    func register(key: RouterKey, mode: Mode? = nil, controller: @escaping ParamController) {
         controllerMap[key.url] = controller
+        if let mode = mode {
+            modeMap[key.url] = mode
+        }
     }
     
     func controller(for key: RouterKey, param: RouterParam? = nil) -> UIViewController? {
         return controllerMap[key.url]?(param)
+    }
+    func mode(for key: RouterKey) -> Mode? {
+        modeMap[key.url]
     }
 }
 
@@ -93,34 +102,43 @@ public extension Router {
     
     /// 页面跳转模式
     enum Mode {
-        case push
-        case modal
+        case push(hidesBottomBar: Bool = true, animated: Bool = true)
+        case modal(wrapped: Bool = false, fullScreen: Bool = false, animated: Bool = true)
+        
+        public var isModal: Bool {
+            switch self {
+            case .modal: return true
+            default: return false
+            }
+        }
     }
     
     /// 跳转到指定路由
     /// - Parameters:
     ///   - key: 路由键
     ///   - param: 路由参数
-    ///   - mode: 跳转模式
-    func goto(key: RouterKey, param: RouterParam? = nil, mode: Mode = .push) {
+    ///   - mode: 跳转模式 (默认: Push)
+    func goto(key: RouterKey, param: RouterParam? = nil, mode: Mode? = nil) {
         guard let controller = controller(for: key, param: param) else { return }
-        var log = "route to \(key.url)"
+        let routerMode = mode ?? self.mode(for: key)
+        var log = "route to \(key.url) | mode \(String(describing: routerMode))"
         if let param = param { log += " | \(param)" }
         Ext.debug(log, tag: .custom("✈️"), locationEnabled: false)
         
-        goto(controller, mode: mode)
+        goto(controller, mode: routerMode)
     }
     
     /// 跳转到指定控制器
     /// - Parameters:
     ///   - vc: 控制器
-    ///   - mode: 跳转模式
-    func goto(_ controller: UIViewController, mode: Mode = .push) {
-        switch mode {
-        case .push:
-            push(controller)
-        case .modal:
-            modal(controller)
+    ///   - mode: 跳转模式 (默认: Push)
+    func goto(_ controller: UIViewController, mode: Mode? = nil) {
+        let routerMode = mode ?? .push()
+        switch routerMode {
+        case .push(let hidesBottomBar, let animated):
+            push(controller, hidesBottomBar: hidesBottomBar, animated: animated)
+        case .modal(let wrapped, let fullScreen, let animated):
+            modal(controller, wrapped: wrapped, fullScreen: fullScreen, animated: animated)
         }
     }
 }
@@ -136,6 +154,7 @@ private extension Router {
     func push(_ controller: UIViewController,
               hidesBottomBar: Bool = true,
               animated: Bool = true) {
+        controller.hidesBottomBarWhenPushed = hidesBottomBar
         topController?.navigationController?.pushViewController(controller, animated: animated)
     }
     
@@ -206,16 +225,11 @@ public extension Router {
     /// - Parameter title: 导航栏标题
     /// - Parameter urlString: 网页 URL
     /// - Parameter mode: 跳转模式
-    func toWeb(_ title: String, urlString: String, mode: Mode) {
+    func toWeb(_ title: String, urlString: String, mode: Mode = .push()) {
         let vc = WebController()
         vc.title = title
         vc.urlString = urlString
-        switch mode {
-        case .push:
-            push(vc)
-        case .modal:
-            vc.isModal = true
-            modal(vc, wrapped: true)
-        }
+        vc.isModal = mode.isModal
+        goto(vc, mode: mode)
     }
 }
