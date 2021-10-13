@@ -20,6 +20,29 @@ public class ApplePlayerView: UIView {
         get { playerLayer.player }
         set { playerLayer.player = newValue }
     }
+    
+    public enum VideoGravity {
+        /// 等比拉伸显示全部内容(可能会出现黑边)
+        case aspectFit
+        /// 等比填充可视区域(超出部分会被截掉)
+        case aspectFill
+        /// 非等比填充可视区域(可能会出现变形)
+        case resize
+    }
+    
+    /// 视频显示模式
+    public var videoGravity: VideoGravity = .aspectFit {
+        didSet {
+            switch videoGravity {
+            case .aspectFit:
+                playerLayer.videoGravity = .resizeAspect
+            case .aspectFill:
+                playerLayer.videoGravity = .resizeAspectFill
+            case .resize:
+                playerLayer.videoGravity = .resize
+            }
+        }
+    }
 }
 
 public protocol ExtPlayerViewDelegate: AnyObject {
