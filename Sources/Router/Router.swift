@@ -16,6 +16,8 @@ private extension RouterKey {
     var url: String { "\(Router.shared.scheme)\(key)" }
 }
 
+
+
 /// 路由处理者键值协议
 public protocol RouterHandlerKey: RouterKey {}
 private extension RouterHandlerKey {
@@ -82,7 +84,7 @@ public extension Router {
     }
     
     func handler(for key: RouterHandlerKey) -> ParamHandler? {
-        return handlerMap[key.url]
+        return handlerMap[key.handlerKey]
     }
     
     func handle(key: RouterHandlerKey, param: RouterParam? = nil) {

@@ -15,8 +15,6 @@ open class WebController: UIViewController {
     /// Web 页面 URL
     public var urlString: String?
     
-    
-    
 // MARK: - Status
     
     /// 进度监听员
@@ -96,6 +94,9 @@ open class WebController: UIViewController {
         return indicator
     }()
     
+    /// 是否显示中间指示器
+    public var indicatorEnabled: Bool = false
+    
 // MARK: - Lifecycle
     
     deinit {
@@ -107,6 +108,8 @@ open class WebController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         navigationItem.largeTitleDisplayMode = .never
+        webView.scrollView.contentInsetAdjustmentBehavior = .never
+        edgesForExtendedLayout = []
         
         if isModal {
             if #available(iOS 13.0, *) {
@@ -177,10 +180,10 @@ extension WebController: WKNavigationDelegate {
     
     private func beginNetworking() {
         refreshControl.beginRefreshing()
-        indicator.startAnimating()
+        if indicatorEnabled { indicator.startAnimating() }
     }
     private func endNetworking() {
-        indicator.stopAnimating()
+        if indicatorEnabled { indicator.stopAnimating() }
         refreshControl.endRefreshing()
     }
 }
@@ -232,12 +235,27 @@ extension WebController {
         }
     }
     
+    /// 解析 JS 发送的消息体 -> JSON
+    public func parseJSON(_ body: Any) -> [String: Any]? {
+        if body is String, let string = body as? String {
+            var json: [String: Any]?
+            do {
+                json = try JSONSerialization.jsonObject(with: Data(string.utf8), options: [.allowFragments, .mutableLeaves]) as? Dictionary<String, Any>
+            } catch {
+                Ext.debug("JSON parse error.", error: error)
+            }
+            return json
+        } else if body is [String: Any], let json = body as? [String: Any] {
+            return json
+        }
+        return nil
+    }
 }
 
 private extension WebController {
     
     func defaultJSHandler(_ body: Any) {
-        guard let json = parseJSMessage(body) else { return }
+        guard let json = parseJSON(body) else { return }
         Ext.debug("\(String(describing: json))")
         guard let method = json["method"] as? String else {
             Ext.debug("method not exist.")
@@ -254,22 +272,6 @@ private extension WebController {
             Ext.debug("method: \(method) not implement.")
             break
         }
-    }
-
-    /// 解析 JS 发送的消息体 -> JSON
-    private func parseJSMessage(_ body: Any) -> [String: Any]? {
-        if body is String, let string = body as? String {
-            var json: [String: Any]?
-            do {
-                json = try JSONSerialization.jsonObject(with: Data(string.utf8), options: [.allowFragments, .mutableLeaves]) as? Dictionary<String, Any>
-            } catch {
-                Ext.debug("JSON parse error.", error: error)
-            }
-            return json
-        } else if body is [String: Any], let json = body as? [String: Any] {
-            return json
-        }
-        return nil
     }
     
     /// 打开新的网页页面
