@@ -65,9 +65,7 @@ open class TableController: UIViewController, ControllerScrollable {
     }
     
     /// 配置 TableView
-    open func configTable(_ tableView: UITableView) {
-        
-    }
+    open func configTable(_ tableView: UITableView) {}
     
     /// 布局 TableView
     open func layoutTable() {
