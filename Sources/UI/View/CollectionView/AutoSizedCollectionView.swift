@@ -22,18 +22,10 @@ public class AutoSizedCollectionView: UICollectionView {
             invalidateIntrinsicContentSize()
         }
     }
-    
-    public override func reloadData() {
-        super.reloadData()
-        invalidateIntrinsicContentSize()
-        layoutIfNeeded()
-    }
 
     public override var intrinsicContentSize: CGSize {
-////        return contentSize
-//        return self.collectionViewLayout.collectionViewContentSize
         layoutIfNeeded()
-        return CGSize(width: UIView.noIntrinsicMetric, height: contentSize.height)
+        return CGSize(width: UIView.noIntrinsicMetric, height: collectionViewLayout.collectionViewContentSize.height)
     }
 }
 
@@ -44,11 +36,6 @@ public class AutoSizedTableView: UITableView {
             invalidateIntrinsicContentSize()
         }
     }
-    
-//    public override func reloadData() {
-//        super.reloadData()
-//        invalidateIntrinsicContentSize()
-//    }
 
     public override var intrinsicContentSize: CGSize {
         layoutIfNeeded()
