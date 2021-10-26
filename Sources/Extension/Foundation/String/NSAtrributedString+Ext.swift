@@ -61,6 +61,19 @@ public extension ExtWrapper where Base == NSAttributedString {
         return NSAttributedString(string: text, attributes: attrs)
     }
     
+    /// 包含下划线富文本
+    static func text(_ text: String, font: UIFont, color: UIColor,
+                     underlines: [String], underlineColor: UIColor) -> NSAttributedString {
+        let mAttri = NSMutableAttributedString()
+        mAttri.append(NSAttributedString.ext.text(text, font: font, color: color))
+        for underline in underlines {
+            mAttri.addAttributes([.foregroundColor: underlineColor,
+                                  .underlineColor: underlineColor,
+                                  .underlineStyle: 1],
+                                 range: underline.ext.nsRange(in: text))
+        }
+        return mAttri
+    }
     
     /// 富文本图片
     /// - Parameters:
