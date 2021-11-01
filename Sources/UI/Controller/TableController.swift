@@ -42,20 +42,25 @@ open class TableController: UIViewController, ControllerScrollable {
     
     open var style: UITableView.Style = .grouped
     
-    open lazy var refreshControl: UIRefreshControl = {
-        let refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(pullToRefresh), for: .valueChanged)
-        return refreshControl
-    }()
-    open var enabledPullToRefresh: Bool = false {
+    
+    /// 下拉刷新是否可用
+    open var pullToRefreshEnabled: Bool = false {
         didSet {
-            guard enabledPullToRefresh else {
+            guard pullToRefreshEnabled else {
                 refreshControl.removeFromSuperview()
                 return
             }
             tableView.addSubview(refreshControl)
         }
     }
+    open lazy var refreshControl: UIRefreshControl = {
+        let refreshControl = UIRefreshControl()
+        refreshControl.addTarget(self, action: #selector(pullToRefresh), for: .valueChanged)
+        return refreshControl
+    }()
+    /// 下拉刷新
+    @objc
+    open func pullToRefresh() {}
     
     open override func viewDidLoad() {
         super.viewDidLoad()
@@ -78,9 +83,7 @@ open class TableController: UIViewController, ControllerScrollable {
         ])
     }
     
-    /// 下拉刷新
-    @objc
-    open func pullToRefresh() {}
+    
 }
 
 // MARK: - Table

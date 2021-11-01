@@ -58,9 +58,11 @@ public extension Router {
         register(key: key) { _ in return controller() }
     }
     func register(key: RouterKey, mode: Mode? = nil, controller: @escaping ParamController) {
+        Ext.debug("register \(key.key) | mode: \(String(describing: mode))", tag: .custom("®️"), locationEnabled: false)
         controllerMap[key.url] = controller
         if let mode = mode {
             modeMap[key.url] = mode
+            //Ext.debug("     append mode => \(key) | mode: \(mode)", locationEnabled: false)
         }
     }
     
@@ -123,7 +125,7 @@ public extension Router {
     func goto(key: RouterKey, param: RouterParam? = nil, mode: Mode? = nil) {
         guard let controller = controller(for: key, param: param) else { return }
         let routerMode = mode ?? self.mode(for: key)
-        var log = "route to \(key.url) | mode \(String(describing: routerMode))"
+        var log = "route to \(key.url) | mode \(String(describing: mode)) - \(String(describing: routerMode))"
         if let param = param { log += " | \(param)" }
         Ext.debug(log, tag: .custom("✈️"), locationEnabled: false)
         
