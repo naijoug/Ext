@@ -8,9 +8,6 @@
 import UIKit
 
 public class CenteredFlowLayout: UICollectionViewFlowLayout {
-    var delegate: UICollectionViewDelegateFlowLayout? {
-        return self.collectionView?.delegate as? UICollectionViewDelegateFlowLayout
-    }
     
     /**
      Reference:
@@ -20,20 +17,13 @@ public class CenteredFlowLayout: UICollectionViewFlowLayout {
     open override func targetContentOffset(forProposedContentOffset proposedContentOffset: CGPoint, withScrollingVelocity velocity: CGPoint) -> CGPoint {
         //Ext.debug("\(proposedContentOffset) | velocity: \(velocity)")
         guard let collectionView = self.collectionView,
-            let attris = layoutAttributesForElements(in: collectionView.bounds),
-            attris.count > 0 else {
-                return super.targetContentOffset(forProposedContentOffset: proposedContentOffset, withScrollingVelocity: velocity)
+              let attris = layoutAttributesForElements(in: collectionView.bounds), attris.count > 0 else {
+                  return super.targetContentOffset(forProposedContentOffset: proposedContentOffset, withScrollingVelocity: velocity)
         }
-        var size = itemSize
-        if let itemSize = delegate?.collectionView?(collectionView, layout: self, sizeForItemAt: IndexPath(item: 0, section: 0)) {
-            //Ext.debug("delegate.itemSize: \(itemSize)")
-            size = itemSize
-        }
-        let pageWidth = size.width + minimumLineSpacing
-        //Ext.debug("pageWidth: \(pageWidth) | \(itemSize) | \(size)")
-        var offsetX = pageWidth/2
+        
+        var offsetX = ext.pageWidth/2
         if abs(velocity.x) > 0.3 {
-            offsetX += (velocity.x > 0) ? pageWidth : -pageWidth
+            offsetX += ((velocity.x > 0) ? 1 : -1) * ext.pageWidth
         }
         let proposedContentOffsetCenterX = proposedContentOffset.x + offsetX
         var targetAttri = attris[0]
@@ -52,4 +42,5 @@ public class CenteredFlowLayout: UICollectionViewFlowLayout {
         //Ext.debug("targetX: \(targetX) \(targetAttri.center.x)")
         return CGPoint(x: targetX, y: proposedContentOffset.y)
     }
+    
 }

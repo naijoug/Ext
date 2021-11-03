@@ -7,10 +7,39 @@
 
 import UIKit
 
+extension ExtWrapper where Base: UICollectionViewFlowLayout {
+    
+    private var delegate: UICollectionViewDelegateFlowLayout? { base.collectionView?.delegate as? UICollectionViewDelegateFlowLayout }
+    
+    var itemSize: CGSize {
+        guard let collectionView = base.collectionView,
+              let size = delegate?.collectionView?(collectionView, layout: base, sizeForItemAt: IndexPath(item: 0, section: 0)) else {
+                  return base.itemSize
+              }
+        return size
+    }
+    
+    var minimumLineSpacing: CGFloat {
+        guard let collectionView = base.collectionView,
+              let spacing = delegate?.collectionView?(collectionView, layout: base, minimumLineSpacingForSectionAt: 0) else {
+            return base.minimumLineSpacing
+        }
+        return spacing
+    }
+    
+    var minimumInteritemSpacing: CGFloat {
+        guard let collectionView = base.collectionView,
+              let spacing = delegate?.collectionView?(collectionView, layout: base, minimumInteritemSpacingForSectionAt: 0) else {
+            return base.minimumInteritemSpacing
+        }
+        return spacing
+    }
+    
+    var pageWidth: CGFloat { itemSize.width + minimumLineSpacing }
+}
+
 /// 可分页布局
 public class PageableFlowLayout: UICollectionViewFlowLayout {
-    
-    private var delegate: UICollectionViewDelegateFlowLayout? { collectionView?.delegate as? UICollectionViewDelegateFlowLayout }
     
     public var logEnabled: Bool = true
     
@@ -22,20 +51,15 @@ public class PageableFlowLayout: UICollectionViewFlowLayout {
     open override func targetContentOffset(forProposedContentOffset proposedContentOffset: CGPoint, withScrollingVelocity velocity: CGPoint) -> CGPoint {
         Ext.debug("\(proposedContentOffset) | velocity: \(velocity)", logEnabled: logEnabled)
         guard let collectionView = self.collectionView,
-              let attris = layoutAttributesForElements(in: collectionView.bounds),
-              attris.count > 0 else {
+              let attris = layoutAttributesForElements(in: collectionView.bounds), attris.count > 0 else {
                   return super.targetContentOffset(forProposedContentOffset: proposedContentOffset, withScrollingVelocity: velocity)
         }
-        var size = itemSize
-        if let itemSize = delegate?.collectionView?(collectionView, layout: self, sizeForItemAt: IndexPath(item: 0, section: 0)) {
-            Ext.debug("delegate.itemSize: \(itemSize)", logEnabled: logEnabled)
-            size = itemSize
-        }
-        let pageWidth = size.width + minimumLineSpacing
-        Ext.debug("pageWidth: \(pageWidth) | itemSize: \(itemSize) | size: \(size)", logEnabled: logEnabled)
-        var offsetX = pageWidth/2
+        
+        Ext.debug("ext: \(ext.pageWidth) | itemSize: \(ext.itemSize) | lineSpacing \(ext.minimumLineSpacing) | interitemSpacing \(ext.minimumInteritemSpacing)", logEnabled: logEnabled)
+        
+        var offsetX = ext.pageWidth/2
         if abs(velocity.x) > 0.3 {
-            offsetX += (velocity.x > 0) ? pageWidth : -pageWidth
+            offsetX += ((velocity.x > 0) ? 1 : -1) * ext.pageWidth
         }
         let proposedContentOffsetCenterX = proposedContentOffset.x + offsetX
         var targetAttri = attris[0]
@@ -50,8 +74,8 @@ public class PageableFlowLayout: UICollectionViewFlowLayout {
                 targetAttri = attri
             }
         }
-        let targetX = targetAttri.center.x - collectionView.bounds.width/2 + size.width/4
-        Ext.debug("targetX: \(targetX) \(targetAttri.center.x)", logEnabled: logEnabled)
+        let targetX = targetAttri.center.x - ext.itemSize.width/2 - ext.minimumLineSpacing
+        Ext.debug("targetX: \(targetX) \(targetAttri.center.x) | \(ext.itemSize.width/4)", logEnabled: logEnabled)
         return CGPoint(x: targetX, y: proposedContentOffset.y)
     }
 }

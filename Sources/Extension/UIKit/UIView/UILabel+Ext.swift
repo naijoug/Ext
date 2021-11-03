@@ -14,8 +14,8 @@ public extension ExtWrapper where Base == UILabel {
         - https://www.codementor.io/@nguyentruongky/hyperlink-label-qv2k8rpk9
      */
     
-    func isTap(_ gesture: UITapGestureRecognizer, target: String, in text: String) -> Bool {
-        guard let attributedText = base.attributedText else { return false }
+    func isTap(_ gesture: UITapGestureRecognizer, target: String) -> Bool {
+        guard let attributedText = base.attributedText, let string = base.attributedText?.string else { return false }
         
         let labelSize = base.bounds.size
         let textContainer   = NSTextContainer(size: labelSize)
@@ -40,7 +40,7 @@ public extension ExtWrapper where Base == UILabel {
         )
         let indexOfCharacter = layoutManager.characterIndex(for: locationOfTouchInTextContainer, in: textContainer, fractionOfDistanceBetweenInsertionPoints: nil)
         
-        let targetRange = (text as NSString).range(of: target)
+        let targetRange = (string as NSString).range(of: target)
         return NSLocationInRange(indexOfCharacter, targetRange)
     }
 }
