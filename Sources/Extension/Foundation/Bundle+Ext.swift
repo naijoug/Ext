@@ -23,7 +23,7 @@ public extension ExtWrapper where Base == Bundle {
         var bundle = Bundle.main
         if let cls = cls { bundle = Bundle(for: cls) }
         let bundlePath = bundle.path(forResource: bundleName, ofType: "bundle")
-        Ext.debug("bundlePath: \(bundlePath ?? "")", locationEnabled: false)
+        //Ext.debug("bundlePath: \(bundlePath ?? "")", locationEnabled: false)
         guard let path = bundlePath else { return Bundle.main }
         return Bundle(path: path) ?? .main
     }

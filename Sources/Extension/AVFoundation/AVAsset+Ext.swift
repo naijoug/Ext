@@ -44,18 +44,28 @@ public extension Ext {
     // Reference: https://stackoverflow.com/questions/35738133/ios-code-to-convert-m4a-to-wav
     
     static func convertToWav(_ url: URL, outputURL: URL) {
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            Ext.debug("convert file not exist.")
+            return
+        }
+        
         var error: OSStatus = noErr
         var destinationFile: ExtAudioFileRef?
         var sourceFile: ExtAudioFileRef?
-
+        
         var srcFormat: AudioStreamBasicDescription = AudioStreamBasicDescription()
         var dstFormat: AudioStreamBasicDescription = AudioStreamBasicDescription()
 
         ExtAudioFileOpenURL(url as CFURL, &sourceFile)
 
+        guard let sourceFile = sourceFile else {
+            Ext.debug("audio file open failed", tag: .error)
+            return
+        }
+        
         var thePropertySize: UInt32 = UInt32(MemoryLayout.stride(ofValue: srcFormat))
 
-        ExtAudioFileGetProperty(sourceFile!,
+        ExtAudioFileGetProperty(sourceFile,
                                 kExtAudioFileProperty_FileDataFormat,
                                 &thePropertySize, &srcFormat)
 
@@ -78,7 +88,7 @@ public extension Ext {
             &destinationFile)
         Ext.debug("Error 1 in convertAudio: \(error.description)")
 
-        error = ExtAudioFileSetProperty(sourceFile!,
+        error = ExtAudioFileSetProperty(sourceFile,
                                         kExtAudioFileProperty_ClientDataFormat,
                                         thePropertySize,
                                         &dstFormat)
@@ -107,7 +117,7 @@ public extension Ext {
                 numFrames = bufferByteSize / dstFormat.mBytesPerFrame
             }
 
-            error = ExtAudioFileRead(sourceFile!, &numFrames, &fillBufList)
+            error = ExtAudioFileRead(sourceFile, &numFrames, &fillBufList)
             Ext.debug("Error 4 in convertAudio: \(error.description)")
 
             if numFrames == 0 {
@@ -122,7 +132,7 @@ public extension Ext {
 
         error = ExtAudioFileDispose(destinationFile!)
         Ext.debug("Error 6 in convertAudio: \(error.description)")
-        error = ExtAudioFileDispose(sourceFile!)
+        error = ExtAudioFileDispose(sourceFile)
         Ext.debug("Error 7 in convertAudio: \(error.description)")
     }
     

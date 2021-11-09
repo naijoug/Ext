@@ -213,9 +213,9 @@ public extension Router {
             .addToReadingList,
             .openInIBooks
         ]
-        vc.completionWithItemsHandler = { (type, succeed, items, error) in
-            Ext.debug("\(String(describing: type)) \(succeed) \(String(describing: items)) \(String(describing: error))")
-            guard succeed else {
+        vc.completionWithItemsHandler = { (type, succeeded, items, error) in
+            Ext.debug("\(String(describing: type)) \(succeeded) \(String(describing: items)) \(String(describing: error))")
+            guard succeeded else {
                 handler?(.failure(error ?? Ext.Error.inner("share fialure.")))
                 return
             }
