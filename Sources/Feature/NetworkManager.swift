@@ -160,7 +160,7 @@ public extension NetworkManager {
                 }
                 if let data = data {
                     let rawData = data.ext.prettyPrintedJSONString ?? data.ext.string ?? ""
-                    responseMsg += " | \(Ext.LogTag.bingo.token) Data => \(rawData)"
+                    responseMsg += " | 🏀 Data => \(rawData)"
                 }
                 Ext.debug("Data Response success | \(responseMsg) \n", tag: .success, locationEnabled: false)
                 dataHandler(data, response, error)
