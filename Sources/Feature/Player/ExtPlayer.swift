@@ -8,7 +8,6 @@
 import AVKit
 import AVFoundation
 
-
 /**
  Reference:
     - https://developer.apple.com/documentation/avfoundation/media_playback_and_selection
@@ -124,7 +123,8 @@ public class ExtPlayer: NSObject {
     public var playerUrl: URL? {
         didSet {
             guard let url = playerUrl else {
-                status = .failed(Ext.Error.inner("player url is nil."))
+                //status = .failed(Ext.Error.inner("player url is nil."))
+                playerItem = nil
                 return
             }
             playerItem = AVPlayerItem(asset: AVURLAsset(url: url))

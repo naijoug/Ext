@@ -82,18 +82,19 @@ public extension ExtWrapper where Base == FileManager {
     }
     
     /// 移动或复制资源到指定位置
-    func save(_ sourceUrl: URL?, to url: URL?) {
+    @discardableResult
+    func save(_ sourceUrl: URL?, to url: URL?) -> Bool {
         guard let sourceUrl = sourceUrl else {
             Ext.debug("源资源 Url 为 nil")
-            return
+            return false
         }
         guard let url = url else {
             Ext.debug("目标资源 Url 为 nil")
-            return
+            return false
         }
         guard base.fileExists(atPath: sourceUrl.path) else {
             Ext.debug("源资源不存在 : \(sourceUrl.path)")
-            return
+            return false
         }
         let folderUrl = url.deletingLastPathComponent()
         // Ext.debug("文件夹路径: \(folderUrl.path)")
@@ -101,29 +102,33 @@ public extension ExtWrapper where Base == FileManager {
         createIfNotExists(folderUrl)
         do {
             try base.moveItem(at: sourceUrl, to: url)
+            return true
         } catch {
             Ext.debug("move failure.", error: error, tag: .file, locationEnabled: false)
             do {
                 try base.copyItem(at: sourceUrl, to: url)
+                return true
             } catch {
                 Ext.debug("copy failure.", error: error, tag: .file, locationEnabled: false)
+                return false
             }
         }
     }
     
     /// 复制资源到指定位置
-    func copy(_ sourceUrl: URL?, to url: URL?) {
+    @discardableResult
+    func copy(_ sourceUrl: URL?, to url: URL?) -> Bool {
         guard let sourceUrl = sourceUrl else {
             Ext.debug("源资源 Url 为 nil")
-            return
+            return false
         }
         guard let url = url else {
             Ext.debug("目标资源 Url 为 nil")
-            return
+            return false
         }
         guard base.fileExists(atPath: sourceUrl.path) else {
             Ext.debug("源资源不存在 : \(sourceUrl.path)")
-            return
+            return false
         }
         let folderUrl = url.deletingLastPathComponent()
         //Ext.debug("文件夹路径: \(folderUrl.path)")
@@ -131,8 +136,10 @@ public extension ExtWrapper where Base == FileManager {
         createIfNotExists(folderUrl)
         do {
             try base.copyItem(at: sourceUrl, to: url)
+            return true
         } catch {
             Ext.debug("copy failure.", error: error, tag: .file, locationEnabled: false)
+            return false
         }
     }
 }

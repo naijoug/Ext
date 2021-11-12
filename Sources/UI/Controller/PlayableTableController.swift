@@ -178,7 +178,7 @@ public extension PlayableTableController {
             play()
         } else {
             if !(playableFor(index)?.isPlaying ?? false) {
-                Ext.debug("当前播放索引未开始播放，play")
+                Ext.debug("当前播放索引 \(playableIndex) 未开始播放，play")
                 play()
             }
         }
