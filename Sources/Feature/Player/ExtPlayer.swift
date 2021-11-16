@@ -57,7 +57,7 @@ public class ExtPlayer: NSObject {
     public var timeLogEnabled: Bool = false
     
     /// 播放状态
-    private(set) var status: ExtPlayer.Status = .unknown {
+    public private(set) var status: ExtPlayer.Status = .unknown {
         didSet {
             guard status != oldValue else { return }
             Ext.debug("\(oldValue) ===> \(status)", logEnabled: logEnabled)
@@ -65,7 +65,7 @@ public class ExtPlayer: NSObject {
         }
     }
     /// 缓冲状态
-    private(set) var bufferStatus: ExtPlayer.BufferStatus = .unknown {
+    public private(set) var bufferStatus: ExtPlayer.BufferStatus = .unknown {
         didSet {
             guard bufferStatus != oldValue else { return }
             Ext.debug("\(oldValue) -> \(bufferStatus)", logEnabled: logEnabled)

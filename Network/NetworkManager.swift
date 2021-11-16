@@ -79,6 +79,9 @@ extension NetworkManager {
 /**
  Reference: https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status
  HTTP Error Code
+    - 200 OK : 请求成功
+    - 206 Partial Content : 请求已成功，分段内容
+ 
     - 401 Unauthorized : 授权出错
     - 404 Not Found : 资源不存在
     - 405 Method Not Allowed : HTTP 方法错误
@@ -90,6 +93,9 @@ extension HTTPURLResponse {
     var statusMessage: String {
         var message = ""
         switch self.statusCode {
+        case 200: message = "OK"
+        case 206: message = "Partial Content"
+        
         case 401: message = "Unauthorized"
         case 404: message = "Not Found"
         case 405: message = "Method Not Allowed"
