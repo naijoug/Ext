@@ -98,7 +98,6 @@ extension Ext.Error: LocalizedError {
 
 public extension Ext {
     
-    
     /// 代码定位
     /// - Parameters:
     ///   - file: 文件名
@@ -106,65 +105,6 @@ public extension Ext {
     ///   - function: 函数名
     static func codeLocation(file: String = #file, line: Int = #line, function: String = #function) -> String {
         return "\((file as NSString).lastPathComponent):\(line) \t\(function)"
-    }
-    
-    /// Log 标记
-    enum LogTag {
-        case normal
-        case success
-        case failure
-        case error
-        
-        case get
-        case pin
-        case fix
-        case bang
-        case fire
-        case full
-        case file
-        case store
-        case timer
-        case bingo
-        case watch
-        case target
-        case launch
-        case network
-        case recycle
-        case champion
-        case notification
-        
-        /// 自定义符号
-        case custom(_ token: String)
-        
-        /// 标记符号
-        var token: String {
-            switch self {
-            case .normal:           return "# "
-            case .success:          return "✅"
-            case .failure:          return "🚫"
-            case .error:            return "❌"
-            
-            case .get:              return "🐵"
-            case .pin:              return "📌"
-            case .fix:              return "🛠"
-            case .bang:             return "💥"
-            case .fire:             return "🔥"
-            case .full:             return "💯"
-            case .file:             return "📚"
-            case .store:            return "📦"
-            case .timer:            return "⏰"
-            case .bingo:            return "🎉"
-            case .watch:            return "👀"
-            case .target:           return "🎯"
-            case .launch:           return "🚀"
-            case .network:          return "🌏"
-            case .recycle:          return "♻️"
-            case .champion:         return "🏆"
-            case .notification:     return "📣"
-            
-            case .custom(let token): return token
-            }
-        }
     }
     
     /// 调试日志
@@ -176,7 +116,7 @@ public extension Ext {
     ///   - logEnabled: 是否显示日志
     ///   - storeEnabled: 是否保存日志到文件
     ///   - locationEnabled: 是否打印代码定位日志
-    static func debug<T>(_ message: T, error: Swift.Error? = nil, tag: LogTag = .normal,
+    static func debug<T>(_ message: T, error: Swift.Error? = nil, tag: Tag = .normal,
                          logEnabled: Bool = true, storeEnabled: Bool = false, locationEnabled: Bool = true,
                          file: String = #file, line: Int = #line, function: String = #function) {
         /**
@@ -186,10 +126,10 @@ public extension Ext {
         #if DEBUG
         guard logEnabled || storeEnabled else { return }
         
-        var log = "Debug \(Date().ext.logTime) \(tag.token)"
+        var log = "Debug \(Date().ext.logTime) \(tag)"
         if locationEnabled { log += " 【\(codeLocation(file: file, line: line, function: function))】" }
         log += " \(message)"
-        if let error = error { log += " \(LogTag.error.token) \(error.localizedDescription)" }
+        if let error = error { log += " \(Tag.error) \(error.localizedDescription)" }
         if logEnabled { print(log) }
         guard storeEnabled else { return }
         DispatchQueue.global().async {
@@ -218,6 +158,89 @@ public extension Ext {
             }
         } else {
             try? data.write(to: logFile, options: .atomicWrite)
+        }
+    }
+}
+
+// MARK: - Tag
+
+public extension Ext {
+    /// 标记符号
+    enum Tag {
+        case normal
+        case success
+        case failure
+        case error
+        
+        case video
+        case audio
+        case image
+        
+        case play
+        case pause
+        
+        case get
+        case pin
+        case sos
+        case fix
+        case bang
+        case fire
+        case file
+        case store
+        case timer
+        case bingo
+        case start
+        case watch
+        case target
+        case launch
+        case network
+        case recycle
+        case perfect
+        case champion
+        case basketball
+        case notification
+        
+        /// 自定义符号
+        case custom(_ token: String)
+    }
+}
+extension Ext.Tag: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .normal:           return "# "
+        case .success:          return "✅"
+        case .failure:          return "🚫"
+        case .error:            return "❌"
+        
+        case .video:            return "🎥"
+        case .audio:            return "🎙"
+        case .image:            return "🌌"
+        
+        case .play:             return "▶️"
+        case .pause:            return "⏸"
+            
+        case .get:              return "🐵"
+        case .pin:              return "📌"
+        case .sos:              return "🆘"
+        case .fix:              return "🛠"
+        case .bang:             return "💥"
+        case .fire:             return "🔥"
+        case .file:             return "📚"
+        case .store:            return "📦"
+        case .timer:            return "⏰"
+        case .bingo:            return "🎉"
+        case .start:            return "🏃🏻‍♀️"
+        case .watch:            return "👀"
+        case .target:           return "🎯"
+        case .launch:           return "🚀"
+        case .network:          return "🌏"
+        case .recycle:          return "♻️"
+        case .perfect:          return "💯"
+        case .champion:         return "🏆"
+        case .basketball:       return "🏀"
+        case .notification:     return "📣"
+        
+        case .custom(let token): return token
         }
     }
 }

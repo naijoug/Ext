@@ -21,6 +21,9 @@ public extension ExtWrapper where Base == UIDevice {
 }
 
 public extension ExtWrapper where Base == AVAsset {
+    /// 资源 URL
+    var url: URL? { (base as? AVURLAsset)?.url }
+    
     /// 视频尺寸
     var videoSize: CGSize? {
         // Reference: https://stackoverflow.com/questions/10433774/avurlasset-getting-video-size
@@ -28,12 +31,6 @@ public extension ExtWrapper where Base == AVAsset {
         let size = videoTrack.naturalSize.applying(videoTrack.preferredTransform)
         //Ext.debug("naturalSize: \(videoTrack.naturalSize) => \(size)")
         return CGSize(width: abs(size.width), height: abs(size.height))
-    }
-    
-    /// 资源 url
-    var urlString: String? {
-        guard let asset = base as? AVURLAsset else { return nil }
-        return asset.url.absoluteString
     }
 }
 

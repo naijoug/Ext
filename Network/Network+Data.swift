@@ -108,14 +108,13 @@ extension NetworkManager {
                     dataHandler(nil, response, Ext.Error.inner("Server error \(httpResponse?.statusCode ?? 0)."))
                     return
                 }
-                responseMsg += " | \(Ext.LogTag.error.token) \(error.localizedDescription)"
                 Ext.debug("Data Response error. | \(responseMsg)", error: error, tag: .failure, locationEnabled: false)
                 dataHandler(data, response, error)
                 return
             }
             if let data = data {
                 let rawData = data.ext.prettyPrintedJSONString ?? data.ext.string ?? ""
-                responseMsg += " | 🏀 Data => \(rawData)"
+                responseMsg += " | \(Ext.Tag.basketball) Data => \(rawData)"
             }
             Ext.debug("Data Response succeeded | \(responseMsg) \n", tag: .success, locationEnabled: false)
             dataHandler(data, response, error)

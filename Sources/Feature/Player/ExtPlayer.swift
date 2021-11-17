@@ -191,7 +191,7 @@ extension ExtPlayer {
         playHandlers.append(handler)
     }
     private func handlePlay(_ isPlaying: Bool) {
-        Ext.debug("avPlayer isPlaying: \(isPlaying) | status: \(self.status) | timeControlStatus: \(avPlayer.timeControlStatus) | \(playHandlers)")
+        Ext.debug("isPlaying: \(isPlaying) | status: \(self.status) | timeControlStatus: \(avPlayer.timeControlStatus) | \(playHandlers)", logEnabled: self.logEnabled)
         
         for handler in playHandlers {
             handler(isPlaying)
@@ -462,7 +462,9 @@ private extension ExtPlayer {
 extension ExtPlayer {
     public override var description: String {
         var msg = super.description
-        msg += " | status: \(status) | bufferStatus: \(bufferStatus) | \(playerItem?.asset.ext.urlString ?? "nil")"
+        msg += " | status: \(status)"
+        msg += " | bufferStatus: \(bufferStatus)"
+        msg += " | \(playerItem?.asset.ext.url?.ext.log ?? "nil")"
         return msg
     }
 }
@@ -493,7 +495,9 @@ extension ExtPlayer.BufferStatus: CustomStringConvertible {
 extension AVPlayer {
     open override var description: String {
         var msg = super.description
-        msg += " | status: \(status) | rate: \(rate) | timeControlStatus: \(timeControlStatus)"
+        msg += " | status: \(status)"
+        msg += " | timeControlStatus: \(timeControlStatus)"
+        msg += " | rate: \(rate)"
         return msg
     }
 }
@@ -522,8 +526,10 @@ extension AVPlayerItem {
     open override var description: String {
         var msg = super.description
         msg += " | status \(status)"
-        msg += " | isPlaybackBufferEmpty: \(isPlaybackBufferEmpty) | isPlaybackLikelyToKeepUp: \(isPlaybackLikelyToKeepUp) | isPlaybackBufferFull: \(isPlaybackBufferFull)"
-        msg += " | \(asset.ext.urlString ?? "")"
+        msg += " | isPlaybackBufferEmpty: \(isPlaybackBufferEmpty)"
+        msg += " | isPlaybackLikelyToKeepUp: \(isPlaybackLikelyToKeepUp)"
+        msg += " | isPlaybackBufferFull: \(isPlaybackBufferFull)"
+        msg += " | \(asset.ext.url?.ext.log ?? "")"
         return msg
     }
 }

@@ -35,7 +35,7 @@ public final class NetworkManager: NSObject {
     /// 是否打印 HTTP headers 日志
     public var headerLogged: Bool = false
     /// 是否打印下载日志
-    public var downloadLogged: Bool = true
+    public var downloadLogged: Bool = false
     
     /// 下载 Session
     private(set) lazy var downloadSession: URLSession = {
