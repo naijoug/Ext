@@ -31,6 +31,10 @@ public extension ExtWrapper where Base: UIViewController {
 // MARK: -
 
 public extension ExtWrapper where Base: UIViewController {
+    
+    /// 控制器视图是否加载
+    var isViewLoaded: Bool { base.viewIfLoaded != nil }
+    
     /// 控制器是否可见
     var isVisible: Bool {
         // Refrence: https://stackoverflow.com/questions/2777438/how-to-tell-if-uiviewcontrollers-view-is-visible
