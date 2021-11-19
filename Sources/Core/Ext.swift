@@ -179,6 +179,8 @@ public extension Ext {
         case play
         case pause
         
+        case debug
+        
         case get
         case pin
         case sos
@@ -218,6 +220,8 @@ extension Ext.Tag: CustomStringConvertible {
         
         case .play:             return "▶️"
         case .pause:            return "⏸"
+            
+        case .debug:            return "🪲"
             
         case .get:              return "🐵"
         case .pin:              return "📌"
