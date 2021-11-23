@@ -179,6 +179,9 @@ public extension Ext {
         case play
         case pause
         
+        case begin
+        case end
+        
         case debug
         
         case get
@@ -191,7 +194,6 @@ public extension Ext {
         case store
         case timer
         case bingo
-        case start
         case watch
         case target
         case launch
@@ -221,6 +223,9 @@ extension Ext.Tag: CustomStringConvertible {
         case .play:             return "▶️"
         case .pause:            return "⏸"
             
+        case .begin:            return "🛫"
+        case .end:              return "🛬"
+            
         case .debug:            return "🪲"
             
         case .get:              return "🐵"
@@ -233,7 +238,6 @@ extension Ext.Tag: CustomStringConvertible {
         case .store:            return "📦"
         case .timer:            return "⏰"
         case .bingo:            return "🎉"
-        case .start:            return "🏃🏻‍♀️"
         case .watch:            return "👀"
         case .target:           return "🎯"
         case .launch:           return "🚀"
