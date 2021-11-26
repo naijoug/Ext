@@ -42,3 +42,12 @@ public extension ExtWrapper where Base == Bundle {
     /// 获取 Bundle 文件路径
     func filePath(_ filePath: String) -> String { (base.bundlePath as NSString).appendingPathComponent(filePath) }
 }
+
+public extension ExtWrapper where Base == Bundle {
+    
+    /// 根据图片名字获取 Bundle 中的图片
+    func image(_ named: String) -> UIImage? {
+        UIImage(named: named, in: base, compatibleWith: nil)
+    }
+    
+}

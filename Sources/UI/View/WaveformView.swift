@@ -70,13 +70,12 @@ public class WaveformView: ExtView {
     public override func layoutSubviews() {
         super.layoutSubviews()
         
-        Ext.debug("xxxxxxxxxxxxxxxxxxxxxxxx")
         level = 0
         updateMeters()
     }
     deinit {
-        Ext.debug("")
         stop()
+        Ext.debug("", tag: .recycle)
     }
     
     public func start() {

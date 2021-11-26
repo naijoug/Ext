@@ -114,7 +114,7 @@ public class ExtPlayer: NSObject {
     }
     deinit {
         clear()
-        Ext.debug("")
+        Ext.debug("", tag: .recycle)
     }
     
 // MARK: - Params
