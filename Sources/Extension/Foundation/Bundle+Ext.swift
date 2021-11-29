@@ -36,11 +36,13 @@ public extension ExtWrapper where Base == Bundle {
     ///   - filePath: bundle 文件路径
     /// - Returns: 文件路径
     static func path(for cls: AnyClass? = nil, bundleName: String, filePath: String) -> String? {
-        return bundle(for: cls, bundleName: bundleName).path(forResource: filePath, ofType: nil)
+        bundle(for: cls, bundleName: bundleName).path(forResource: filePath, ofType: nil)
     }
     
     /// 获取 Bundle 文件路径
-    func filePath(_ filePath: String) -> String { (base.bundlePath as NSString).appendingPathComponent(filePath) }
+    func filePath(_ filePath: String) -> String? {
+        base.path(forResource: filePath, ofType: nil)
+    }
 }
 
 public extension ExtWrapper where Base == Bundle {
