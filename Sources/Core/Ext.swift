@@ -114,28 +114,58 @@ public extension Ext {
     ///   - errir: 错误信息
     ///   - tag: 日志标记
     ///   - logEnabled: 是否显示日志
-    ///   - storeEnabled: 是否保存日志到文件
     ///   - locationEnabled: 是否打印代码定位日志
     static func debug<T>(_ message: T, error: Swift.Error? = nil, tag: Tag = .normal,
-                         logEnabled: Bool = true, storeEnabled: Bool = false, locationEnabled: Bool = true,
+                         logEnabled: Bool = true, locationEnabled: Bool = true,
                          file: String = #file, line: Int = #line, function: String = #function) {
         /**
          Reference:
             - https://swift.gg/2016/08/03/swift-prettify-your-print-statements-pt-1/
          */
         #if DEBUG
-        guard logEnabled || storeEnabled else { return }
+        guard logEnabled else { return }
+        logToTerminal(
+            log(message, error: error, tag: tag, locationEnabled: locationEnabled,
+                file: file, line: line, function: function)
+        )
+        #endif
+    }
+    
+    
+    ///   - logToFileEnabled: 是否保存日志到文件
+    static func debug<T>(_ message: T, error: Swift.Error? = nil, tag: Tag = .normal,
+                         logEnabled: Bool = true, locationEnabled: Bool = true, logToFileEnabled: Bool,
+                         file: String = #file, line: Int = #line, function: String = #function) {
+        #if DEBUG
+        guard logEnabled else { return }
+        logToTerminal(
+            log(message, error: error, tag: tag, locationEnabled: locationEnabled,
+                file: file, line: line, function: function)
+        )
+        #endif
         
+        guard logToFileEnabled else { return }
+        DispatchQueue.global().async {
+            logToFile(
+                log(message, error: error, tag: tag, locationEnabled: locationEnabled,
+                    file: file, line: line, function: function)
+            )
+        }
+    }
+    
+    /// 日志内容
+    private static func log<T>(_ message: T, error: Swift.Error? = nil, tag: Tag = .normal, locationEnabled: Bool = true,
+                               file: String = #file, line: Int = #line, function: String = #function) -> String {
         var log = "Debug \(Date().ext.logTime) \(tag)"
         if locationEnabled { log += " 【\(codeLocation(file: file, line: line, function: function))】" }
         log += " \(message)"
         if let error = error { log += " \(Tag.error) \(error.localizedDescription)" }
-        if logEnabled { print(log) }
-        guard storeEnabled else { return }
-        DispatchQueue.global().async {
-            logToFile(log)
-        }
-        #endif
+        return log
+    }
+    
+    /// 输出日志到终端
+    private static func logToTerminal(_ message: String) {
+        print(message)
     }
     
     /// 添加 log 到日志文件
