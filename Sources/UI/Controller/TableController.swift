@@ -28,6 +28,30 @@ public protocol ControllerScrollable {
     var scrollHandler: ScrollHandler? { get set }
 }
 
+// MARK: - Unknown Cell (for placeholder)
+
+public class UnknownCell: ExtTableCell {
+    
+    private var placeholderView: UIView!
+    
+    public override func setupUI() {
+        super.setupUI()
+        backgroundColor = .clear
+        placeholderView = contentView.ext.add(UIView())
+        
+        placeholderView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            placeholderView.heightAnchor.constraint(equalToConstant: CGFloat.leastNormalMagnitude),
+            placeholderView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            placeholderView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+            placeholderView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
+            placeholderView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+        ])
+    }
+}
+
+// MARK: - Table Controller
+
 open class TableController: UIViewController, ControllerScrollable {
     public var scrollHandler: ScrollHandler?
     
@@ -35,6 +59,7 @@ open class TableController: UIViewController, ControllerScrollable {
         let tableView = UITableView(frame: CGRect.zero, style: style)
         tableView.delegate = self
         tableView.dataSource = self
+        tableView.ext.registerClass(UnknownCell.self)
         tableView.tableFooterView = UIView()
         self.configTable(tableView)
         return tableView
@@ -96,7 +121,7 @@ extension TableController: UITableViewDataSource {
         return 0
     }
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        return UITableViewCell()
+        return tableView.ext.dequeueReusableCell(UnknownCell.self, for: indexPath)
     }
 }
 
