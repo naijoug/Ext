@@ -12,6 +12,7 @@ import UIKit
     - https://stackoverflow.com/questions/42437966/how-to-adjust-height-of-uicollectionview-to-be-the-height-of-the-content-size-of
     - https://stackoverflow.com/questions/56318626/dynamic-height-uicollectionview-inside-a-dynamic-height-uitableviewcell
     - https://stackoverflow.com/questions/24126708/uicollectionview-inside-a-uitableviewcell-dynamic-height
+    - https://stackoverflow.com/questions/25895311/uicollectionview-self-sizing-cells-with-auto-layout
  */
 
 /// 自适应尺寸 UICollectionView

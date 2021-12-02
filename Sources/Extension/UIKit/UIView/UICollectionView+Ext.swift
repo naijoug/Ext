@@ -7,6 +7,37 @@
 
 import UIKit
 
+public extension ExtWrapper where Base: UICollectionViewFlowLayout {
+    
+    private var delegate: UICollectionViewDelegateFlowLayout? { base.collectionView?.delegate as? UICollectionViewDelegateFlowLayout }
+    
+    var itemSize: CGSize {
+        guard let collectionView = base.collectionView,
+              let size = delegate?.collectionView?(collectionView, layout: base, sizeForItemAt: IndexPath(item: 0, section: 0)) else {
+                  return base.itemSize
+              }
+        return size
+    }
+    
+    var minimumLineSpacing: CGFloat {
+        guard let collectionView = base.collectionView,
+              let spacing = delegate?.collectionView?(collectionView, layout: base, minimumLineSpacingForSectionAt: 0) else {
+            return base.minimumLineSpacing
+        }
+        return spacing
+    }
+    
+    var minimumInteritemSpacing: CGFloat {
+        guard let collectionView = base.collectionView,
+              let spacing = delegate?.collectionView?(collectionView, layout: base, minimumInteritemSpacingForSectionAt: 0) else {
+            return base.minimumInteritemSpacing
+        }
+        return spacing
+    }
+    
+    var pageWidth: CGFloat { itemSize.width + minimumLineSpacing }
+}
+
 public extension ExtWrapper where Base: UICollectionView {
     
     /// 注册 Nib Cell

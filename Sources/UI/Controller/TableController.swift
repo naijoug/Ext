@@ -55,18 +55,9 @@ public class UnknownCell: ExtTableCell {
 open class TableController: UIViewController, ControllerScrollable {
     public var scrollHandler: ScrollHandler?
     
-    open lazy var tableView: UITableView = {
-        let tableView = UITableView(frame: CGRect.zero, style: style)
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.ext.registerClass(UnknownCell.self)
-        tableView.tableFooterView = UIView()
-        self.configTable(tableView)
-        return tableView
-    }()
+// MARK: - Status
     
     open var style: UITableView.Style = .grouped
-    
     
     /// 下拉刷新是否可用
     open var pullToRefreshEnabled: Bool = false {
@@ -78,14 +69,23 @@ open class TableController: UIViewController, ControllerScrollable {
             tableView.addSubview(refreshControl)
         }
     }
-    open lazy var refreshControl: UIRefreshControl = {
+    
+// MARK: - UI
+    
+    open private(set) lazy var tableView: UITableView = {
+        let tableView = UITableView(frame: CGRect.zero, style: style)
+        tableView.delegate = self
+        tableView.dataSource = self
+        tableView.ext.registerClass(UnknownCell.self)
+        tableView.tableFooterView = UIView()
+        self.configTable(tableView)
+        return tableView
+    }()
+    open private(set) lazy var refreshControl: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
         refreshControl.addTarget(self, action: #selector(pullToRefresh), for: .valueChanged)
         return refreshControl
     }()
-    /// 下拉刷新
-    @objc
-    open func pullToRefresh() {}
     
     open override func viewDidLoad() {
         super.viewDidLoad()
@@ -93,11 +93,18 @@ open class TableController: UIViewController, ControllerScrollable {
         
         layoutTable()
     }
+}
+
+// MARK: - Override
+
+extension TableController {
     
     /// 配置 TableView
+    @objc
     open func configTable(_ tableView: UITableView) {}
     
     /// 布局 TableView
+    @objc
     open func layoutTable() {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -108,7 +115,9 @@ open class TableController: UIViewController, ControllerScrollable {
         ])
     }
     
-    
+    /// 下拉刷新
+    @objc
+    open func pullToRefresh() {}
 }
 
 // MARK: - Table
@@ -147,6 +156,20 @@ extension TableController: UITableViewDelegate {
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
     }
+    
+//    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+//        /**
+//         Solution:
+//            - https://stackoverflow.com/questions/8603359/change-default-icon-for-moving-cells-in-uitableview
+//         */
+//
+//        guard let reoderView = cell.subviews.first(where: { $0.description.contains("Reorder") }) else { return }
+//        reoderView.frame = CGRect(x: cell.bounds.width - cell.bounds.height*2, y: 0,
+//                                  width: cell.bounds.height*2, height: cell.bounds.height)
+//        guard let moveImageView = reoderView.subviews.first(where: { $0 is UIImageView }) as? UIImageView else { return }
+//        moveImageView.isHidden = true
+//    }
+    
 }
 
 // MARK: - Scroll
