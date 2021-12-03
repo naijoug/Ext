@@ -47,9 +47,9 @@ public extension ExtWrapper where Base == Bundle {
 
 public extension ExtWrapper where Base == Bundle {
     
-    /// 根据图片名字获取 Bundle 中的图片
+    /// 根据图片名字获取 Bundle 中的图片 (如果不存在，再从 mainBundle 获取)
     func image(_ named: String) -> UIImage? {
-        UIImage(named: named, in: base, compatibleWith: nil)
+        UIImage(named: named, in: base, compatibleWith: nil) ?? UIImage(named: named)
     }
     
 }

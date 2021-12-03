@@ -20,8 +20,6 @@ public enum HttpMethod: String {
 public typealias DataHandler = Ext.DataHandler<(Data?, URLResponse?, Error?)>
 /// 进度回调
 public typealias ProgressHandler = (_ progress: Double, _ speed: Double) -> Void
-/// 下载回调
-public typealias DownloadHandler = Ext.ResultDataHandler<URL>
 
 /// network manager
 public final class NetworkManager: NSObject {
@@ -103,5 +101,9 @@ extension HTTPURLResponse {
         default: ()
         }
         return "【statusCode == \(self.statusCode)\(message.isEmpty ? "" : " | \(message)")】"
+    }
+    
+    open override var description: String {
+        return "\(statusMessage)"
     }
 }

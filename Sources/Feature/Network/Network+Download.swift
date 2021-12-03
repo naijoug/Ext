@@ -12,6 +12,17 @@ import Foundation
     - https://stackoverflow.com/questions/32322386/how-to-download-multiple-files-sequentially-using-nsurlsession-downloadtask-in-s
  */
 
+/// 下载结果数据
+public struct DownloadData {
+    /// 下载资源地址
+    public let url: URL
+    /// 下载消耗的时间
+    public let elapsed: TimeInterval
+}
+
+/// 下载回调
+public typealias DownloadHandler = Ext.ResultDataHandler<DownloadData>
+
 /// 下载任务
 struct DownloadTask {
     let startTime = Date()
@@ -118,7 +129,7 @@ private extension DownloadTask {
         }
         Ext.debug("Download succeeded. \(elapsed) | \(downloadUrlString)",
                   tag: .success, logEnabled: NetworkManager.shared.downloadLogged, locationEnabled: false)
-        self.handler(.success(url))
+        self.handler(.success(DownloadData(url: url, elapsed: elapsed)))
     }
     func errorHandler(_ date: Date, session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         let elapsed = date.timeIntervalSince(startTime)
