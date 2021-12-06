@@ -12,12 +12,11 @@ public extension ExtWrapper where Base == UIImage {
     /// - Parameters:
     ///   - format: "icon_xx_%04d_"
     ///   - count: 帧图片数量
-    static func animationImages(format: String, count: Int) -> [UIImage] {
+    static func animationImages(format: String, count: Int, bundle: Bundle? = nil) -> [UIImage] {
         var images = [UIImage]()
         for i in 0...count {
-            if let image = UIImage(named: String(format: format, i)) {
-                images.append(image)
-            }
+            guard let image = (bundle ?? .main).ext.image(String(format: format, i)) else { continue }
+            images.append(image)
         }
         return images
     }
@@ -30,8 +29,8 @@ public extension ExtWrapper where Base: UIImageView {
     ///   - format: 帧图片格式 "icon_xx_%04d"
     ///   - count: 帧图片数量
     ///   - duration: 帧动画持续时间
-    func animationImages(format: String, count: Int, duration: TimeInterval? = nil) {
-        base.animationImages = UIImage.ext.animationImages(format: format, count: count)
+    func animationImages(format: String, count: Int, duration: TimeInterval? = nil, bundle: Bundle? = nil) {
+        base.animationImages = UIImage.ext.animationImages(format: format, count: count, bundle: bundle)
         if let duration = duration {
             base.animationDuration = duration
         }
