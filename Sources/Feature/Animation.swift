@@ -12,7 +12,12 @@ public enum Animation {}
 public extension Animation {
     
     /// 图片飞行动画
-    static func fly(imageNamed: String, startView: UIView?, endView: UIView?, handler: Ext.ResultVoidHandler?) {
+    static func fly(image: UIImage?, startView: UIView?, endView: UIView?, handler: Ext.ResultVoidHandler?) {
+        guard let image = image else {
+            handler?(.failure(Ext.Error.inner("fly image is nil.")))
+            return
+        }
+        
         guard let view = UIApplication.shared.ext.mainWindow,
             let startView = startView, let endView = endView,
             let startPoint = startView.superview?.convert(startView.center, to: view),
@@ -23,11 +28,6 @@ public extension Animation {
         }
         Ext.debug("\(startView) | \(endView)")
         Ext.debug("animation start: \(startPoint) -> end: \(endPoint)")
-        
-        guard let image = UIImage(named: imageNamed) else {
-            handler?(.failure(Ext.Error.inner("fly image is nil.")))
-            return
-        }
         
         let animationImageView = UIImageView(image: image)
         view.addSubview(animationImageView)

@@ -179,6 +179,19 @@ private extension Router {
 
 public extension Router {
     
+    func actionSheet(_ title: String? = nil, actions: [UIAlertAction]) {
+        guard !actions.isEmpty else { return }
+        let controller = UIAlertController(title: title, message: nil, preferredStyle: .actionSheet)
+        for action in actions {
+            controller.addAction(action)
+        }
+        goto(controller, mode: .modal())
+    }
+    
+}
+
+public extension Router {
+    
     /// 系统打开 url
     /// - Parameter url: url
     func openURL(_ url: URL?) {
