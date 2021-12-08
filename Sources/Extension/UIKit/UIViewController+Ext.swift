@@ -151,7 +151,7 @@ public extension ExtWrapper where Base: UIViewController {
     /// Debug UIViewController Lifecycle
     static func debug() {
         guard Ext.isDebug else { return }
-        Ext.debug("UIViewController Lifecycle debugging", tag: .recycle, locationEnabled: false)
+        //Ext.debug("UIViewController Lifecycle debugging", tag: .recycle, locationEnabled: false)
         UIViewController.swizzle()
     }
 }

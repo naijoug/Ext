@@ -63,7 +63,7 @@ extension NetworkManager {
     /// 创建请求 URL
     private func url(_ urlString: String, method: HttpMethod, params: Any?, urlEncoded: Bool = true) -> URL? {
         guard let url = URL(string: urlString) else { return nil }
-        guard method == .get, let params = params as? [String: Any] else { return url }
+        guard method == .get, let params = params as? [String: Any], !params.isEmpty else { return url }
         
         guard urlEncoded, var urlComponets = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
             var string = urlString
