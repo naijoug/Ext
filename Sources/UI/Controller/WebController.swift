@@ -8,6 +8,27 @@
 import UIKit
 import WebKit
 
+/**
+ Reference:
+    - https://developer.apple.com/documentation/webkit/wkusercontentcontroller
+    - https://stackoverflow.com/questions/27105094/how-to-remove-cache-in-wkwebview
+ */
+
+public extension ExtWrapper where Base: WKWebView {
+    
+    /// 清理 WKWebView 缓存数据
+    /// - Parameter handler: 清理完成回调
+    static func clean(_ handler: @escaping Ext.VoidHandler) {
+        HTTPCookieStorage.shared.removeCookies(since: Date.distantPast)
+        WKWebsiteDataStore.default().removeData(
+            ofTypes: [WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache],
+            modifiedSince: Date(timeIntervalSince1970: 0)) {
+                handler()
+            }
+    }
+    
+}
+
 open class WebController: UIViewController {
     
     /// 是否 modal 方式显示
@@ -17,13 +38,16 @@ open class WebController: UIViewController {
     
 // MARK: - Status
     
+    /// 日志标记
+    public var logEnabled: Bool = false
+    
     /// 进度监听员
     private var progressObserver: NSKeyValueObservation?
     /// 网页加载进度
     public private(set) var progress: Double = 0 {
         didSet {
             guard oldValue != progress else { return }
-            Ext.debug("web progress: \(oldValue) -> \(progress)")
+            Ext.debug("web progress: \(oldValue) -> \(progress)", logEnabled: logEnabled)
         }
     }
     
@@ -33,26 +57,32 @@ open class WebController: UIViewController {
     public private(set) var loadingSeconds: TimeInterval = 0
     
     /**
-     Reference:
-        - https://developer.apple.com/documentation/webkit/wkusercontentcontroller
-     */
-    
-    /**
      默认 handler 名字: native
        - 实现功能 body 中 JSON 参数
         * toWeb : 打开内嵌网页 { "method": "toWeb", "title": "xxx", "url": "http://xxx" }
         * toRoot : 回到根页面 { "method": "toRoot" }
      */
     private let defaultJSHandlerName = "native"
-    public var defaultJSHandlerEnabled: Bool = true {
+    /// 默认 JS 交换功能是否可用
+    public var defaultJSHandlerEnabled: Bool = false {
         didSet {
             let names = [defaultJSHandlerName]
             defaultJSHandlerEnabled ? addJSHandlerNames(names) : removeJSHandlerNames(names)
         }
     }
-    
     /// JS 交互函数名列表
     public private(set) var jsHandlerNames = [String]()
+    
+    /// 下拉刷新是否可用
+    open var pullToRefreshEnabled: Bool = false {
+        didSet {
+            guard pullToRefreshEnabled else {
+                refreshControl.removeFromSuperview()
+                return
+            }
+            webView.scrollView.addSubview(refreshControl)
+        }
+    }
     
 // MARK: - UI
     
@@ -60,7 +90,7 @@ open class WebController: UIViewController {
     
     private lazy var refreshControl: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(reloadWebView), for: .valueChanged)
+        refreshControl.addTarget(self, action: #selector(pullToRefresh), for: .valueChanged)
         return refreshControl
     }()
     
@@ -73,17 +103,19 @@ open class WebController: UIViewController {
         
         let webView = WKWebView(frame: CGRect.zero, configuration: configuration)
         view.addSubview(webView)
-        webView.scrollView.alwaysBounceVertical = true
-        webView.scrollView.bounces = true
-        webView.navigationDelegate = self
         webView.uiDelegate = self
+        webView.navigationDelegate = self
+        webView.scrollView.bounces = true
+        webView.scrollView.alwaysBounceVertical = true
+        webView.scrollView.contentInsetAdjustmentBehavior = .never
         
         webView.translatesAutoresizingMaskIntoConstraints = false
-        webView.leftAnchor.constraint(equalTo: view.leftAnchor).isActive = true
-        webView.rightAnchor.constraint(equalTo: view.rightAnchor).isActive = true
-        webView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor).isActive = true
-        webView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor).isActive = true
-        
+        NSLayoutConstraint.activate([
+            webView.topAnchor.constraint(equalTo: view.topAnchor),
+            webView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            webView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            webView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
         return webView
     }()
     
@@ -107,10 +139,9 @@ open class WebController: UIViewController {
     override open func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        navigationItem.largeTitleDisplayMode = .never
-        webView.scrollView.contentInsetAdjustmentBehavior = .never
         edgesForExtendedLayout = []
         
+        navigationItem.largeTitleDisplayMode = .never
         if isModal {
             if #available(iOS 13.0, *) {
                 navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(closeAction))
@@ -119,8 +150,7 @@ open class WebController: UIViewController {
             }
         }
         
-        defaultJSHandlerEnabled = true
-        webView.scrollView.addSubview(refreshControl)
+        pullToRefreshEnabled = true
         progressObserver = webView.observe(\.estimatedProgress, options: [.initial, .new], changeHandler: { [weak self] _, change in
             guard let `self` = self else { return }
             self.progress = change.newValue ?? 0
@@ -129,20 +159,32 @@ open class WebController: UIViewController {
         reloadWebView()
     }
     
+    @objc
+    private func closeAction() {
+        dismiss(animated: true, completion: nil)
+    }
+}
+
+// MARK: - Override
+
+extension WebController {
+    
+    /// 下拉刷新
+    @objc
+    open func pullToRefresh() {
+        reloadWebView()
+    }
+    
     /// 刷新网页
     @objc
     open func reloadWebView() {
         guard let urlString = urlString, let url = URL(string: urlString) else { return }
-        Ext.debug("open url: \(url.absoluteString)")
+        Ext.debug("open url: \(url.absoluteString)", logEnabled: logEnabled)
         startDate = Date()
         webView.load(URLRequest(url: url))
         beginNetworking()
     }
     
-    @objc
-    private func closeAction() {
-        dismiss(animated: true, completion: nil)
-    }
 }
 
 // MARK: - WKUIDelegate
@@ -158,7 +200,7 @@ extension WebController: WKUIDelegate {
         Ext.debug(message)
     }
     public func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
-        Ext.debug("prompt: \(prompt) | defaultText: \(defaultText ?? "")")
+        Ext.debug("prompt: \(prompt) | defaultText: \(defaultText ?? "")", logEnabled: logEnabled)
     }
 }
 
@@ -171,10 +213,10 @@ extension WebController: WKNavigationDelegate {
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         endNetworking()
         loadingSeconds = Date().timeIntervalSince(startDate)
-        Ext.debug("webView load finish. \(loadingSeconds)")
+        Ext.debug("webView load succeeded. \(loadingSeconds)", logEnabled: logEnabled)
     }
     public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        Ext.debug("webView load fail.", error: error)
+        Ext.debug("webView load failed.", error: error)
         endNetworking()
     }
     
@@ -193,7 +235,7 @@ extension WebController: WKNavigationDelegate {
 extension WebController: WKScriptMessageHandler {
     
     public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        Ext.debug("names: \(jsHandlerNames) | name: \(message.name) | body: \(message.body) | \(message.frameInfo)")
+        Ext.debug("names: \(jsHandlerNames) | name: \(message.name) | body: \(message.body) | \(message.frameInfo)", logEnabled: logEnabled)
         guard jsHandlerNames.contains(message.name) else { return }
         
         jsHandler(message.name, body: message.body)
@@ -256,9 +298,9 @@ private extension WebController {
     
     func defaultJSHandler(_ body: Any) {
         guard let json = parseJSON(body) else { return }
-        Ext.debug("\(String(describing: json))")
+        Ext.debug("\(String(describing: json))", logEnabled: logEnabled)
         guard let method = json["method"] as? String else {
-            Ext.debug("method not exist.")
+            Ext.debug("method not exist.", logEnabled: logEnabled)
             return
         }
         switch method {
@@ -269,7 +311,7 @@ private extension WebController {
         case "toRoot":
             toRoot()
         default:
-            Ext.debug("method: \(method) not implement.")
+            Ext.debug("method: \(method) not implement.", logEnabled: logEnabled)
             break
         }
     }

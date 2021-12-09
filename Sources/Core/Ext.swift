@@ -221,6 +221,7 @@ public extension Ext {
         case bang
         case fire
         case file
+        case clean
         case store
         case timer
         case bingo
@@ -265,6 +266,7 @@ extension Ext.Tag: CustomStringConvertible {
         case .bang:             return "💥"
         case .fire:             return "🔥"
         case .file:             return "📚"
+        case .clean:            return "🧹"
         case .store:            return "📦"
         case .timer:            return "⏰"
         case .bingo:            return "🎉"
