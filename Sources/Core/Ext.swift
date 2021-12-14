@@ -77,7 +77,7 @@ extension Ext.Error: LocalizedError {
         case .server(let message, let code):
             var msg = ""
             if let message = message {
-                msg += "\(message) *"
+                msg += "\(message)"
             }
             if let code = code {
                 msg += " [\(code)]"

@@ -28,7 +28,6 @@ public extension ExtWrapper where Base == Bundle {
         return Bundle(path: path) ?? .main
     }
     
-    
     /// Bundle 文件路径
     /// - Parameters:
     ///   - cls: bundle Class
@@ -46,6 +45,11 @@ public extension ExtWrapper where Base == Bundle {
 }
 
 public extension ExtWrapper where Base == Bundle {
+    
+    /// Bundle 路径
+    func bundle(for path: String) -> Bundle? {
+        Bundle(path: base.bundleURL.appendingPathComponent(path).path)
+    }
     
     /// 根据图片名字获取 Bundle 中的图片 (如果不存在，再从 mainBundle 获取)
     func image(_ named: String) -> UIImage? {
