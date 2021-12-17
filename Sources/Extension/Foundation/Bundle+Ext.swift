@@ -12,6 +12,7 @@ public extension ExtWrapper where Base == Bundle {
     /*
      Reference:
         - https://stackoverflow.com/questions/31316325/how-to-get-bundle-for-a-struct
+        - https://stackoverflow.com/questions/41834472/xcode8-usage-of-image-literals-in-frameworks
      */
     
     /// Bundle

@@ -42,4 +42,9 @@ public extension ExtWrapper where Base == String {
         //Ext.debug("default \(Ext.LocalizedDefaultLangCode) again | base: \(base) => result: \(result)", tag: .custom("🌐"))
         return localized(code: Ext.LocalizedDefaultLangCode)
     }
+    
+    /// 先进行字符串本地化处理，再进行字符串格式化处理
+    func localizedFormat(_ arguments: CVarArg...) -> String {
+        base.ext.localized.ext.format(arguments: arguments)
+    }
 }

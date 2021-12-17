@@ -82,6 +82,36 @@ public extension ExtWrapper where Base == String {
     }
     
     /**
+     Reference:
+        - https://stackoverflow.com/questions/40626006/formatting-string-with-in-swift
+     */
+    
+    func format(_ arguments: CVarArg...) -> String {
+        format(arguments: arguments)
+    }
+    
+    func format(arguments: [CVarArg]) -> String {
+        /// 是否有效格式化字符串
+        func checkValid() -> Bool {
+            switch arguments.count {
+            case 1:
+                let arg0 = arguments[0]
+                if arg0 is Int                              { return base.contains("%d") }
+                else if arg0 is Float || arg0 is Double     { return base.contains("%f") }
+                else if arg0 is String                      { return base.contains("%@") }
+            default: () // todo
+            }
+            return true
+        }
+        let isValid = checkValid()
+        Ext.debug("\(isValid) | \(base) | \(arguments)")
+        return isValid ? String(format: base, arguments: arguments) : base
+    }
+}
+
+public extension ExtWrapper where Base == String {
+    
+    /**
      首字符大写
 
      string:           toDo

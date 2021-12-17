@@ -41,7 +41,7 @@ public class UnknownCell: ExtTableCell {
         
         placeholderView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            placeholderView.heightAnchor.constraint(equalToConstant: CGFloat.leastNormalMagnitude),
+            placeholderView.heightAnchor.constraint(equalToConstant: 1),
             placeholderView.topAnchor.constraint(equalTo: contentView.topAnchor),
             placeholderView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             placeholderView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
