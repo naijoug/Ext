@@ -58,11 +58,9 @@ public extension Router {
         register(key: key) { _ in return controller() }
     }
     func register(key: RouterKey, mode: Mode? = nil, controller: @escaping ParamController) {
-        //Ext.debug("register \(key.key) | mode: \(String(describing: mode))", tag: .custom("®️"), locationEnabled: false)
         controllerMap[key.url] = controller
         if let mode = mode {
             modeMap[key.url] = mode
-            //Ext.debug("     append mode => \(key) | mode: \(mode)", locationEnabled: false)
         }
     }
     

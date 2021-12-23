@@ -112,9 +112,9 @@ private extension DownloadTask {
     func successHandler(_ date: Date, session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         let downloadUrlString = downloadTask.currentRequest?.url?.absoluteString ?? ""
         let elapsed = date.timeIntervalSince(startTime)
-        guard let httpResponse = downloadTask.response as? HTTPURLResponse, 200..<300 ~= httpResponse.statusCode else {
+        guard let httpResponse = downloadTask.response as? HTTPURLResponse, httpResponse.isResponseOK else {
             let statusCode = (downloadTask.response as? HTTPURLResponse)?.statusCode ?? -110
-            Ext.debug("Download failed. \(elapsed) | \(downloadUrlString) | statusCode != 200, \(statusCode)",
+            Ext.debug("Download failed. \(elapsed) | \(downloadUrlString) | statusCode !≈ 200, \(statusCode)",
                       tag: .failure, logEnabled: NetworkManager.shared.downloadLogged, locationEnabled: false)
             self.handler(.failure(Ext.Error.inner("download failed \(statusCode)")))
             return

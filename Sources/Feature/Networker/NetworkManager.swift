@@ -21,7 +21,7 @@ public typealias DataHandler = Ext.DataHandler<(Data?, URLResponse?, Error?)>
 /// 进度回调
 public typealias ProgressHandler = (_ progress: Double, _ speed: Double) -> Void
 
-/// network manager
+/// Networker
 public final class NetworkManager: NSObject {
     public static let shared = NetworkManager()
     private override init() {
@@ -75,7 +75,10 @@ extension NetworkManager {
 }
 
 /**
- Reference: https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status
+ Reference:
+    - https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status
+    - https://stackoverflow.com/questions/26191377/how-to-check-response-statuscode-in-sendsynchronousrequest-on-swift
+    
  HTTP Error Code
     - 200 OK : 请求成功
     - 206 Partial Content : 请求已成功，分段内容
@@ -87,6 +90,9 @@ extension NetworkManager {
  */
 
 extension HTTPURLResponse {
+    /// 是否成功响应
+    var isResponseOK: Bool { (200...299).contains(self.statusCode) }
+    
     /// HTTP 状态描述
     var statusMessage: String {
         var message = ""

@@ -19,7 +19,7 @@ public extension NetworkManager {
     @discardableResult
     func data(_ urlString: String, method: HttpMethod,
               headers: [String: String]? = nil, headerLogged: Bool = false,
-              params: Any? = nil, handler: @escaping DataHandler) -> URLSessionDataTask? {
+              params: Any? = nil, timeoutInterval: TimeInterval = 60.0, handler: @escaping DataHandler) -> URLSessionDataTask? {
         
         guard let url = self.url(urlString, method: method, params: params) else {
             Ext.debug("Data HTTP url create failed. \(urlString)", tag: .failure, locationEnabled: false)
@@ -27,7 +27,7 @@ public extension NetworkManager {
             return nil
         }
         
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: url, timeoutInterval: timeoutInterval)
         // 设置 HTTP 请求方法
         request.httpMethod = method.rawValue
         // 根据请求方法，设置组装请求参数
@@ -99,9 +99,9 @@ extension NetworkManager {
         let session = URLSession(configuration: configuration)
         let task = session.dataTask(with: request) { (data, response, error) in
             let elapsed = Date().timeIntervalSince(requestTime)
-            var responseMsg = "elapsed : \(String(format: "%.4f", elapsed)) | \(requestMsg)"
             let httpResponse = response as? HTTPURLResponse
-            guard httpResponse?.statusCode == 200 else {
+            var responseMsg = "elapsed : \(String(format: "%.4f", elapsed)) / \(request.timeoutInterval) | \(requestMsg)"
+            guard httpResponse?.isResponseOK ?? false else {
                 guard let error = error else {
                     responseMsg += " | \(httpResponse?.statusMessage ?? "")"
                     Ext.debug("Data Response failed. | \(responseMsg)", tag: .failure, locationEnabled: false)

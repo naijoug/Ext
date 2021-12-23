@@ -9,6 +9,7 @@ import Foundation
 
 extension Int: ExtCompatible {}
 extension Float: ExtCompatible {}
+extension Double: ExtCompatible {}
 
 public extension ExtWrapper where Base == Float {
     
@@ -16,7 +17,7 @@ public extension ExtWrapper where Base == Float {
     func decimal(_ decimal: Int = 2) -> String {
         let formater = NumberFormatter()
         formater.minimumFractionDigits = 0
-        formater.maximumFractionDigits = 1
+        formater.maximumFractionDigits = decimal
         return formater.string(from: NSNumber(value: base)) ?? String(format: "%.\(decimal)f", base)
     }
     
@@ -29,5 +30,15 @@ public extension ExtWrapper where Base == Float {
         formater.numberStyle = .percent
         formater.maximumFractionDigits = decimal
         return formater.string(from: NSNumber(value: base)) ?? String(format: "%.\(decimal)f%%", base*100)
+    }
+}
+
+public extension ExtWrapper where Base == Double {
+    /// 保留小数位
+    func decimal(_ decimal: Int = 2) -> String {
+        let formater = NumberFormatter()
+        formater.minimumFractionDigits = 0
+        formater.maximumFractionDigits = decimal
+        return formater.string(from: NSNumber(value: base)) ?? String(format: "%.\(decimal)f", base)
     }
 }

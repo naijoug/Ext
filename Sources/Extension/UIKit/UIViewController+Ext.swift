@@ -125,15 +125,39 @@ public extension ExtWrapper where Base: UIViewController {
     /// 控制类名
     var className: String { "\(type(of: base))" }
     
+    /// Debug UIViewController Lifecycle
+    static func debug() {
+        guard Ext.isDebug else { return }
+        //Ext.debug("UIViewController Lifecycle debugging", tag: .recycle, locationEnabled: false)
+        UIViewController.swizzle()
+    }
+}
+private extension ExtWrapper where Base: UIViewController {
+    /// 是否为 UIKit 系统控制器
+    private var isUIKit: Bool {
+        let name = className
+        let map = [ // 系统控制器表
+            "UIInputWindowController": true
+        ]
+        return (map[name] ?? false) || (name.hasPrefix("UI") && name.hasSuffix("ViewController"))
+    }
+    /// 是否为 DoKit 控制器
+    private var isDoKit: Bool {
+        let name = className
+        return name.hasPrefix("Doraemon") && name.hasSuffix("Controller")
+    }
+    
+    private var isValid: Bool { !isUIKit && !isDoKit }
+    
     /// 控制器生命周期
-    enum Lifecycle: String {
+    enum Lifecycle {
         case viewDidLoad
         case viewWillAppear
         case viewDidAppear
         case viewWillDisappear
         case viewDidDisappear
         
-        public var tag: String {
+        var tag: String {
             switch self {
             case .viewDidLoad:          return "🌞"
             case .viewWillAppear:       return "🌖"
@@ -142,17 +166,22 @@ public extension ExtWrapper where Base: UIViewController {
             case .viewDidDisappear:     return "🌑"
             }
         }
+        var title: String {
+            switch self {
+            case .viewDidLoad:          return "viewDidLoad         "
+            case .viewWillAppear:       return "viewWillAppear      "
+            case .viewDidAppear:        return "viewDidAppear       "
+            case .viewWillDisappear:    return "viewWillDisappear   "
+            case .viewDidDisappear:     return "viewDidDisappear    "
+            }
+        }
     }
+    
+    
     
     func log(_ lifecycle: Lifecycle) {
-        Ext.debug("\(lifecycle.rawValue) \t | \(className)", tag: .custom(lifecycle.tag), locationEnabled: false)
-    }
-    
-    /// Debug UIViewController Lifecycle
-    static func debug() {
-        guard Ext.isDebug else { return }
-        //Ext.debug("UIViewController Lifecycle debugging", tag: .recycle, locationEnabled: false)
-        UIViewController.swizzle()
+        guard isValid else { return }
+        Ext.debug("\(lifecycle.title) \t | \(className)", tag: .custom(lifecycle.tag), locationEnabled: false)
     }
 }
 
@@ -174,7 +203,7 @@ final class Deallocator {
 private var associatedObjectAddr = ""
 
 private extension UIViewController {
-
+    
     static func swizzle() {
         ext.swizzlingInstanceMethod(self, original: #selector(viewDidLoad), swizzled: #selector(swizzled_viewDidLoad))
         ext.swizzlingInstanceMethod(self, original: #selector(viewWillAppear(_:)), swizzled: #selector(swizzled_viewWillAppear(_:)))
