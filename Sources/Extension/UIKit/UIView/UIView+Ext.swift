@@ -373,3 +373,83 @@ public extension ExtWrapper where Base: UIView {
         return line
     }
 }
+
+// MARK: - Subtract View
+
+/**
+ Reference:
+    - http://www.lymanli.com/2018/11/10/subtract-mask/
+    - https://stackoverflow.com/questions/31661023/change-color-of-certain-pixels-in-a-uiimage
+ */
+
+import CoreGraphics
+
+public extension ExtWrapper where Base: UIView {
+    
+    func subtrackMaskView(_ view: UIView, fillBackground: Bool = false) {
+        guard let targetFrame = view.superview?.convert(view.frame, to: base) else { return }
+        let backgroundColor = view.backgroundColor
+        Ext.debug("sutrack target: \(targetFrame) | backgroundColor: \(String(describing: backgroundColor))")
+        
+        UIGraphicsBeginImageContextWithOptions(base.bounds.size, false, UIScreen.main.scale)
+        defer { UIGraphicsEndImageContext() }
+        guard let context = UIGraphicsGetCurrentContext() else { return }
+        context.translateBy(x: targetFrame.origin.x, y: targetFrame.origin.y)
+        if backgroundColor == nil, fillBackground {
+            Ext.debug("view is alpha & fillBackground")
+            view.backgroundColor = .white
+            view.layer.render(in: context)
+            view.backgroundColor = nil
+        } else {
+            Ext.debug("view is not alpha")
+            view.layer.render(in: context)
+        }
+        
+        let image = UIGraphicsGetImageFromCurrentImageContext()?.ext.subtractMaskImage
+        Ext.debug("view backgroundColor ")
+        
+        let maskView = UIView()
+        maskView.frame = base.bounds
+        maskView.layer.contents = image?.cgImage
+        
+        base.mask = maskView
+    }
+    
+}
+private extension ExtWrapper where Base: UIImage {
+    
+    var subtractMaskImage: UIImage? {
+        guard let cgImage = base.cgImage else { return nil }
+        let scale: CGFloat = UIScreen.main.scale
+        let pixelWidth = Int(base.size.width * scale)
+        let pixelHeight = Int(base.size.height * scale)
+        
+        let bitmapBytesPerRow = pixelWidth
+        
+        Ext.debug("draw bitmap...| scale: \(scale) | pixel: \(pixelWidth) \(pixelHeight) | pixel \(cgImage.width) \(cgImage.height) | \(bitmapBytesPerRow) ")
+        guard let context = CGContext(data: nil,
+                                      width: pixelWidth, height: pixelHeight,
+                                      bitsPerComponent: 8, bytesPerRow: bitmapBytesPerRow,
+                                      space: CGColorSpaceCreateDeviceGray(),
+                                      bitmapInfo: CGImageAlphaInfo.alphaOnly.rawValue) else { return nil }
+        
+        context.draw(cgImage, in: CGRect(x: 0, y: 0, width: CGFloat(pixelWidth), height: CGFloat(pixelHeight)))
+        Ext.debug("222")
+        let startTime = Date()
+        if let data = context.data {
+            let pixelBuffer = data.bindMemory(to: UInt8.self, capacity: pixelHeight * bitmapBytesPerRow)
+            Ext.debug("data: \(data) | type: \(data) | pixelBuffer: \(pixelBuffer)")
+            for y in 0..<pixelHeight {
+                for x in 0..<bitmapBytesPerRow {
+                    let val = pixelBuffer[y*bitmapBytesPerRow + x]
+                    pixelBuffer[y*bitmapBytesPerRow + x] = 255 - val
+                }
+            }
+            Ext.debug("date end | pixelBuffer [0, 0]: \(pixelBuffer[0]) | [x: y] [\(bitmapBytesPerRow - 1), \(pixelHeight - 1)]")
+        }
+        Ext.debug("333 clacDuration: \(Date().timeIntervalSince(startTime))")
+        guard let maskCGImage = context.makeImage() else { return nil }
+        Ext.debug("444")
+        return UIImage(cgImage: maskCGImage)
+    }
+}

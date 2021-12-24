@@ -49,7 +49,8 @@ public extension NetworkManager {
     ///   - progress: 下载进度回调
     ///   - handler: 下载数据回调
     @discardableResult
-    func download(urlString: String, cacheUrl: URL?, stamp: String = "", progress: ProgressHandler? = nil, handler: @escaping DownloadHandler) -> URLSessionDownloadTask? {
+    func download(urlString: String, cacheUrl: URL?, stamp: String = "\(Date().timeIntervalSince1970)",
+                  progress: ProgressHandler? = nil, handler: @escaping DownloadHandler) -> URLSessionDownloadTask? {
         guard let url = URL(string: urlString) else {
             Ext.debug("Download HTTP url create failed. \(urlString)", tag: .failure, logEnabled: downloadLogged, locationEnabled: false)
             handler(.failure(Ext.Error.inner("download url error.")))
@@ -63,7 +64,7 @@ public extension NetworkManager {
         }
         
         Ext.debug("Download Request | \(url.absoluteString)", tag: .network, logEnabled: downloadLogged, locationEnabled: false)
-        let request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 60 * 5)
+        let request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 60 * 3)
         let task = downloadSession.downloadTask(with: request)
         task.resume()
         return task
@@ -120,6 +121,11 @@ private extension DownloadTask {
             return
         }
         
+        if let url = cacheUrl, FileManager.default.fileExists(atPath: url.path) {
+            Ext.debug("Download succeeded from cached. \(elapsed) | \(downloadUrlString)",
+                      tag: .success, logEnabled: NetworkManager.shared.downloadLogged, locationEnabled: false)
+            self.handler(.success(DownloadData(url: url, elapsed: elapsed)))
+        }
         let url = cacheUrl ?? URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(location.lastPathComponent)
         guard FileManager.default.ext.save(location, to: url) else {
             Ext.debug("Download file save failed.",
