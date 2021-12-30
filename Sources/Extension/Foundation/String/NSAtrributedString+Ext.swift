@@ -8,6 +8,15 @@
 import Foundation
 
 public extension ExtWrapper where Base == NSAttributedString {
+
+    /// 可变的富文本
+    var mutable: NSMutableAttributedString {
+        NSMutableAttributedString(attributedString: base)
+    }
+    
+}
+
+public extension ExtWrapper where Base == NSAttributedString {
         
     
     /// 富文本拼接

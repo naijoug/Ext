@@ -20,7 +20,7 @@ public enum ScrollViewStatus {
 }
 
 /// 控制可滚动协议
-public protocol ControllerScrollable {
+public protocol ScrollableController: UIViewController {
     
     typealias ScrollHandler = Ext.DataHandler<ScrollViewStatus>
     
@@ -52,7 +52,7 @@ public class UnknownCell: ExtTableCell {
 
 // MARK: - Table Controller
 
-open class TableController: UIViewController, ControllerScrollable {
+open class TableController: UIViewController, ScrollableController {
     public var scrollHandler: ScrollHandler?
     
 // MARK: - Status

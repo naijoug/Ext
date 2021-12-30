@@ -65,3 +65,40 @@ open class PlaceholderTextView: UITextView {
     
 
 }
+
+extension UITextView {
+    
+    /// 插入富文本
+    /// - Parameters:
+    ///   - attri: 富文本内容
+    ///   - index: 指定位置 (nil: 表示在光标位置插入)
+    func insert(_ attri: NSAttributedString, at index: Int? = nil) {
+        let mAttri = NSMutableAttributedString(attributedString: self.attributedText)
+        if let index = index {
+            mAttri.insert(attri, at: index)
+            
+            if let font = self.font {
+                mAttri.addAttributes([.font: font], range: NSRange(location: 0, length: mAttri.length))
+            }
+            self.attributedText = mAttri
+        } else {
+            // 当前光标输入位置
+            let location = self.selectedRange.location
+            var range = self.selectedRange
+            if location - 1 >= 0 {
+                let atRange = NSRange(location: location - 1, length: 1)
+                if mAttri.attributedSubstring(from: atRange).string == "@" {
+                    range = atRange
+                }
+            }
+            mAttri.replaceCharacters(in: range, with: attri)
+            
+            if let font = self.font {
+                mAttri.addAttributes([.font: font], range: NSRange(location: 0, length: mAttri.length))
+            }
+            self.attributedText = mAttri
+            
+            self.selectedRange = NSRange(location: range.location + attri.length, length: 0)
+        }
+    }
+}
