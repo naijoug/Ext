@@ -137,7 +137,12 @@ private extension ExtWrapper where Base: UIViewController {
     private var isUIKit: Bool {
         let name = className
         let map = [ // 系统控制器表
-            "UIInputWindowController": true
+            "UIInputWindowController": true,
+            "UIAlertController": true,
+            "UINavigationController": true,
+            "QLPreviewController": true,
+            "QLRemotePreviewCollection": true,
+            "QLRemoteAccessoryViewController": true
         ]
         return (map[name] ?? false) || (name.hasPrefix("UI") && name.hasSuffix("ViewController"))
     }

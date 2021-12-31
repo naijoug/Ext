@@ -9,6 +9,13 @@ import AVFoundation
 
 // - https://stackoverflow.com/questions/11090760/progress-bar-for-avassetexportsession
 
+public extension ExtWrapper where Base == URL {
+    
+    /// 媒体资源时长
+    var duration: TimeInterval { AVAsset(url: base).duration.seconds }
+    
+}
+
 public extension ExtWrapper where Base == UIDevice {
     /**
      Reference:
