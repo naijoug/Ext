@@ -75,6 +75,25 @@ public extension ExtWrapper where Base == String {
 
 public extension ExtWrapper where Base == String {
     
+    /// 删除前缀
+    func removePrefix(_ prefix: String) -> String {
+        guard base.hasPrefix(prefix) else { return base }
+        return String(base.dropFirst(prefix.count))
+    }
+    /// 删除后缀
+    func removeSuffix(_ suffix: String) -> String {
+        guard base.hasSuffix(suffix) else { return base }
+        return String(base.dropLast(suffix.count))
+    }
+    
+    /// 分割字符串
+    func split(_ separator: Character) -> [String] {
+        base.split(separator: separator).compactMap({ String($0) })
+    }
+}
+
+public extension ExtWrapper where Base == String {
+    
     /// test swift format
     func test() {
         // https://stackoverflow.com/questions/52332747/what-are-the-supported-swift-string-format-specifiers
