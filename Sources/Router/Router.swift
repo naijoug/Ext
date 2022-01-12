@@ -7,6 +7,11 @@
 
 import Foundation
 
+/**
+ Reference:
+    - https://github.com/devxoul/URLNavigator
+ */
+
 /// 路由键值协议
 public protocol RouterKey {
     /// 路由键
@@ -15,8 +20,6 @@ public protocol RouterKey {
 private extension RouterKey {
     var url: String { "\(Router.shared.scheme)\(key)" }
 }
-
-
 
 /// 路由处理者键值协议
 public protocol RouterHandlerKey: RouterKey {}

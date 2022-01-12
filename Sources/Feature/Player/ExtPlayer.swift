@@ -20,9 +20,9 @@ public protocol ExtPlayerDelegate: AnyObject {
     func extPlayer(_ player: ExtPlayer, bufferStatus status: ExtPlayer.BufferStatus)
 }
 
-public class ExtPlayer: NSObject {
+public extension ExtPlayer {
     /// 播放状态
-    public enum Status: Equatable {
+    enum Status: Equatable {
         public static func == (lhs: ExtPlayer.Status, rhs: ExtPlayer.Status) -> Bool {
             return lhs.description == rhs.description
         }
@@ -35,18 +35,22 @@ public class ExtPlayer: NSObject {
         case failed(_ error: Error) // 播放失败
     }
     /// 播放器缓存状态
-    public enum BufferStatus {
+    enum BufferStatus {
         case unknown                // 未知状态
         case buffering              // 正在缓冲 (不能播放)
         case bufferToReady          // 缓冲准备好，可以播放
         case bufferToEnd            // 缓冲完成
     }
     /// 播放器时间状态
-    public enum TimeStatus {
+    enum TimeStatus {
         case buffer(_ time: TimeInterval, _ duration: TimeInterval)
         case periodic(_ time: TimeInterval, _ duration: TimeInterval)
         case boundary(_ time: TimeInterval, _ duration: TimeInterval)
     }
+}
+
+public class ExtPlayer: NSObject {
+    
     public weak var delegate: ExtPlayerDelegate?
     
 // MARK: - Status
@@ -346,8 +350,8 @@ private extension ExtPlayer {
     }
     
     @objc
-    func didPlayToEnd(_ notification: Notification) {
-        guard let item = notification.object as? AVPlayerItem, item == playerItem else { return }
+    func didPlayToEnd(_ noti: Notification) {
+        guard let item = noti.object as? AVPlayerItem, item == playerItem else { return }
         Ext.debug("didPlayToEnd", logEnabled: logEnabled)
         // play to end, seek to start
         avPlayer.seek(to: .zero)
@@ -390,11 +394,10 @@ private extension ExtPlayer {
         playerObservers.append(avPlayer.observe(\.timeControlStatus, options: [.initial, .new], changeHandler: { [weak self] player, change in
             guard let `self` = self else { return }
             Ext.debug("player timeControlStatus: \(player.timeControlStatus) | currentTime: \(self.currentTime)", logEnabled: self.logEnabled)
+            // 缓冲区域内容不够播放时，变为缓冲状态
+            let isBuffering = player.timeControlStatus == .waitingToPlayAtSpecifiedRate && !(player.currentItem?.isPlaybackLikelyToKeepUp ?? false)
+            self.bufferStatus = isBuffering ? .buffering : .bufferToReady
             switch player.timeControlStatus {
-            case .waitingToPlayAtSpecifiedRate:
-                // 缓冲区域内容不够播放时，变为缓冲状态
-                guard !(player.currentItem?.isPlaybackLikelyToKeepUp ?? false) else { return }
-                self.bufferStatus = .buffering
             case .playing:
                 self.handlePlay(true)
             case .paused:
@@ -420,6 +423,9 @@ private extension ExtPlayer {
             guard let `self` = self else { return }
             Ext.debug("playerItem status: \(item.status)", logEnabled: self.logEnabled)
             switch item.status {
+            case .readyToPlay:
+                Ext.debug("playerItem readyToPlay.")
+                self.bufferStatus = .bufferToReady
             case .failed: // AVPlayerItem 错误 (播放资源错误)
                 self.status = .failed(item.error ?? Ext.Error.inner("player item failed."))
             default: break
@@ -464,6 +470,7 @@ extension ExtPlayer {
         var msg = super.description
         msg += " | status: \(status)"
         msg += " | bufferStatus: \(bufferStatus)"
+        msg += " | timeControlStatus: \(avPlayer.timeControlStatus)"
         msg += " | \(playerItem?.asset.ext.url?.ext.log ?? "nil")"
         return msg
     }
@@ -526,6 +533,7 @@ extension AVPlayerItem {
     open override var description: String {
         var msg = super.description
         msg += " | status \(status)"
+        if let error = error { msg += " | \(Ext.Tag.error): \(error)" }
         msg += " | isPlaybackBufferEmpty: \(isPlaybackBufferEmpty)"
         msg += " | isPlaybackLikelyToKeepUp: \(isPlaybackLikelyToKeepUp)"
         msg += " | isPlaybackBufferFull: \(isPlaybackBufferFull)"
