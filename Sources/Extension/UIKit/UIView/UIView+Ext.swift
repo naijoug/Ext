@@ -67,6 +67,21 @@ public extension ExtWrapper where Base: NSLayoutConstraint {
     
 }
 
+public extension ExtWrapper where Base: UIView  {
+    
+    /// 设置两个并排布局视图的优先级
+    /// - Parameters:
+    ///   - highView: 高优先级视图
+    ///   - lowView: 低优先级视图
+    static func priority(high highView: UIView, low lowView: UIView) {
+        lowView.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        lowView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+        highView.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+        highView.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+    }
+    
+}
+
 // MARK: - Frame
 
 extension ExtWrapper where Base: UIView {

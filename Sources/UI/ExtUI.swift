@@ -122,16 +122,18 @@ extension Ext {
     open class WrapperTableCell<T: UIView>: ExtTableCell {
         public private(set) var wrapperView: T!
         
+        open var wrapperInsets: UIEdgeInsets { .zero }
+        
         open override func setupUI() {
             super.setupUI()
             
             wrapperView = contentView.ext.add(T())
             wrapperView.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
-                wrapperView.topAnchor.constraint(equalTo: contentView.topAnchor),
-                wrapperView.leftAnchor.constraint(equalTo: contentView.leftAnchor),
-                wrapperView.rightAnchor.constraint(equalTo: contentView.rightAnchor),
-                wrapperView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
+                wrapperView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: wrapperInsets.top),
+                wrapperView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: wrapperInsets.left),
+                wrapperView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -wrapperInsets.right),
+                wrapperView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -wrapperInsets.bottom)
             ])
         }
     }
