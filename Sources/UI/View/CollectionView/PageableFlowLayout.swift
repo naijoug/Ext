@@ -24,7 +24,7 @@ public class PageableFlowLayout: UICollectionViewFlowLayout {
     /// 对齐方式 (默认: 居中对齐)
     public var alignment: Alignment = .center
     
-    public var logEnabled: Bool = true
+    public var logEnabled: Bool = false
     
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     public override init() {

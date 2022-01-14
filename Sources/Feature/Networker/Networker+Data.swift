@@ -1,5 +1,5 @@
 //
-//  Network+Data.swift
+//  Networker+Data.swift
 //  Ext
 //
 //  Created by guojian on 2021/11/12.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-public extension NetworkManager {
+public extension Networker {
     
     /// 数据获取
     /// - Parameters:
@@ -58,7 +58,7 @@ public extension NetworkManager {
     
 }
 
-extension NetworkManager {
+extension Networker {
     
     /// 创建请求 URL
     private func url(_ urlString: String, method: HttpMethod, params: Any?, urlEncoded: Bool = true) -> URL? {
@@ -117,7 +117,7 @@ extension NetworkManager {
                 responseMsg += " | \(Ext.Tag.basketball) Data => \(rawData)"
             }
             Ext.debug("Data Response succeeded | \(responseMsg) \n", tag: .success, locationEnabled: false)
-            dataHandler(data, response, error)
+            dataHandler(data, response, nil)
         }
         task.resume()
         return task

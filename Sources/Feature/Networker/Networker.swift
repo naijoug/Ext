@@ -1,5 +1,5 @@
 //
-//  NetworkManager.swift
+//  Networker.swift
 //  Ext
 //
 //  Created by naijoug on 2021/3/10.
@@ -22,8 +22,8 @@ public typealias DataHandler = Ext.DataHandler<(Data?, URLResponse?, Error?)>
 public typealias ProgressHandler = (_ progress: Double, _ speed: Double) -> Void
 
 /// Networker
-public final class NetworkManager: NSObject {
-    public static let shared = NetworkManager()
+public final class Networker: NSObject {
+    public static let shared = Networker()
     private override init() {
         super.init()
     }
@@ -47,7 +47,7 @@ public final class NetworkManager: NSObject {
     private var downloadTasks = [String: [DownloadTask]]()
 }
  
-extension NetworkManager {
+extension Networker {
     
     /// 添加一个下载任务
     func append(_ task: DownloadTask) -> Bool {
@@ -72,6 +72,7 @@ extension NetworkManager {
         guard let key = url?.absoluteString else { return nil }
         return downloadTasks.removeValue(forKey: key)
     }
+    
 }
 
 /**

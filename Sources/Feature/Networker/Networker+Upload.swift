@@ -1,5 +1,5 @@
 //
-//  Network+Upload.swift
+//  Networker+Upload.swift
 //  Ext
 //
 //  Created by guojian on 2021/11/12.
@@ -39,7 +39,7 @@ extension FormData: CustomStringConvertible {
     }
 }
 
-public extension NetworkManager {
+public extension Networker {
     
     /// formdata 格式上传 (POST)
     /// - Parameters:
@@ -83,7 +83,7 @@ public extension NetworkManager {
     
 }
 
-extension NetworkManager {
+extension Networker {
     
     /// 创建 multipart/form-data Body 体
     /// - Parameters:

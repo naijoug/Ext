@@ -1,5 +1,5 @@
 //
-//  Network+Download.swift
+//  Networker+Download.swift
 //  Ext
 //
 //  Created by guojian on 2021/11/12.
@@ -39,7 +39,7 @@ struct DownloadTask {
     let handler: DownloadHandler
 }
 
-public extension NetworkManager {
+public extension Networker {
     
     /// 下载请求
     /// - Parameters:
@@ -72,7 +72,7 @@ public extension NetworkManager {
     
 }
 
-extension NetworkManager: URLSessionDownloadDelegate {
+extension Networker: URLSessionDownloadDelegate {
     
     /// downloading
     public func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
@@ -116,32 +116,32 @@ private extension DownloadTask {
         guard let httpResponse = downloadTask.response as? HTTPURLResponse, httpResponse.isResponseOK else {
             let statusCode = (downloadTask.response as? HTTPURLResponse)?.statusCode ?? -110
             Ext.debug("Download failed. \(elapsed) | \(downloadUrlString) | statusCode !≈ 200, \(statusCode)",
-                      tag: .failure, logEnabled: NetworkManager.shared.downloadLogged, locationEnabled: false)
+                      tag: .failure, logEnabled: Networker.shared.downloadLogged, locationEnabled: false)
             self.handler(.failure(Ext.Error.inner("download failed \(statusCode)")))
             return
         }
         
         if let url = cacheUrl, FileManager.default.fileExists(atPath: url.path) {
             Ext.debug("Download succeeded from cached. \(elapsed) | \(downloadUrlString)",
-                      tag: .success, logEnabled: NetworkManager.shared.downloadLogged, locationEnabled: false)
+                      tag: .success, logEnabled: Networker.shared.downloadLogged, locationEnabled: false)
             self.handler(.success(DownloadData(url: url, elapsed: elapsed)))
         }
         let url = cacheUrl ?? URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(location.lastPathComponent)
         guard FileManager.default.ext.save(location, to: url) else {
             Ext.debug("Download file save failed.",
-                      tag: .error, logEnabled: NetworkManager.shared.downloadLogged, locationEnabled: false)
+                      tag: .error, logEnabled: Networker.shared.downloadLogged, locationEnabled: false)
             self.handler(.failure(Ext.Error.inner("download file save failed.")))
             return
         }
         Ext.debug("Download succeeded. \(elapsed) | \(downloadUrlString)",
-                  tag: .success, logEnabled: NetworkManager.shared.downloadLogged, locationEnabled: false)
+                  tag: .success, logEnabled: Networker.shared.downloadLogged, locationEnabled: false)
         self.handler(.success(DownloadData(url: url, elapsed: elapsed)))
     }
     func errorHandler(_ date: Date, session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         let elapsed = date.timeIntervalSince(startTime)
         let statusCode = (task.response as? HTTPURLResponse)?.statusCode ?? -110
         Ext.debug("Download error. \(elapsed) | \(task.currentRequest?.url?.absoluteString ?? "") | \(statusCode)",
-                  error: error, tag: .failure, logEnabled: NetworkManager.shared.downloadLogged, locationEnabled: false)
+                  error: error, tag: .failure, logEnabled: Networker.shared.downloadLogged, locationEnabled: false)
         self.handler(.failure(error ?? Ext.Error.inner("download error \(statusCode)")))
     }
     

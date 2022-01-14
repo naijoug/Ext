@@ -51,7 +51,7 @@ public extension Ext {
     
 }
 public extension Result {
-    /// 是否请求成功
+    /// 是否成功
     var isSucceeded: Bool {
         switch self {
         case .failure: return false
@@ -61,8 +61,7 @@ public extension Result {
 }
 extension Ext {
     /**
-     错误扩展
-     Refrence :
+     Reference :
         - https://stackoverflow.com/questions/39176196/how-to-provide-a-localized-description-with-an-error-type-in-swift
      */
     public enum Error: Swift.Error {
@@ -70,10 +69,6 @@ extension Ext {
         case error(_ error: Swift.Error)
         /// 内部处理错误
         case inner(_ message: String?)
-        /// 服务器响应错误
-        case server(_ message: String?, _ code: Int?)
-        /// 网络响应错误
-        case response(_ message: String?, _ code: Int?)
     }
 }
 extension Ext.Error: LocalizedError {
@@ -82,25 +77,7 @@ extension Ext.Error: LocalizedError {
         case .error(let error):
             return error.localizedDescription
         case .inner(let message):
-            return "\(message ?? "")"
-        case .server(let message, let code):
-            var msg = ""
-            if let message = message {
-                msg += "\(message)"
-            }
-            if let code = code {
-                msg += " [\(code)]"
-            }
-            return msg
-        case .response(let message, let code):
-            var msg = "response error"
-            if let code = code {
-                msg += " [\(code)]"
-            }
-            if let message = message {
-                msg += " \(message)"
-            }
-            return msg
+            return message
         }
     }
 }
@@ -134,12 +111,11 @@ public extension Ext {
         #if DEBUG
         guard logEnabled else { return }
         logToTerminal(
-            log(message, error: error, tag: tag, locationEnabled: locationEnabled,
+            logMessage(message, error: error, tag: tag, locationEnabled: locationEnabled,
                 file: file, line: line, function: function)
         )
         #endif
     }
-    
     
     ///   - logToFileEnabled: 是否保存日志到文件
     static func debug<T>(_ message: T, error: Swift.Error? = nil, tag: Tag = .normal,
@@ -148,7 +124,7 @@ public extension Ext {
         #if DEBUG
         guard logEnabled else { return }
         logToTerminal(
-            log(message, error: error, tag: tag, locationEnabled: locationEnabled,
+            logMessage(message, error: error, tag: tag, locationEnabled: locationEnabled,
                 file: file, line: line, function: function)
         )
         #endif
@@ -156,21 +132,14 @@ public extension Ext {
         guard logToFileEnabled else { return }
         DispatchQueue.global().async {
             logToFile(
-                log(message, error: error, tag: tag, locationEnabled: locationEnabled,
+                logMessage(message, error: error, tag: tag, locationEnabled: locationEnabled,
                     file: file, line: line, function: function)
             )
         }
     }
     
-    /// 日志内容
-    private static func log<T>(_ message: T, error: Swift.Error? = nil, tag: Tag = .normal, locationEnabled: Bool = true,
-                               file: String = #file, line: Int = #line, function: String = #function) -> String {
-        var log = "Debug \(Date().ext.logTime) \(tag)"
-        if locationEnabled { log += " 【\(codeLocation(file: file, line: line, function: function))】" }
-        log += " \(message)"
-        if let error = error { log += " \(Tag.error) \(error.localizedDescription)" }
-        return log
-    }
+}
+private extension Ext {
     
     /// 输出日志到终端
     private static func logToTerminal(_ message: String) {
@@ -198,6 +167,16 @@ public extension Ext {
         } else {
             try? data.write(to: logFile, options: .atomicWrite)
         }
+    }
+    
+    /// 日志内容
+    private static func logMessage<T>(_ message: T, error: Swift.Error? = nil, tag: Tag = .normal, locationEnabled: Bool = true,
+                                      file: String = #file, line: Int = #line, function: String = #function) -> String {
+        var log = "Debug \(Date().ext.logTime) \(tag)"
+        if locationEnabled { log += " 【\(codeLocation(file: file, line: line, function: function))】" }
+        log += " \(message)"
+        if let error = error { log += " \(Tag.error) \(error.localizedDescription)" }
+        return log
     }
 }
 
