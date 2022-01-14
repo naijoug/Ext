@@ -11,7 +11,7 @@ import UIKit
 public enum ScrollViewStatus {
     case didScroll(_ scrollView: UIScrollView)
     
-    case beginDragging(_ scrollView: UIScrollView)
+    case willBeginDragging(_ scrollView: UIScrollView)
     case willEndDragging(_ scrollView: UIScrollView, _ velocity: CGPoint, _ targetContentOffset: UnsafeMutablePointer<CGPoint>)
     case didEndDragging(_ scrollView: UIScrollView, _ decelerate: Bool)
     
@@ -180,7 +180,7 @@ extension TableController: UIScrollViewDelegate {
     }
     
     open func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
-        scrollHandler?(.beginDragging(scrollView))
+        scrollHandler?(.willBeginDragging(scrollView))
     }
     open func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         scrollHandler?(.willEndDragging(scrollView, velocity, targetContentOffset))
@@ -190,7 +190,7 @@ extension TableController: UIScrollViewDelegate {
     }
     
     open func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
-        scrollHandler?(.beginDragging(scrollView))
+        scrollHandler?(.beginDecelerating(scrollView))
     }
     open func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         scrollHandler?(.endDecelerating(scrollView))
@@ -202,7 +202,7 @@ public extension ScrollViewStatus {
         switch self {
         case .didScroll(let scrollView): return scrollView
             
-        case .beginDragging(let scrollView): return scrollView
+        case .willBeginDragging(let scrollView): return scrollView
         case .willEndDragging(let scrollView, _, _): return scrollView
         case .didEndDragging(let scrollView, _): return scrollView
         
