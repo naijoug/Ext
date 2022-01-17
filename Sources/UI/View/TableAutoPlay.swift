@@ -21,7 +21,11 @@ public class TableAutoPlay {
     var logEnabled: Bool = true
     
     /// 当前最佳播放索引
-    private var playableIndexPath: IndexPath?
+    private var playableIndexPath: IndexPath? {
+        didSet {
+            Ext.debug("play switch: \(oldValue?.description ?? "") -> \(playableIndexPath?.description ?? "")")
+        }
+    }
     
     /**
      是否正在进行拖拽滚动
@@ -49,70 +53,71 @@ public class TableAutoPlay {
 
 public extension TableAutoPlay {
     
-    /// 启动播放
-    func start() {
-        Ext.debug("\(playableIndexPath)", logEnabled: logEnabled)
-        //guard let _ = viewIfLoaded else { return }
-        
-        guard let playable = playableFor(playableIndexPath) else { return }
-        playable.isPlayable = true
-        playable.play()
-    }
+//    /// 启动播放
+//    func start() {
+//        Ext.debug("\(playableIndexPath)", logEnabled: logEnabled)
+//        //guard let _ = viewIfLoaded else { return }
+//
+//        guard let playable = playableFor(playableIndexPath) else { return }
+//        playable.play()
+//    }
+//
+//    /// 停止播放
+//    func stop() {
+//        Ext.debug("\(playableIndexPath) | \(self) | ", logEnabled: logEnabled)
+//        //guard let _ = viewIfLoaded else { return }
+//
+//        guard let tableView = self.tableView else { return }
+//
+//        for cell in tableView.visibleCells {
+//            (cell as? Playable)?.pause()
+//        }
+//    }
     
-    /// 停止播放
-    func stop() {
-        Ext.debug("\(playableIndexPath) | \(self) | ", logEnabled: logEnabled)
-        //guard let _ = viewIfLoaded else { return }
-        
-        guard let tableView = self.tableView else { return }
-        
-        for cell in tableView.visibleCells {
-            (cell as? Playable)?.isPlayable = false
-        }
-    }
-    
-    /// 开始播放
-    @objc
-    func play() {
-        Ext.debug("")
-        // 播放可播放 Item
-        guard let playable = playableFor(playableIndexPath), playable.isPlayable else { return }
-        playable.play()
-    }
-    /// 暂停播放
-    @objc
-    func pause() {
-        Ext.debug("")
-        //guard let _ = viewIfLoaded else { return }
-        
-        guard let tableView = self.tableView else { return }
-        for cell in tableView.visibleCells {
-            (cell as? Playable)?.pause()
-        }
-    }
+//    /// 开始播放
+//    @objc
+//    func play() {
+//        Ext.debug("")
+//        // 播放可播放 Item
+//        guard let playable = playableFor(playableIndexPath) else { return }
+//        playable.play()
+//    }
+//    /// 暂停播放
+//    @objc
+//    func pause() {
+//        Ext.debug("")
+//        //guard let _ = viewIfLoaded else { return }
+//        
+//        guard let tableView = self.tableView else { return }
+//        for cell in tableView.visibleCells {
+//            (cell as? Playable)?.pause()
+//        }
+//    }
 }
 
 private extension TableAutoPlay {
+    
+    /// 播放最佳
+    func playBest() {
+        Ext.debug("current playable indexPath: \(playableIndexPath?.description ?? "")", logEnabled: logEnabled)
+        guard let cell = bestVisibleCell(), let indexPath = tableView?.indexPath(for: cell) else { return }
+        play(at: indexPath)
+    }
     
     /// 播放指定索引
     private func play(at indexPath: IndexPath?) {
         guard let indexPath = indexPath else { return }
         Ext.debug("play \(indexPath)", logEnabled: logEnabled)
         guard playableIndexPath != indexPath else {
-            guard playableFor(indexPath)?.isPlaying ?? false else { return }
-            Ext.debug("当前播放索引 \(playableIndexPath) 未开始播放，play", logEnabled: logEnabled)
-            play()
+            guard let playable = playableFor(indexPath), !playable.isPlaying else { return }
+            Ext.debug("当前播放索引 \(playableIndexPath?.description ?? "") 未开始播放，play", logEnabled: logEnabled)
+            playable.play()
             return
         }
+        Ext.debug("play switch", tag: .target)
         pause(at: playableIndexPath)
         playableIndexPath = indexPath
-        play()
-    }
-    /// 播放最佳
-    func playBest() {
-        Ext.debug("current playable indexPath: \(playableIndexPath)", logEnabled: logEnabled)
-        guard let index = clacBestPlayableIndex() else { return }
-        play(at: index)
+        playableFor(indexPath)?.play()
     }
     
     /// 暂停指定索引
@@ -126,14 +131,6 @@ private extension TableAutoPlay {
     func playableFor(_ indexPath: IndexPath?) -> Playable? {
         guard let indexPath = indexPath else { return nil }
         return tableView?.cellForRow(at: indexPath) as? Playable
-    }
-    
-    /// 计算当前最佳播放索引
-    func clacBestPlayableIndex() -> IndexPath? {
-        Ext.debug("当前最佳可播放索引: \(playableIndexPath)", logEnabled: logEnabled)
-        guard let cell = bestVisibleCell(), let indexPath = tableView?.indexPath(for: cell) else { return nil }
-        Ext.debug("best playable index: \(indexPath.row)", logEnabled: logEnabled)
-        return indexPath
     }
     
 }
@@ -238,12 +235,12 @@ private extension TableAutoPlay {
     /// 计算可视范围
     func calcVisible(_ visible: Visible?, log: String = "") -> CGFloat? {
         guard let visible = visible, let superView = tableView?.superview else { return nil }
-        Ext.debug("superView: \(superView)")
+        //Ext.debug("superView: \(superView)")
         guard let point = visible.visibleView.superview?.convert(visible.visibleView.frame.origin, to: superView) else { return nil }
         let minY = max(visibleMinY, min(visibleMaxY, point.y))
         let maxY = min(visibleMaxY, max(visibleMinY, point.y + visible.visibleView.frame.height))
         let delta = maxY - minY
-        Ext.debug("\(log) delta: \(delta) | visible: \(minY) ~ \(maxY) in range: [\(visibleMinY) ~ \(visibleMaxY)] | height: \(visible.visibleView.frame.height) | \(point)", logEnabled: true)
+        //Ext.debug("\(log) delta: \(delta) | visible: \(minY) ~ \(maxY) in range: [\(visibleMinY) ~ \(visibleMaxY)] | height: \(visible.visibleView.frame.height) | \(point)", logEnabled: true)
         return delta
     }
 }
