@@ -95,9 +95,8 @@ extension Networker {
         
         let requestTime = Date()
         Ext.debug("Data Request | \(requestMsg)", tag: .network, locationEnabled: false)
-        let configuration = URLSessionConfiguration.default
-        let session = URLSession(configuration: configuration)
-        let task = session.dataTask(with: request) { (data, response, error) in
+        
+        let task = dataSession.dataTask(with: request) { (data, response, error) in
             let elapsed = Date().timeIntervalSince(requestTime)
             let httpResponse = response as? HTTPURLResponse
             var responseMsg = "elapsed : \(String(format: "%.4f", elapsed)) / \(request.timeoutInterval) | \(requestMsg)"

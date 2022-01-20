@@ -35,6 +35,11 @@ public final class Networker: NSObject {
     /// 是否打印下载日志
     public var downloadLogged: Bool = false
     
+    /// 数据请求 Session
+    private(set) lazy var dataSession: URLSession = {
+        URLSession(configuration: URLSessionConfiguration.default)
+    }()
+    
     /// 下载 Session
     private(set) lazy var downloadSession: URLSession = {
         let config = URLSessionConfiguration.background(withIdentifier: "DownloadSession")

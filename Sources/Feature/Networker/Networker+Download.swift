@@ -14,8 +14,11 @@ import Foundation
 
 /// 下载结果数据
 public struct DownloadData {
-    /// 下载资源地址
+    /// 下载成功的资源地址
     public let url: URL
+    
+    /// 开始下载时间戳
+    public let started: TimeInterval
     /// 下载消耗的时间
     public let elapsed: TimeInterval
 }
@@ -31,7 +34,7 @@ struct DownloadTask {
     let url: URL
     /// 缓存路径 URL
     let cacheUrl: URL?
-    /// 下载时间戳
+    /// 下载任务标记
     let stamp: String
     /// 下载进度回调
     let progress: ProgressHandler?
@@ -124,7 +127,7 @@ private extension DownloadTask {
         if let url = cacheUrl, FileManager.default.fileExists(atPath: url.path) {
             Ext.debug("Download succeeded from cached. \(elapsed) | \(downloadUrlString)",
                       tag: .success, logEnabled: Networker.shared.downloadLogged, locationEnabled: false)
-            self.handler(.success(DownloadData(url: url, elapsed: elapsed)))
+            self.handler(.success(DownloadData(url: url, started: startTime.timeIntervalSince1970, elapsed: elapsed)))
         }
         let url = cacheUrl ?? URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(location.lastPathComponent)
         guard FileManager.default.ext.save(location, to: url) else {
@@ -135,7 +138,7 @@ private extension DownloadTask {
         }
         Ext.debug("Download succeeded. \(elapsed) | \(downloadUrlString)",
                   tag: .success, logEnabled: Networker.shared.downloadLogged, locationEnabled: false)
-        self.handler(.success(DownloadData(url: url, elapsed: elapsed)))
+        self.handler(.success(DownloadData(url: url, started: startTime.timeIntervalSince1970, elapsed: elapsed)))
     }
     func errorHandler(_ date: Date, session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         let elapsed = date.timeIntervalSince(startTime)
