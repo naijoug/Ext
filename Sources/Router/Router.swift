@@ -239,6 +239,12 @@ public extension Router {
         return vc
     }
     
+    /// 进入系统分享
+    func toSystemShare(_ activityItems: [Any]?, activities: [UIActivity]? = nil, handler: Ext.ResultDataHandler<String>? = nil) {
+        guard let vc = systemShare(activityItems, activities: activities, handler: handler) else { return }
+        goto(vc, mode: .modal())
+    }
+    
     /// 进入内嵌浏览器
     /// - Parameter title: 导航栏标题
     /// - Parameter urlString: 网页 URL
