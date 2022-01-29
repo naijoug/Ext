@@ -7,26 +7,6 @@
 
 import UIKit
 
-/// 可视化协议 : 用于判断在屏幕的可以范围
-public protocol Visible: AnyObject {
-    /// 可视视图: 用于计算可视范围的视图
-    var visibleView: UIView { get }
-}
-
-/// 可播放协议
-public protocol Playable: AnyObject {
-    /// 是否正在播放
-    var isPlaying: Bool { get }
-    /// 是否可以进行播放
-    var isPlayable: Bool { get set }
-    /// 播放
-    func play() -> Void
-    /// 暂停
-    func pause() -> Void
-}
-
-
-
 // MARK: - Playable Table
 
 open class PlayableTableController: TableController {

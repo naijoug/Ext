@@ -53,11 +53,11 @@ public extension ExtWrapper where Base == UIImage {
     static func color(_ color: UIColor, size: CGSize = CGSize(width: 1, height: 1)) -> UIImage {
         let rect = CGRect(x: 0, y: 0, width: 1, height: 1)
         UIGraphicsBeginImageContext(rect.size)
+        defer { UIGraphicsEndImageContext() }
         let context = UIGraphicsGetCurrentContext()
         context?.setFillColor(color.cgColor)
         context?.fill(rect)
         let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
         return UIImage(cgImage: (image?.cgImage)!)
     }
     
@@ -73,13 +73,13 @@ public extension ExtWrapper where Base == UIImage {
         let imageW = nsTitle.size(withAttributes: [.font: font]).width
         
         UIGraphicsBeginImageContext(CGSize(width: imageW, height: imageH))
+        defer { UIGraphicsEndImageContext() }
         nsTitle.draw(in: CGRect(x: 0, y: 0, width: imageW, height: imageH),
                      withAttributes: [
                         .font: font,
                         .foregroundColor: color
                      ])
         let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
         return UIImage(cgImage: (image?.cgImage)!)
     }
 }
@@ -96,10 +96,9 @@ public extension ExtWrapper where Base: UIImage {
         }
         
 //        UIGraphicsBeginImageContextWithOptions(base.size, false, UIScreen.main.scale)
+//        defer { UIGraphicsEndImageContext() }
 //        base.draw(at: .zero, blendMode: .normal, alpha: alpha)
-//        let image = UIGraphicsGetImageFromCurrentImageContext()
-//        UIGraphicsEndImageContext()
-//        return image
+//        return UIGraphicsGetImageFromCurrentImageContext()
     }
     
     /// 比例缩放图片
@@ -108,34 +107,25 @@ public extension ExtWrapper where Base: UIImage {
         let height = base.size.height * ratio
         
         UIGraphicsBeginImageContextWithOptions(CGSize(width: width, height: height), false, UIScreen.main.scale)
+        defer { UIGraphicsEndImageContext() }
         base.draw(in: CGRect(x: 0, y: 0, width: width, height: height))
-        let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        
-        return image
+        return UIGraphicsGetImageFromCurrentImageContext()
     }
     
     /// 压缩到指定尺寸
     func scale(to size: CGSize) -> UIImage? {
-        var image: UIImage?
         UIGraphicsBeginImageContextWithOptions(size, false, 0)
+        defer { UIGraphicsEndImageContext() }
         base.draw(in: CGRect(x: 0, y: 0, width: size.width, height: size.height))
-        image = UIGraphicsGetImageFromCurrentImageContext()
-        if image == nil {
-            print("scale image nil.")
-        }
-        UIGraphicsEndImageContext()
-        return image
+        return UIGraphicsGetImageFromCurrentImageContext()
     }
     
     /// 裁剪图片指定区域
     func clip(in frame: CGRect) -> UIImage? {
-        var image: UIImage?
         UIGraphicsBeginImageContext(frame.size)
+        defer { UIGraphicsEndImageContext() }
         base.draw(in: frame)
-        image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return image
+        return UIGraphicsGetImageFromCurrentImageContext()
     }
     
     /// 生成圆形图片
@@ -144,22 +134,21 @@ public extension ExtWrapper where Base: UIImage {
         let shotest = min(size.width, size.height)
         let outputRect = CGRect(x: 0, y: 0, width: shotest, height: shotest)
         UIGraphicsBeginImageContextWithOptions(outputRect.size, false, 0)
-        let context = UIGraphicsGetCurrentContext()!
-        context.addEllipse(in: outputRect)
-        context.clip()
+        defer { UIGraphicsEndImageContext() }
+        let context = UIGraphicsGetCurrentContext()
+        context?.addEllipse(in: outputRect)
+        context?.clip()
         base.draw(in: CGRect(x: (shotest - size.width)/2,
                              y: (shotest - size.height)/2,
                              width: size.width,
                              height: size.height))
-        let maskedImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return maskedImage
+        return UIGraphicsGetImageFromCurrentImageContext()
     }
     
     /// 圆角
     func roundedCorners(_ radius: CGFloat) -> UIImage? {
         let size = base.size
-        UIGraphicsBeginImageContextWithOptions(size, false, base.scale)
+        UIGraphicsBeginImageContextWithOptions(size, false, UIScreen.main.scale)
         defer { UIGraphicsEndImageContext() }
         let rect = CGRect(origin: .zero, size: size)
         UIBezierPath(roundedRect: rect, cornerRadius: radius).addClip()
