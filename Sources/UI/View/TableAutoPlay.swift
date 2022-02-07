@@ -7,12 +7,12 @@
 
 import Foundation
 
-/// 可视化协议 : 用于判断在屏幕的可以范围
-public protocol Visible: AnyObject {
-    /// 可视视图: 用于计算可视范围的视图
-    var visibleView: UIView { get }
-}
-
+///// 可视化协议 : 用于判断在屏幕的可以范围
+//public protocol Visible: AnyObject {
+//    /// 可视视图: 用于计算可视范围的视图
+//    var visibleView: UIView { get }
+//}
+//
 /// 可播放协议
 public protocol Playable: AnyObject {
     /// 是否正在播放
@@ -26,9 +26,32 @@ public protocol Playable: AnyObject {
 }
 
 /// 自动播放协议
-public protocol AutoPlayable: Playable, Visible {}
+public protocol AutoPlayable: AnyObject {
+ 
+    /// 是否正在播放
+    var isPlaying: Bool { get }
+//    /// 是否可以进行播放
+//    var isPlayable: Bool { get set }
+    /// 播放
+    func play() -> Void
+    /// 暂停
+    func pause() -> Void
+    
+    /// 可视视图: 用于计算可视范围的视图
+    var visibleView: UIView { get }
+}
+
+public enum AutoPlayAction {
+    case play(_ indexPath: IndexPath)
+}
+
+public protocol AutoPlayDelegate: AnyObject {
+    func autoPlay(_ autoPlay: TableAutoPlay, didAction action: AutoPlayAction)
+}
 
 public class TableAutoPlay {
+    
+    public weak var delegate: AutoPlayDelegate?
     
     private weak var tableView: UITableView?
     
@@ -41,7 +64,8 @@ public class TableAutoPlay {
     /// 当前最佳播放索引
     private var playableIndexPath: IndexPath? {
         didSet {
-            Ext.debug("play switch: \(oldValue?.description ?? "") -> \(playableIndexPath?.description ?? "")")
+            Ext.debug("play indexPath: \(oldValue?.description ?? "") -> \(playableIndexPath?.description ?? "")")
+            
         }
     }
     
@@ -92,25 +116,22 @@ public extension TableAutoPlay {
 //        }
 //    }
     
-//    /// 开始播放
-//    @objc
-//    func play() {
-//        Ext.debug("")
-//        // 播放可播放 Item
-//        guard let playable = playableFor(playableIndexPath) else { return }
-//        playable.play()
-//    }
-//    /// 暂停播放
-//    @objc
-//    func pause() {
-//        Ext.debug("")
-//        //guard let _ = viewIfLoaded else { return }
-//        
-//        guard let tableView = self.tableView else { return }
-//        for cell in tableView.visibleCells {
-//            (cell as? Playable)?.pause()
-//        }
-//    }
+    /// 开始播放
+    @objc
+    func play() {
+        Ext.debug("")
+        playBest()
+    }
+    /// 暂停播放
+    func pause() {
+        Ext.debug("")
+        //guard let _ = viewIfLoaded else { return }
+        
+        guard let tableView = self.tableView else { return }
+        for cell in tableView.visibleCells {
+            (cell as? AutoPlayable)?.pause()
+        }
+    }
 }
 
 private extension TableAutoPlay {
@@ -132,9 +153,10 @@ private extension TableAutoPlay {
             playable.play()
             return
         }
-        Ext.debug("play switch", tag: .target)
+        Ext.debug("play indexPath changed.", tag: .target)
         pause(at: playableIndexPath)
         playableIndexPath = indexPath
+        delegate?.autoPlay(self, didAction: .play(indexPath))
         playableFor(indexPath)?.play()
     }
     
@@ -146,9 +168,9 @@ private extension TableAutoPlay {
     }
     
     /// 根据索引获取获取可播放内容
-    func playableFor(_ indexPath: IndexPath?) -> Playable? {
+    func playableFor(_ indexPath: IndexPath?) -> AutoPlayable? {
         guard let indexPath = indexPath else { return nil }
-        return tableView?.cellForRow(at: indexPath) as? Playable
+        return tableView?.cellForRow(at: indexPath) as? AutoPlayable
     }
     
 }
@@ -235,10 +257,10 @@ private extension TableAutoPlay {
     /// 计算最佳可视 Cell
     private func bestVisibleCell() -> UITableViewCell? {
         guard let tableView = self.tableView, tableView.visibleCells.count > 0 else { return nil }
-        var bestCell: Visible?
+        var bestCell: AutoPlayable?
         for i in 0..<tableView.visibleCells.count {
             let cell = tableView.visibleCells[i]
-            guard let visibleCell = cell as? Visible,
+            guard let visibleCell = cell as? AutoPlayable,
                   let delta = calcVisible(visibleCell, log: "visibleCell \(i) - "), delta > 0 else { continue }
             guard let currentBestCell = bestCell else {
                 bestCell = visibleCell
@@ -251,7 +273,7 @@ private extension TableAutoPlay {
     }
     
     /// 计算可视范围
-    func calcVisible(_ visible: Visible?, log: String = "") -> CGFloat? {
+    func calcVisible(_ visible: AutoPlayable?, log: String = "") -> CGFloat? {
         guard let visible = visible, let superView = tableView?.superview else { return nil }
         //Ext.debug("superView: \(superView)")
         guard let point = visible.visibleView.superview?.convert(visible.visibleView.frame.origin, to: superView) else { return nil }
