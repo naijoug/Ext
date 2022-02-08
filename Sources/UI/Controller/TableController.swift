@@ -15,8 +15,8 @@ public enum ScrollViewStatus {
     case willEndDragging(_ scrollView: UIScrollView, _ velocity: CGPoint, _ targetContentOffset: UnsafeMutablePointer<CGPoint>)
     case didEndDragging(_ scrollView: UIScrollView, _ decelerate: Bool)
     
-    case beginDecelerating(_ scrollView: UIScrollView)
-    case endDecelerating(_ scrollView: UIScrollView)
+    case willBeginDecelerating(_ scrollView: UIScrollView)
+    case didEndDecelerating(_ scrollView: UIScrollView)
 }
 
 /// 控制可滚动协议
@@ -190,10 +190,10 @@ extension TableController: UIScrollViewDelegate {
     }
     
     open func scrollViewWillBeginDecelerating(_ scrollView: UIScrollView) {
-        scrollHandler?(.beginDecelerating(scrollView))
+        scrollHandler?(.willBeginDecelerating(scrollView))
     }
     open func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-        scrollHandler?(.endDecelerating(scrollView))
+        scrollHandler?(.didEndDecelerating(scrollView))
     }
 }
 
@@ -206,8 +206,8 @@ public extension ScrollViewStatus {
         case .willEndDragging(let scrollView, _, _): return scrollView
         case .didEndDragging(let scrollView, _): return scrollView
         
-        case .beginDecelerating(let scrollView): return scrollView
-        case .endDecelerating(let scrollView): return scrollView
+        case .willBeginDecelerating(let scrollView): return scrollView
+        case .didEndDecelerating(let scrollView): return scrollView
         }
     }
     
@@ -230,7 +230,7 @@ public extension ScrollViewStatus {
         case let .didEndDragging(_, decelerate):
             guard !decelerate else { return .normal }
             return .scrollEnd
-        case .endDecelerating:
+        case .didEndDecelerating:
             return .scrollEnd
         default: return .normal
         }

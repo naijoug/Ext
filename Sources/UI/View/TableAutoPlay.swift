@@ -13,6 +13,7 @@ import Foundation
 //    var visibleView: UIView { get }
 //}
 //
+
 /// 可播放协议
 public protocol Playable: AnyObject {
     /// 是否正在播放
@@ -30,8 +31,6 @@ public protocol AutoPlayable: AnyObject {
  
     /// 是否正在播放
     var isPlaying: Bool { get }
-//    /// 是否可以进行播放
-//    var isPlayable: Bool { get set }
     /// 播放
     func play() -> Void
     /// 暂停
@@ -61,8 +60,21 @@ public class TableAutoPlay {
     
     var logEnabled: Bool = true
     
+    /// 是否停止自动播放处理
+    public var isStopping: Bool = false {
+        didSet {
+            if !isStopping, !isDragScrolling {
+                Ext.debug("开启自动播放，并且没有拖动滚动")
+                playBest()
+            }
+        }
+    }
+    
+    /// 是否拖拽时自动播放处理
+    public var draggingEnabled: Bool = false
+    
     /// 当前最佳播放索引
-    private var playableIndexPath: IndexPath? {
+    public private(set) var playableIndexPath: IndexPath? {
         didSet {
             Ext.debug("play indexPath: \(oldValue?.description ?? "") -> \(playableIndexPath?.description ?? "")")
             
@@ -94,27 +106,6 @@ public class TableAutoPlay {
 // MARK: - Play
 
 public extension TableAutoPlay {
-    
-//    /// 启动播放
-//    func start() {
-//        Ext.debug("\(playableIndexPath)", logEnabled: logEnabled)
-//        //guard let _ = viewIfLoaded else { return }
-//
-//        guard let playable = playableFor(playableIndexPath) else { return }
-//        playable.play()
-//    }
-//
-//    /// 停止播放
-//    func stop() {
-//        Ext.debug("\(playableIndexPath) | \(self) | ", logEnabled: logEnabled)
-//        //guard let _ = viewIfLoaded else { return }
-//
-//        guard let tableView = self.tableView else { return }
-//
-//        for cell in tableView.visibleCells {
-//            (cell as? Playable)?.pause()
-//        }
-//    }
     
     /// 开始播放
     @objc
@@ -197,9 +188,9 @@ public extension TableAutoPlay {
             guard !decelerate else { return }
             Ext.debug("拖拽无减速，直接静止", logEnabled: logEnabled)
             innerScrollEnd()
-        case .beginDecelerating:
+        case .willBeginDecelerating:
             Ext.debug("停止拖拽，开始减速", logEnabled: logEnabled)
-        case .endDecelerating:
+        case .didEndDecelerating:
             Ext.debug("拖拽之后减速停止", logEnabled: logEnabled)
             innerScrollEnd()
         }
@@ -213,17 +204,21 @@ private extension TableAutoPlay {
         guard isDragScrolling else { return }
         isDragScrolling = false
         
-        scrollEnd()
+        scrollToEnd()
     }
     
     /// 正在手指拖拽
     @objc
     func scrollTracking() {
+        guard !isStopping, draggingEnabled else { return }
+        Ext.debug("处理手指拖动...")
         playBest()
     }
     /// 滚动结束
     @objc
-    func scrollEnd() {
+    func scrollToEnd() {
+        guard !isStopping else { return }
+        Ext.debug("处理滚动结束...")
         playBest()
     }
     /// 滚动到顶部
@@ -237,16 +232,6 @@ private extension TableAutoPlay {
 // MARK: - Visiable
 
 private extension TableAutoPlay {
-    
-    /// 最大可视索引
-    var maxVisibleIndex: Int {
-        for cell in tableView?.visibleCells.reversed() ?? [] {
-            guard let indexPath = tableView?.indexPath(for: cell) else { continue }
-            return indexPath.row
-        }
-        return 0
-    }
-    
     @objc
     var visibleMinY: CGFloat { 0 }
     @objc
