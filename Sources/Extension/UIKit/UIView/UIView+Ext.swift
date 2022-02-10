@@ -339,18 +339,16 @@ public extension ExtWrapper where Base: UIView {
     
     /// 添加 Label
     /// - Parameters:
-    ///   - fontSize: 字体大小
+    ///   - font: 字体
     ///   - color: 字体颜色
-    ///   - bold: 是否加粗
     ///   - multiline: 是否多行
-    func addLabel(fontSize: CGFloat,
+    func addLabel(font: UIFont,
                   color: UIColor,
-                  bold: Bool = false,
                   multiline: Bool = false) -> UILabel {
         let label = add(UILabel())
+        label.font = font
         label.textColor = color
         label.numberOfLines = multiline ? 0 : 1
-        label.font = bold ? UIFont.boldSystemFont(ofSize: fontSize) : UIFont.systemFont(ofSize: fontSize)
         return label
     }
     

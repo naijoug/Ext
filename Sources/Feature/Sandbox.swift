@@ -159,7 +159,7 @@ private class FileCell: ExtTableCell {
     override func setupUI() {
         super.setupUI()
         
-        titleLabel  = contentView.ext.addLabel(fontSize: 17, color: .darkGray, bold: true, multiline: true)
+        titleLabel  = contentView.ext.addLabel(font: UIFont.boldSystemFont(ofSize: 17), color: .darkGray, multiline: true)
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([

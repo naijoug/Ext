@@ -34,31 +34,10 @@ public extension ExtWrapper where Base == NSAttributedString {
     /// 富文本文字
     /// - Parameters:
     ///   - text: 文字内容
-    ///   - fontSize: 字体大小
-    ///   - color: 字体颜色
-    ///   - bold: 是否加粗
-    ///   - underline: 是否有下划线
-    static func text(_ text: String,
-                     fontSize: CGFloat,
-                     color: UIColor,
-                     bold: Bool = false,
-                     underline: Bool = false) -> NSAttributedString {
-        NSAttributedString.ext.text(
-            text,
-            font: bold ? UIFont.boldSystemFont(ofSize: fontSize) : UIFont.systemFont(ofSize: fontSize),
-            color: color,
-            underline: underline
-        )
-    }
-    /// 富文本文字
-    /// - Parameters:
-    ///   - text: 文字内容
     ///   - font: 字体
     ///   - color: 字体颜色
     ///   - underline: 是否有下划线
-    static func text(_ text: String,
-                     font: UIFont,
-                     color: UIColor,
+    static func text(_ text: String, font: UIFont, color: UIColor,
                      underline: Bool = false) -> NSAttributedString {
         var attrs = [NSAttributedString.Key : Any]()
         attrs[.font] = font
@@ -89,9 +68,7 @@ public extension ExtWrapper where Base == NSAttributedString {
     ///   - imageNamed: 图片
     ///   - font: 字体
     ///   - offsetY: Y 轴偏移
-    static func image(imageNamed: String?,
-                      font: UIFont,
-                      offsetY: CGFloat = 2) -> NSAttributedString? {
+    static func image(imageNamed: String?, font: UIFont, offsetY: CGFloat = 2) -> NSAttributedString? {
         guard let imageNamed = imageNamed else { return nil }
         return NSAttributedString.ext.image(UIImage(named: imageNamed), font: font, offsetY: offsetY)
     }
@@ -100,9 +77,7 @@ public extension ExtWrapper where Base == NSAttributedString {
     ///   - image: 图片
     ///   - font: 字体
     ///   - offsetY: Y 轴偏移
-    static func image(_ image: UIImage?,
-                      font: UIFont,
-                      offsetY: CGFloat = 2) -> NSAttributedString? {
+    static func image(_ image: UIImage?, font: UIFont, offsetY: CGFloat = 2) -> NSAttributedString? {
         guard let image = image else { return nil }
         let attachment = NSTextAttachment()
         var attachH = image.size.height

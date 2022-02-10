@@ -236,7 +236,6 @@ private extension TableAutoPlay {
     var visibleMinY: CGFloat { 0 }
     @objc
     var visibleMaxY: CGFloat { tableView?.frame.height ?? 0 }
-    
 }
 private extension TableAutoPlay {
     /// 计算最佳可视 Cell

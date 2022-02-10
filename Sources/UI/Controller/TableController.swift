@@ -219,7 +219,14 @@ public extension ScrollViewStatus {
         /// 拖拽中
         case dragging
         /// 滚动停止 (无减速停止 || 减速之后停止)
-        case scrollEnd
+        case scrollToEnd(decelerate: Bool)
+        
+        public var isDragging: Bool {
+            switch self {
+            case .dragging: return true
+            default: return false
+            }
+        }
     }
     /// 滚动状态
     var scrollStatus: ScrollStatus {
@@ -229,9 +236,9 @@ public extension ScrollViewStatus {
             return .dragging
         case let .didEndDragging(_, decelerate):
             guard !decelerate else { return .normal }
-            return .scrollEnd
+            return .scrollToEnd(decelerate: false)
         case .didEndDecelerating:
-            return .scrollEnd
+            return .scrollToEnd(decelerate: true)
         default: return .normal
         }
     }
