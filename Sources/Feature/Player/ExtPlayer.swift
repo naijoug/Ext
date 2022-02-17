@@ -88,6 +88,13 @@ public class ExtPlayer: NSObject {
         }
     }
     
+    /// 播放速度
+    public var speed: Float = 1.0 {
+        didSet {
+            
+        }
+    }
+    
 // MARK: - Public
     
     /// 监听边界时间点
@@ -208,6 +215,7 @@ extension ExtPlayer {
 public extension ExtPlayer {
     /// 播放状态
     var isPlaying: Bool {
+        if avPlayer.timeControlStatus == .playing { return true }
         switch status {
         case .playing: return true
         default: return false
@@ -266,9 +274,10 @@ public extension ExtPlayer {
     }
     
     /// 播放
-    func play() {
+    func play(_ speed: Float = 1.0) {
         Ext.debug("play currentTime: \(currentTime) | duration: \(duration ?? 0)", logEnabled: logEnabled)
-        avPlayer.play()
+        //avPlayer.play()
+        avPlayer.rate = speed
         status = .playing
     }
     /// 暂停播放

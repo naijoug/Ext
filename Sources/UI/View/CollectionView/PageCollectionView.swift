@@ -104,6 +104,16 @@ open class PageCollectionView<Item: PageCollectionItem, Cell: PageCollectionCell
         0
     }
     
+    open func collectionView(_ collectionView: UICollectionView, viewForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> UICollectionReusableView {
+        return UICollectionReusableView()
+    }
+    open func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForHeaderInSection section: Int) -> CGSize {
+        .zero
+    }
+    open func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, referenceSizeForFooterInSection section: Int) -> CGSize {
+        .zero
+    }
+    
     public func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
         guard let item = item else { return }
         let offsetX = targetContentOffset.pointee.x
@@ -124,7 +134,6 @@ public extension PageCollectionView {
     
     enum Action {
         case scrollTo(_ index: Int)
-        case more
     }
     
     func addAction(_ actionHandler: @escaping Ext.DataHandler<PageCollectionView.Action>) {
@@ -137,7 +146,6 @@ public extension PageCollectionView {
         guard let index = index else { return nil }
         return collectionView.cellForItem(at: IndexPath(item: index, section: 0)) as? Cell
     }
-    
 }
 
 // MARK: - Private

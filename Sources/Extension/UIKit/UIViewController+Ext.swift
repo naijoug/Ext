@@ -60,10 +60,11 @@ public extension ExtWrapper where Base: UIViewController {
     // Reference: https://www.swiftbysundell.com/articles/using-child-view-controllers-as-plugins-in-swift/
     
     /// 添加子控制器
-    func add(_ child: UIViewController) {
+    func add<T: UIViewController>(_ child: T) -> T {
         base.addChild(child)
         base.view.addSubview(child.view)
         child.didMove(toParent: base)
+        return child
     }
     
     /// 从父控制器移除

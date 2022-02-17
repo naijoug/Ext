@@ -7,13 +7,6 @@
 
 import Foundation
 
-///// 可视化协议 : 用于判断在屏幕的可以范围
-//public protocol Visible: AnyObject {
-//    /// 可视视图: 用于计算可视范围的视图
-//    var visibleView: UIView { get }
-//}
-//
-
 /// 可播放协议
 public protocol Playable: AnyObject {
     /// 是否正在播放
@@ -36,8 +29,8 @@ public protocol AutoPlayable: AnyObject {
     /// 暂停
     func pause() -> Void
     
-    /// 可视视图: 用于计算可视范围的视图
-    var visibleView: UIView { get }
+    /// 可播放视图: 用于计算可视范围的最佳播放视图
+    var playableView: UIView { get }
 }
 
 public enum AutoPlayAction {
@@ -257,12 +250,12 @@ private extension TableAutoPlay {
     }
     
     /// 计算可视范围
-    func calcVisible(_ visible: AutoPlayable?, log: String = "") -> CGFloat? {
+    private func calcVisible(_ visible: AutoPlayable?, log: String = "") -> CGFloat? {
         guard let visible = visible, let superView = tableView?.superview else { return nil }
         //Ext.debug("superView: \(superView)")
-        guard let point = visible.visibleView.superview?.convert(visible.visibleView.frame.origin, to: superView) else { return nil }
+        guard let point = visible.playableView.superview?.convert(visible.playableView.frame.origin, to: superView) else { return nil }
         let minY = max(visibleMinY, min(visibleMaxY, point.y))
-        let maxY = min(visibleMaxY, max(visibleMinY, point.y + visible.visibleView.frame.height))
+        let maxY = min(visibleMaxY, max(visibleMinY, point.y + visible.playableView.frame.height))
         let delta = maxY - minY
         //Ext.debug("\(log) delta: \(delta) | visible: \(minY) ~ \(maxY) in range: [\(visibleMinY) ~ \(visibleMaxY)] | height: \(visible.visibleView.frame.height) | \(point)", logEnabled: true)
         return delta
