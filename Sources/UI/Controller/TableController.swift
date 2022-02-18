@@ -123,35 +123,21 @@ extension TableController {
 // MARK: - Table
 
 extension TableController: UITableViewDataSource {
-    open func numberOfSections(in tableView: UITableView) -> Int {
-        return 1
-    }
-    open func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 0
-    }
+    open func numberOfSections(in tableView: UITableView) -> Int { 1 }
+    open func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int { 0 }
     open func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        return tableView.ext.dequeueReusableCell(UnknownCell.self, for: indexPath)
+        tableView.ext.dequeueReusableCell(UnknownCell.self, for: indexPath)
     }
 }
 
 extension TableController: UITableViewDelegate {
-    open func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return UITableView.automaticDimension
-    }
+    open func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat { UITableView.automaticDimension }
     
-    open func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return CGFloat.leastNormalMagnitude
-    }
-    open func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        return nil
-    }
+    open func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat { CGFloat.leastNormalMagnitude }
+    open func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? { nil }
     
-    open func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return CGFloat.leastNormalMagnitude
-    }
-    open func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-        return nil
-    }
+    open func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat { CGFloat.leastNormalMagnitude }
+    open func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? { nil }
     
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)

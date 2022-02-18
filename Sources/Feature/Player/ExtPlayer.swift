@@ -88,13 +88,6 @@ public class ExtPlayer: NSObject {
         }
     }
     
-    /// 播放速度
-    public var speed: Float = 1.0 {
-        didSet {
-            
-        }
-    }
-    
 // MARK: - Public
     
     /// 监听边界时间点
@@ -214,20 +207,9 @@ extension ExtPlayer {
 
 public extension ExtPlayer {
     /// 播放状态
-    var isPlaying: Bool {
-        if avPlayer.timeControlStatus == .playing { return true }
-        switch status {
-        case .playing: return true
-        default: return false
-        }
-    }
+    var isPlaying: Bool { status == .playing }
     /// 缓冲状态
-    var isBuffering: Bool {
-        switch bufferStatus {
-        case .buffering: return true
-        default: return false
-        }
-    }
+    var isBuffering: Bool { bufferStatus == .buffering }
     
     /// 当前时间 (单位: 秒)
     var currentTime: TimeInterval {
@@ -362,6 +344,7 @@ private extension ExtPlayer {
     func didPlayToEnd(_ noti: Notification) {
         guard let item = noti.object as? AVPlayerItem, item == playerItem else { return }
         Ext.debug("didPlayToEnd", logEnabled: logEnabled)
+        Ext.debug("didPlayToEnd, \(self)")
         // play to end, seek to start
         avPlayer.seek(to: .zero)
         status = .playToEnd
@@ -479,7 +462,7 @@ extension ExtPlayer {
         var msg = super.description
         msg += " | status: \(status)"
         msg += " | bufferStatus: \(bufferStatus)"
-        msg += " | timeControlStatus: \(avPlayer.timeControlStatus)"
+        msg += " | avPlayer: \(avPlayer)"
         msg += " | \(playerItem?.asset.ext.url?.ext.log ?? "nil")"
         return msg
     }

@@ -13,6 +13,7 @@ import UIKit
     - https://stackoverflow.com/questions/56318626/dynamic-height-uicollectionview-inside-a-dynamic-height-uitableviewcell
     - https://stackoverflow.com/questions/24126708/uicollectionview-inside-a-uitableviewcell-dynamic-height
     - https://stackoverflow.com/questions/25895311/uicollectionview-self-sizing-cells-with-auto-layout
+    - https://medium.com/@rozan.ktm/uicollectionview-inside-uitableviewcell-dynamic-height-based-on-uicollectionviewcell-height-86b3257e85c6
  */
 
 /// 自适应尺寸 UICollectionView
