@@ -11,25 +11,15 @@ import Foundation
 public protocol Playable: AnyObject {
     /// 是否正在播放
     var isPlaying: Bool { get }
-    /// 是否可以进行播放
-    var isPlayable: Bool { get set }
     /// 播放
     func play() -> Void
     /// 暂停
     func pause() -> Void
 }
 
-/// 自动播放协议
-public protocol AutoPlayable: AnyObject {
- 
-    /// 是否正在播放
-    var isPlaying: Bool { get }
-    /// 播放
-    func play() -> Void
-    /// 暂停
-    func pause() -> Void
-    
-    /// 可播放视图: 用于计算可视范围的最佳播放视图
+/// 可自动播放协议
+public protocol AutoPlayable: Playable {
+    /// 可自动播放播放视图: 用于计算可视范围的最佳播放视图
     var playableView: UIView { get }
 }
 
