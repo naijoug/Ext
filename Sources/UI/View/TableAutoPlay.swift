@@ -41,13 +41,13 @@ public class TableAutoPlay {
         self.tableView = tableView
     }
     
-    var logEnabled: Bool = true
+    public var logEnabled: Bool = false
     
     /// 是否停止自动播放处理
     public var isStopping: Bool = false {
         didSet {
             if !isStopping, !isDragScrolling {
-                Ext.debug("开启自动播放，并且没有拖动滚动")
+                Ext.debug("开启自动播放，并且没有拖动滚动", logEnabled: logEnabled)
                 playBest()
             }
         }
@@ -59,7 +59,7 @@ public class TableAutoPlay {
     /// 当前最佳播放索引
     public private(set) var playableIndexPath: IndexPath? {
         didSet {
-            Ext.debug("play indexPath: \(oldValue?.description ?? "") -> \(playableIndexPath?.description ?? "")")
+            Ext.debug("play indexPath: \(oldValue?.description ?? "") -> \(playableIndexPath?.description ?? "")", logEnabled: logEnabled)
             
         }
     }
@@ -93,12 +93,12 @@ public extension TableAutoPlay {
     /// 开始播放
     @objc
     func play() {
-        Ext.debug("")
+        Ext.debug("", logEnabled: logEnabled)
         playBest()
     }
     /// 暂停播放
     func pause() {
-        Ext.debug("")
+        Ext.debug("", logEnabled: logEnabled)
         //guard let _ = viewIfLoaded else { return }
         
         guard let tableView = self.tableView else { return }
@@ -127,7 +127,7 @@ private extension TableAutoPlay {
             playable.play()
             return
         }
-        Ext.debug("play indexPath changed.", tag: .target)
+        Ext.debug("play indexPath changed.", tag: .target, logEnabled: logEnabled)
         pause(at: playableIndexPath)
         playableIndexPath = indexPath
         delegate?.autoPlay(self, didAction: .play(indexPath))
@@ -194,14 +194,14 @@ private extension TableAutoPlay {
     @objc
     func scrollTracking() {
         guard !isStopping, draggingEnabled else { return }
-        Ext.debug("处理手指拖动...")
+        Ext.debug("处理手指拖动...", logEnabled: logEnabled)
         playBest()
     }
     /// 滚动结束
     @objc
     func scrollToEnd() {
         guard !isStopping else { return }
-        Ext.debug("处理滚动结束...")
+        Ext.debug("处理滚动结束...", logEnabled: logEnabled)
         playBest()
     }
     /// 滚动到顶部
