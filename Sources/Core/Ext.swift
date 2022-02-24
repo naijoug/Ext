@@ -84,6 +84,9 @@ extension Ext.Error: LocalizedError {
 
 public extension Ext {
     
+    /// Ext 全局 log 开关 (用于重要日志, 如发生错误时)
+    static var logEnabled: Bool = true
+    
     /// 代码定位
     /// - Parameters:
     ///   - file: 文件名
@@ -188,6 +191,7 @@ public extension Ext {
         case normal
         case success
         case failure
+        case warning
         case error
         
         case video
@@ -196,13 +200,14 @@ public extension Ext {
         
         case play
         case pause
+        case replay
         
         case begin
         case end
         
         case debug
+        case programmer
         
-        case get
         case pin
         case sos
         case fix
@@ -233,6 +238,7 @@ extension Ext.Tag: CustomStringConvertible {
         case .normal:           return "# "
         case .success:          return "✅"
         case .failure:          return "🚫"
+        case .warning:          return ""
         case .error:            return "❌"
         
         case .video:            return "🎥"
@@ -241,13 +247,14 @@ extension Ext.Tag: CustomStringConvertible {
         
         case .play:             return "▶️"
         case .pause:            return "⏸"
+        case .replay:           return "🔄"
             
         case .begin:            return "🛫"
         case .end:              return "🛬"
             
         case .debug:            return "🪲"
+        case .programmer:       return "🐵"
             
-        case .get:              return "🐵"
         case .pin:              return "📌"
         case .sos:              return "🆘"
         case .fix:              return "🛠"

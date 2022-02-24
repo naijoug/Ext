@@ -463,7 +463,7 @@ extension ExtPlayer {
         msg += " | status: \(status)"
         msg += " | bufferStatus: \(bufferStatus)"
         msg += " | avPlayer: \(avPlayer)"
-        msg += " | \(playerItem?.asset.ext.url?.ext.log ?? "nil")"
+        if let playerItem = playerItem { msg += " | playerItem: \(playerItem)" }
         return msg
     }
 }
@@ -524,12 +524,12 @@ extension AVPlayer.TimeControlStatus: CustomStringConvertible {
 extension AVPlayerItem {
     open override var description: String {
         var msg = super.description
+        if let url = asset.ext.url { msg += " | \(url.ext.log)" }
         msg += " | status \(status)"
-        if let error = error { msg += " | \(Ext.Tag.error): \(error)" }
         msg += " | isPlaybackBufferEmpty: \(isPlaybackBufferEmpty)"
         msg += " | isPlaybackLikelyToKeepUp: \(isPlaybackLikelyToKeepUp)"
         msg += " | isPlaybackBufferFull: \(isPlaybackBufferFull)"
-        msg += " | \(asset.ext.url?.ext.log ?? "")"
+        if let error = error { msg += " | \(Ext.Tag.error): \(error)" }
         return msg
     }
 }
@@ -541,5 +541,13 @@ extension AVPlayerItem.Status: CustomStringConvertible {
         case .failed:       return "failed"
         @unknown default:   return "unknown default"
         }
+    }
+}
+
+private extension ExtWrapper where Base == URL {
+    var log: String {
+        let tag: Ext.Tag = base.isFileURL ? .file : .network
+        let msg: String = base.isFileURL ? base.path.ext.removePrefix(Sandbox.path) : base.absoluteString
+        return "{\(tag) - \(msg)}"
     }
 }

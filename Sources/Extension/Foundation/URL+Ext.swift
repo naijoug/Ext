@@ -10,14 +10,6 @@ import Foundation
 extension URL: ExtCompatible{}
 
 public extension ExtWrapper where Base == URL {
-    var log: String {
-        let tag: Ext.Tag = base.isFileURL ? .file : .network
-        let msg: String = base.isFileURL ? base.path : base.absoluteString
-        return "{\(tag) \(msg)}"
-    }
-}
-
-public extension ExtWrapper where Base == URL {
     
     // Reference: https://stackoverflow.com/questions/2188469/how-can-i-calculate-the-size-of-a-folder
     

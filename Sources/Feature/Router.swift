@@ -100,6 +100,9 @@ public extension Router {
     
     static weak var window: UIWindow?
     
+    /// 顶层显示控制器
+    var topController: UIViewController? { UIApplication.shared.ext.topViewController() }
+    
     func launch(key: RouterKey, param: RouterParam? = nil) {
         guard let controller = controller(for: key, param: param) else { return }
         Router.window?.rootViewController = controller
@@ -149,8 +152,6 @@ public extension Router {
 }
 
 private extension Router {
-    /// 顶层显示控制器
-    private var topController: UIViewController? { UIApplication.shared.ext.topViewController() }
     
     /// Push 进入页面
     /// - Parameter controller: 页面控制器
@@ -246,13 +247,12 @@ public extension Router {
     }
     
     /// 进入内嵌浏览器
+    /// - Parameter resource: 网页资源
     /// - Parameter title: 导航栏标题
-    /// - Parameter urlString: 网页 URL
     /// - Parameter mode: 跳转模式
-    func toWeb(_ title: String, urlString: String, mode: Mode = .push()) {
-        let vc = WebController()
+    func toWeb(_ resource: WebResource, title: String? = nil, mode: Mode = .push()) {
+        let vc = WebController(resource)
         vc.title = title
-        vc.urlString = urlString
         vc.isModal = mode.isModal
         goto(vc, mode: mode)
     }

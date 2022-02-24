@@ -7,17 +7,41 @@
 
 import Foundation
 
-/**
- Reference:
-    - https://github.com/music4kid/AirSandbox
- */
+/// 沙盒
+public final class Sandbox {}
 
-public extension Ext {
+public extension Sandbox {
+    
+    /// 沙盒目录种类
+    enum Directory {
+        case documents
+        case library
+        case tmp
+    }
+    
+    /// 沙盒目录 URL
+    static func url(_ directory: Directory) -> URL? {
+        switch directory {
+        case .documents:
+            return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+        case .library:
+            return FileManager.default.urls(for: .libraryDirectory, in: .userDomainMask).first
+        case .tmp:
+            return FileManager.default.temporaryDirectory
+        }
+    }
+    
+    /// 沙盒路径
+    static var path: String { url(.library)?.deletingLastPathComponent().path ?? "" }
+}
+
+public extension Sandbox {
+    
     /// 注入沙盒入口
     /// - Parameters:
     ///   - view: 注入视图
     ///   - numberOfTaps: 点击次数 (默认: 5)
-    static func sandbox(_ view: UIView?, numberOfTaps: Int = 5) {
+    static func inject(_ view: UIView?, numberOfTaps: Int = 5) {
         guard let view = view else { return }
         
         view.isUserInteractionEnabled = true
@@ -31,10 +55,15 @@ public extension Ext {
         
         Router.shared.goto(FileController(), mode: .modal(wrapped: true, fullScreen: false, animated: true))
     }
+    
 }
 
-
 // MARK: - File
+
+/**
+ Reference:
+    - https://github.com/music4kid/AirSandbox
+ */
 
 private class FileController: TableController {
     
@@ -71,7 +100,7 @@ private class FileController: TableController {
 extension FileController {
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return items.count
+        items.count
     }
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.ext.dequeueReusableCell(FileCell.self, for: indexPath)

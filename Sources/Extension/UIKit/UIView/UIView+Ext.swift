@@ -357,14 +357,14 @@ public extension ExtWrapper where Base: UIView {
     /// - Parameter width: 线高度
     @discardableResult
     func addTopLine(color: UIColor = UIColor.ext.rgbHex(0xdddddd),
-                    height: CGFloat = 0.5, left: CGFloat = 0, right: CGFloat = 0) -> UIView {
+                    height: CGFloat = 0.5, edgeInsets: UIEdgeInsets = .zero) -> UIView {
         let line = add(UIView(), backgroundColor: color)
         line.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            line.topAnchor.constraint(equalTo: base.topAnchor),
-            line.leftAnchor.constraint(equalTo: base.leftAnchor, constant: left),
-            line.rightAnchor.constraint(equalTo: base.rightAnchor, constant: right),
-            line.heightAnchor.constraint(equalToConstant: height)
+            line.heightAnchor.constraint(equalToConstant: height),
+            line.topAnchor.constraint(equalTo: base.topAnchor, constant: edgeInsets.top),
+            line.leftAnchor.constraint(equalTo: base.leftAnchor, constant: edgeInsets.left),
+            line.rightAnchor.constraint(equalTo: base.rightAnchor, constant: edgeInsets.right)
         ])
         return line
     }
@@ -374,14 +374,14 @@ public extension ExtWrapper where Base: UIView {
     /// - Parameter width: 线高度
     @discardableResult
     func addBottomLine(color: UIColor = UIColor.ext.rgbHex(0xdddddd),
-                       height: CGFloat = 0.5, left: CGFloat = 0, right: CGFloat = 0) -> UIView {
+                       height: CGFloat = 0.5, edgeInsets: UIEdgeInsets = .zero) -> UIView {
         let line = add(UIView(), backgroundColor: color)
         line.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            line.bottomAnchor.constraint(equalTo: base.bottomAnchor),
-            line.leftAnchor.constraint(equalTo: base.leftAnchor, constant: left),
-            line.rightAnchor.constraint(equalTo: base.rightAnchor, constant: right),
-            line.heightAnchor.constraint(equalToConstant: height)
+            line.heightAnchor.constraint(equalToConstant: height),
+            line.leftAnchor.constraint(equalTo: base.leftAnchor, constant: edgeInsets.left),
+            line.rightAnchor.constraint(equalTo: base.rightAnchor, constant: edgeInsets.right),
+            line.bottomAnchor.constraint(equalTo: base.bottomAnchor, constant: edgeInsets.bottom)
         ])
         return line
     }
