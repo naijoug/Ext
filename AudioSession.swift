@@ -124,21 +124,35 @@ private extension AudioSession {
     }
 }
 
-// MARK: - Public
+// MARK: - Private
 
 private extension AudioSession.Kind {
+    /**
+        - playback:         播放
+        - record:           录制
+        - playAndRecord:    播放录制
+     */
     var avCategory: AVAudioSession.Category {
         switch self {
         case .playback:         return .playback
         case .playAndRecord:    return .playAndRecord
         }
     }
+    /**
+        - default:          默认模式，兼容所有 category
+        - videoRecording:   视频录制模式
+     */
     var avMode: AVAudioSession.Mode {
         switch self {
         case .playback:         return .default
         case .playAndRecord:    return .default
         }
     }
+    /**
+        - allowBluetooth:       (输入&输出) 支持蓝牙设备
+        - allowBluetoothA2DP:   (输出) 支持 A2DP 蓝牙设备
+        - defaultToSpeaker:     (输出) 播放录制模式下，默认输出为听筒，这个选项用将输出声音外放
+     */
     var avOptions: AVAudioSession.CategoryOptions {
         switch self {
         case .playback:         return []
@@ -146,22 +160,16 @@ private extension AudioSession.Kind {
         }
     }
 }
+
+// MARK: - Public
+
 public extension AudioSession {
     
     /// 常用的音频种类
     enum Kind {
-        /**
-         播放模式
-            options:
-         */
+        /// 播放模式
         case playback
-        /**
-         播放录制模式
-            options:
-                - allowBluetooth: 支持蓝牙设备 (输入&输出)
-                - allowBluetoothA2DP: 支持 A2DP 蓝牙设备 (输出)
-                - defaultToSpeaker: 播放录制模式下，默认输出为听筒，这个选项用将输出声音外放
-         */
+        /// 播放录制模式
         case playAndRecord
     }
     

@@ -157,11 +157,7 @@ private extension FileController {
     
     /// 分享文件
     func shareFile(_ filePath: String) {
-        var activityItems = [Any]()
-        activityItems.append(URL(fileURLWithPath: filePath))
-        
-        guard let vc = Router.shared.systemShare(activityItems, activities: nil, handler: nil) else { return }
-        present(vc, animated: true, completion: nil)
+        Router.shared.toSystemShare([URL(fileURLWithPath: filePath)])
     }
 }
 

@@ -94,7 +94,11 @@ public enum WebResource {
     case file(_ filePath: String)
 }
 
+/// 网页视图
 open class WebView: ExtView {
+    
+    /// 加载的网络资源
+    public private(set) var resource: WebResource?
     
     /// 开始加载时间
     private var startDate = Date()
@@ -110,6 +114,8 @@ open class WebView: ExtView {
         }
     }
     
+// MARK: - JS Handler
+    
     /// JS 交互处理者
     public typealias JSHandler = (String, Any) -> Void
     /// JS 交互处理表
@@ -122,20 +128,19 @@ open class WebView: ExtView {
             * toWeb : 打开内嵌网页 { "method": "toWeb", "title": "xxx", "url": "http://xxx" }
             * toRoot : 回到根页面 { "method": "toRoot" }
      */
-    ///
     public var defaultJSHandlerEnabled: Bool = false {
         didSet {
             defaultJSHandler(defaultJSHandlerEnabled)
         }
     }
     
-// MARK: - Public
+// MARK: - Status
     
     /// 日志标记
     public var logEnabled: Bool = false
     
     /// 下拉刷新是否可用
-    open var pullToRefreshEnabled: Bool = false {
+    public var pullToRefreshEnabled: Bool = false {
         didSet {
             guard pullToRefreshEnabled else {
                 refreshControl.removeFromSuperview()
@@ -224,9 +229,6 @@ open class WebView: ExtView {
             return
         }
     }
-    
-    /// 加载的网络资源
-    private var resource: WebResource?
 }
 
 // MARK: - Public
