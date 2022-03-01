@@ -28,3 +28,44 @@ extension ExtWrapper where Base: UIScrollView {
     }
     
 }
+
+
+public extension UIScrollView {
+    
+    private static var pageViewControllerIndexKey = "pageViewControllerIndexKey"
+    
+    var pageViewControllerIndex: Int? {
+        get {
+            Ext.getAssociatedObject(self, key: &UIScrollView.pageViewControllerIndexKey)
+        }
+        set {
+            if let value = newValue {
+                Ext.setAssociatedObject(self, key: &UIScrollView.pageViewControllerIndexKey, value: value, policy: .retainNonatomic)
+            }
+        }
+    }
+    
+}
+
+public extension ExtWrapper where Base: UIPageViewController {
+    
+    /**
+     Reference:
+        - https://stackoverflow.com/questions/23267929/combine-uipageviewcontroller-swipes-with-ios-7-uinavigationcontroller-back-swipe/33217469
+     */
+    
+    /**
+     UIPageViewController 中的 scrollView
+       类型为: _UIQueuingScrollView, 为 UIScrollView 的子类
+     */
+    var scrollView: UIScrollView? {
+        if let scrollView = base.view as? UIScrollView {
+            return scrollView
+        }
+        for subview in base.view.subviews where subview is UIScrollView {
+            return subview as? UIScrollView
+        }
+        return nil
+    }
+    
+}

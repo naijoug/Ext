@@ -137,7 +137,7 @@ public extension ExtAudioPlayer {
         
         let url = urls[playIndex]
         Ext.debug("播放 \(playIndex) url: \(url.path)")
-        playUrl(url)
+        playAudio(url)
     }
     
     /// 暂停播放
@@ -161,7 +161,7 @@ public extension ExtAudioPlayer {
     }
     
     /// 播放指定路径音频
-    private func playUrl(_ url: URL, time: TimeInterval? = nil) {
+    private func playAudio(_ url: URL, time: TimeInterval? = nil) {
         do {
             if avPlayer != nil {
                 avPlayer?.stop()

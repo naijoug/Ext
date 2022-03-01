@@ -109,7 +109,7 @@ open class WebView: ExtView {
     /// 网页加载进度
     public private(set) var progress: Double = 0 {
         didSet {
-            guard oldValue != progress else { return }
+            guard Int(oldValue * 10) != Int(progress * 10) else { return }
             Ext.debug("web progress: \(oldValue) -> \(progress)", logEnabled: logEnabled)
         }
     }

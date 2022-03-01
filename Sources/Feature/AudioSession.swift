@@ -128,9 +128,12 @@ private extension AudioSession {
 
 private extension AudioSession.Kind {
     /**
+        - ambient:
+        - soloAmbient:      
         - playback:         播放
         - record:           录制
         - playAndRecord:    播放录制
+        - multiRoute:       
      */
     var avCategory: AVAudioSession.Category {
         switch self {
@@ -140,7 +143,14 @@ private extension AudioSession.Kind {
     }
     /**
         - default:          默认模式，兼容所有 category
+        - voiceChat:
+        - gameChat:         
         - videoRecording:   视频录制模式
+        - measurement:
+        - moviePlayback:
+        - videoChat:
+        - spokenAudio:      [iOS9]
+        - voicePrompt:      [iOS12]
      */
     var avMode: AVAudioSession.Mode {
         switch self {
@@ -149,9 +159,13 @@ private extension AudioSession.Kind {
         }
     }
     /**
+        - mixWithOthers:        (输出) 
+        - duckOthers:           (输出)
         - allowBluetooth:       (输入&输出) 支持蓝牙设备
-        - allowBluetoothA2DP:   (输出) 支持 A2DP 蓝牙设备
         - defaultToSpeaker:     (输出) 播放录制模式下，默认输出为听筒，这个选项用将输出声音外放
+        - interruptSpokenAudioAndMixWithOthers:
+        - allowBluetoothA2DP:   (输出) 支持 A2DP 蓝牙设备
+        - allowAirPlay:         (输出) AirPlay 设备 <PlayAndRecord>
      */
     var avOptions: AVAudioSession.CategoryOptions {
         switch self {
