@@ -158,7 +158,7 @@ public extension ExtWrapper where Base == NSAttributedString {
     }
 }
 
-public extension ExtWrapper where Base == NSAttributedString {
+public extension ExtWrapper where Base: NSAttributedString {
     
     /**
      HTML Encoded String
@@ -186,13 +186,21 @@ public extension ExtWrapper where Base == NSAttributedString {
     ///   - blurRadius: 模糊半径
     ///   - offset: 偏移
     func shadow(color: UIColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.3), blurRadius: CGFloat = 5, offset: CGSize = .zero) -> NSAttributedString {
-        let mAttri = NSMutableAttributedString(attributedString: base)
         let shadow = NSShadow()
         shadow.shadowColor = color
         shadow.shadowBlurRadius = blurRadius
         shadow.shadowOffset = offset
-        mAttri.addAttribute(.shadow, value: shadow, range: NSRange(location: 0, length: mAttri.length))
-        return mAttri
+        return addAttribute(.shadow, value: shadow)
+    }
+    
+    /// 添加属性
+    /// - Parameters:
+    ///   - name: 属性名
+    ///   - value: 属性值
+    func addAttribute(_ name: NSAttributedString.Key, value: Any) -> NSAttributedString {
+        NSMutableAttributedString(attributedString: base).setup {
+            $0.addAttribute(name, value: value, range: NSRange(location: 0, length: base.length))
+        }
     }
 }
 

@@ -42,13 +42,6 @@ public class WaveformView: ExtView {
     /// 定时器
     private var displayLink: CADisplayLink?
     
-    public var level: CGFloat = 0 {
-        didSet {
-            // Ext.debug("level: \(level)")
-            amplitude = max(level, idleAmplitude)
-        }
-    }
-    
     public override func setupUI() {
         super.setupUI()
         backgroundColor = UIColor.black.withAlphaComponent(0.5)
@@ -70,12 +63,22 @@ public class WaveformView: ExtView {
     public override func layoutSubviews() {
         super.layoutSubviews()
         
-        level = 0
+        update(0)
         updateMeters()
     }
     deinit {
         stop()
         Ext.debug("", tag: .recycle)
+    }
+}
+
+// MARK: - Public
+
+extension WaveformView {
+    
+    public func update(_ level: CGFloat) {
+        // Ext.debug("level: \(level)")
+        amplitude = max(level, idleAmplitude)
     }
     
     public func start() {
@@ -88,6 +91,9 @@ public class WaveformView: ExtView {
         guard displayLink != nil else { return }
         displayLink?.invalidate()
         displayLink = nil
+        
+        update(0)
+        updateMeters()
     }
     
     @objc

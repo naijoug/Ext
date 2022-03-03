@@ -201,6 +201,7 @@ public extension Ext {
         case play
         case pause
         case replay
+        case stop
         
         case begin
         case end
@@ -232,6 +233,7 @@ public extension Ext {
         case custom(_ token: String)
     }
 }
+
 extension Ext.Tag: CustomStringConvertible {
     public var description: String {
         switch self {
@@ -248,6 +250,7 @@ extension Ext.Tag: CustomStringConvertible {
         case .play:             return "▶️"
         case .pause:            return "⏸"
         case .replay:           return "🔄"
+        case .stop:             return "⏹"
             
         case .begin:            return "🛫"
         case .end:              return "🛬"

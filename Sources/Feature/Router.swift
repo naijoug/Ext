@@ -28,7 +28,13 @@ private extension RouterHandlerKey {
 }
 
 /// 路由参数协议
-public protocol RouterParam {}
+public protocol RouterParam {
+    /// 路由跳转模式
+    func mode() -> Router.Mode?
+}
+public extension RouterParam {
+    func mode() -> Router.Mode? { nil }
+}
 
 /// 简单路由
 public final class Router {
@@ -103,6 +109,7 @@ public extension Router {
     /// 顶层显示控制器
     var topController: UIViewController? { UIApplication.shared.ext.topViewController() }
     
+    /// 启动页面
     func launch(key: RouterKey, param: RouterParam? = nil) {
         guard let controller = controller(for: key, param: param) else { return }
         Router.window?.rootViewController = controller
@@ -128,7 +135,7 @@ public extension Router {
     ///   - mode: 跳转模式 (默认: Push)
     func goto(key: RouterKey, param: RouterParam? = nil, mode: Mode? = nil) {
         guard let controller = controller(for: key, param: param) else { return }
-        let routerMode = mode ?? self.mode(for: key)
+        let routerMode = mode ?? param?.mode() ?? self.mode(for: key)
         var log = "route to \(key.url) | mode \(String(describing: mode)) - \(String(describing: routerMode))"
         if let param = param { log += " | \(param)" }
         Ext.debug(log, tag: .custom("✈️"), locationEnabled: false)
@@ -181,19 +188,6 @@ private extension Router {
 
 public extension Router {
     
-    func actionSheet(_ title: String? = nil, actions: [UIAlertAction]) {
-        guard !actions.isEmpty else { return }
-        let controller = UIAlertController(title: title, message: nil, preferredStyle: .actionSheet)
-        for action in actions {
-            controller.addAction(action)
-        }
-        goto(controller, mode: .modal())
-    }
-    
-}
-
-public extension Router {
-    
     /// 系统打开 url
     /// - Parameter url: url
     func openURL(_ url: URL?) {
@@ -206,6 +200,22 @@ public extension Router {
         } else {
             UIApplication.shared.openURL(url)
         }
+    }
+    
+    
+    /// 打开系统 alert
+    /// - Parameters:
+    ///   - style: alert 形式
+    ///   - title: 标题
+    ///   - message: 内容
+    ///   - actions: 响应列表
+    func alert(_ style: UIAlertController.Style, title: String?, message: String? = nil, actions: [UIAlertAction]) {
+        guard !actions.isEmpty else { return }
+        let controller = UIAlertController(title: title, message: message, preferredStyle: style)
+        for action in actions {
+            controller.addAction(action)
+        }
+        goto(controller, mode: .modal())
     }
     
     /// 系统分享
