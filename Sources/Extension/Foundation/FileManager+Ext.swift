@@ -20,6 +20,19 @@ public extension ExtWrapper where Base == FileManager {
         }
     }
     
+    
+    /// 异步删除文件
+    /// - Parameters:
+    ///   - url: 文件 url
+    ///   - handler: 删除完成回调
+    func remove(_ url: URL?, handler: @escaping Ext.VoidHandler) {
+        DispatchQueue.ext.asyncDo {
+            remove(url)
+        } done: {
+            handler()
+        }
+    }
+    
     /// 如果文件夹不存在，创建
     func createIfNotExists(_ folderUrl: URL?) {
         guard let folderUrl = folderUrl else {

@@ -197,29 +197,23 @@ public extension ExtWrapper where Base: NSAttributedString {
     /// - Parameters:
     ///   - name: 属性名
     ///   - value: 属性值
-    func addAttribute(_ name: NSAttributedString.Key, value: Any) -> NSAttributedString {
-        NSMutableAttributedString(attributedString: base).setup {
-            $0.addAttribute(name, value: value, range: NSRange(location: 0, length: base.length))
+    ///   - target: 目标文字
+    func addAttribute(_ name: NSAttributedString.Key, value: Any, target: String? = nil) -> NSAttributedString {
+        addAttributes([name: value], target: target)
+    }
+    
+    
+    /// 添加属性
+    /// - Parameters:
+    ///   - attrs: 属性字典
+    ///   - target: 目标文字
+    func addAttributes(_ attrs: [NSAttributedString.Key : Any] = [:], target: String? = nil) -> NSAttributedString {
+        var range = NSRange(location: 0, length: base.length)
+        if let target = target {
+            range = (base.string as NSString).range(of: target)
+        }
+        return NSMutableAttributedString(attributedString: base).setup {
+            $0.addAttributes(attrs, range: range)
         }
     }
-}
-
-public extension ExtWrapper where Base == NSMutableAttributedString {
-    
-    
-    /// 为目标字符串添加特殊属性
-    /// - Parameters:
-    ///   - target: 目标字符串
-    ///   - font: 字体大小
-    ///   - color: 文字颜色
-    func add(_ target: String, font: UIFont, color: UIColor) -> NSMutableAttributedString {
-        let string = base.mutableString
-        let range = (string as NSString).range(of: target)
-        base.addAttributes([
-            NSAttributedString.Key.font: font,
-            NSAttributedString.Key.foregroundColor: color
-        ], range: range)
-        return base
-    }
-    
 }

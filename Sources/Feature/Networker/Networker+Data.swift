@@ -31,7 +31,7 @@ public extension Networker {
         // 设置 HTTP 请求方法
         request.httpMethod = method.rawValue
         // 根据请求方法，设置组装请求参数
-        var requestMsg = "\(method.rawValue) | \(request.url?.absoluteString ?? "")"
+        var requestMsg = "\(method.rawValue) | \(request.url?.absoluteString.removingPercentEncoding ?? "")"
         // 设置 HTTP 请求头
         if let headers = headers {
             for (key, value) in headers {

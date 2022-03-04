@@ -8,6 +8,31 @@
 import Foundation
 
 public extension ExtWrapper where Base == DispatchQueue {
+
+    /// 延迟函数
+    /// - Parameters:
+    ///   - delay: 延迟时间 (单位: 秒 s)
+    ///   - handler: 延迟操作
+    func after(delay: TimeInterval, handler: @escaping Ext.VoidHandler) {
+        base.asyncAfter(deadline: .now() + delay, execute: handler)
+    }
+    
+    /// 异步队列做一些事情，然后回调主队列
+    /// - Parameters:
+    ///   - something: 异步完成的操作(全局队列)
+    ///   - done: 完成回调(回到主队列)
+    static func asyncDo(_ something: @escaping Ext.VoidHandler, done: @escaping Ext.VoidHandler) {
+        DispatchQueue.global().async {
+            something()
+            DispatchQueue.main.sync {
+                done()
+            }
+        }
+    }
+    
+}
+
+public extension ExtWrapper where Base == DispatchQueue {
         
     // Reference: https://stackoverflow.com/questions/37886994/dispatch-once-after-the-swift-3-gcd-api-changes
     
@@ -36,14 +61,5 @@ public extension ExtWrapper where Base == DispatchQueue {
 
         _onceTracker.append(token)
         block()
-    }
-    
-    
-    /// 延迟函数
-    /// - Parameters:
-    ///   - delay: 延迟时间 (单位: 秒 s)
-    ///   - handler: 延迟操作
-    func after(delay: TimeInterval, handler: @escaping Ext.VoidHandler) {
-        base.asyncAfter(deadline: .now() + delay, execute: handler)
     }
 }
