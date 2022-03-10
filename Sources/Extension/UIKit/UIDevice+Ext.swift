@@ -28,7 +28,8 @@ public extension ExtWrapper where Base == UIDevice {
             return identifier + String(UnicodeScalar(UInt8(value)))
         }
         
-        func mapToDevice(identifier: String) -> String { // swiftlint:disable:this cyclomatic_complexity
+        // swiftlint:disable:next cyclomatic_complexity
+        func mapToDevice(identifier: String) -> String {
             #if os(iOS)
             switch identifier {
             case "iPod1,1":                                 return "iPod touch"
