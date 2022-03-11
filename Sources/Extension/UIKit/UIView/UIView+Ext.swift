@@ -211,7 +211,7 @@ public extension ExtWrapper where Base: UIView {
         default: break
         }
         
-        base.clipsToBounds = true
+        base.clipsToBounds = radius > 0
         base.layer.cornerRadius = radius
         base.layer.maskedCorners = maskedCorners
     }

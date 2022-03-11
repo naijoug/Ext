@@ -51,6 +51,7 @@ public extension ExtWrapper where Base: UIPageViewController {
     
     /**
      Reference:
+        - https://stackoverflow.com/questions/21798218/disable-uipageviewcontroller-bounce
         - https://stackoverflow.com/questions/23267929/combine-uipageviewcontroller-swipes-with-ios-7-uinavigationcontroller-back-swipe/33217469
      */
     
