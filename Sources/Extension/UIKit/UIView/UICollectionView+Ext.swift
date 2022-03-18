@@ -51,27 +51,27 @@ public extension ExtWrapper where Base: UICollectionView {
     
     /// 从缓存池中取出 Cell
     func dequeueReusableCell<T>(_ cellType: T.Type, for indexPath: IndexPath) -> T where T: UICollectionViewCell {
-        return base.dequeueReusableCell(withReuseIdentifier: cellType.ext.identifier, for: indexPath) as! T
+        base.dequeueReusableCell(withReuseIdentifier: cellType.ext.identifier, for: indexPath) as! T
     }
     
     func registerReusableHeaderView<T>(_ viewType: T.Type) where T: UICollectionReusableView {
-        return registerReusableView(viewType, ofKind: UICollectionView.elementKindSectionHeader)
+        registerReusableView(viewType, ofKind: UICollectionView.elementKindSectionHeader)
     }
     func registerReusableFooterView<T>(_ viewType: T.Type) where T: UICollectionReusableView {
-        return registerReusableView(viewType, ofKind: UICollectionView.elementKindSectionFooter)
+        registerReusableView(viewType, ofKind: UICollectionView.elementKindSectionFooter)
     }
     func registerReusableView<T>(_ viewType: T.Type, ofKind: String) where T: UICollectionReusableView {
-        return base.register(viewType, forSupplementaryViewOfKind: ofKind, withReuseIdentifier: viewType.ext.identifier)
+        base.register(viewType, forSupplementaryViewOfKind: ofKind, withReuseIdentifier: viewType.ext.identifier)
     }
     
     func dequeueReusableHeaderView<T>(_ viewType: T.Type, for indexPath: IndexPath) -> T where T: UICollectionReusableView {
-        return dequeueReusableView(viewType, ofKind: UICollectionView.elementKindSectionHeader, for: indexPath)
+        dequeueReusableView(viewType, ofKind: UICollectionView.elementKindSectionHeader, for: indexPath)
     }
     func dequeueReusableFooterView<T>(_ viewType: T.Type, for indexPath: IndexPath) -> T where T: UICollectionReusableView {
-        return dequeueReusableView(viewType, ofKind: UICollectionView.elementKindSectionFooter, for: indexPath)
+        dequeueReusableView(viewType, ofKind: UICollectionView.elementKindSectionFooter, for: indexPath)
     }
     func dequeueReusableView<T>(_ viewType: T.Type, ofKind: String, for indexPath: IndexPath) -> T where T: UICollectionReusableView {
-        return base.dequeueReusableSupplementaryView(ofKind: ofKind, withReuseIdentifier: viewType.ext.identifier, for: indexPath) as! T
+        base.dequeueReusableSupplementaryView(ofKind: ofKind, withReuseIdentifier: viewType.ext.identifier, for: indexPath) as! T
     }
 }
 

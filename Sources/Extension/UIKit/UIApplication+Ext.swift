@@ -38,6 +38,10 @@ public extension ExtWrapper where Base == UIApplication {
             - https://developer.apple.com/library/archive/documentation/StringsTextFonts/Conceptual/TextAndWebiPhoneOS/KeyboardManagement/KeyboardManagement.html
      */
      var keyboardHeight: CGFloat { 216 + safeAreaInsets.bottom }
+}
+
+@available(iOSApplicationExtension, unavailable)
+public extension ExtWrapper where Base == UIApplication {
     
     /// 主窗口
     var mainWindow: UIWindow? {

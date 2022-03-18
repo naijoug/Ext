@@ -19,11 +19,11 @@ public extension ExtWrapper where Base: UITableView {
     
     /// 从缓存池中取出 Cell
     func dequeueReusableCell<T>(_ cellType: T.Type) -> T where T: UITableViewCell {
-        return base.dequeueReusableCell(withIdentifier: cellType.ext.identifier) as! T
+        base.dequeueReusableCell(withIdentifier: cellType.ext.identifier) as! T
     }
     /// 从缓存池中取出 Cell
     func dequeueReusableCell<T>(_ cellType: T.Type, for indexPath: IndexPath) -> T where T: UITableViewCell {
-        return base.dequeueReusableCell(withIdentifier: cellType.ext.identifier, for: indexPath) as! T
+        base.dequeueReusableCell(withIdentifier: cellType.ext.identifier, for: indexPath) as! T
     }
     
     /// 注册自定义 HeaderFooterView
@@ -32,7 +32,7 @@ public extension ExtWrapper where Base: UITableView {
     }
     /// 从缓存池中取出 HeaderFooterView
     func dequeueHeaderFooterView<T>(_ type: T.Type) -> T where T: UITableViewHeaderFooterView {
-        return base.dequeueReusableHeaderFooterView(withIdentifier: type.ext.identifier) as! T
+        base.dequeueReusableHeaderFooterView(withIdentifier: type.ext.identifier) as! T
     }
 }
 
