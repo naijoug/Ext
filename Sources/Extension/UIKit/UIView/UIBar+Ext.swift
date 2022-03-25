@@ -1,11 +1,22 @@
 //
-//  UINavigationBar+Ext.swift
+//  UIBar+Ext.swift
 //  Ext
 //
 //  Created by naijoug on 2021/1/28.
 //
 
 import UIKit
+
+public extension ExtWrapper where Base: UIBarItem {
+    
+    // Reference: https://stackoverflow.com/questions/14318368/uibarbuttonitem-how-can-i-find-its-frame
+    
+    /// 返回 UIBarItem 的视图
+    var view: UIView? { return base.value(forKey: "view") as? UIView }
+    
+}
+
+// MARK: - NavigationBar
 
 public extension ExtWrapper where Base: UINavigationBar {
     
@@ -56,6 +67,26 @@ public extension ExtWrapper where Base: UINavigationBar {
             appearance.backgroundImage = isTransparent ? UIImage() : nil
             base.scrollEdgeAppearance = appearance
             base.standardAppearance = appearance
+        }
+    }
+}
+
+// MARK: - TabBar
+
+public extension ExtWrapper where Base: UITabBar {
+    
+    // Reference: https://stackoverflow.com/questions/39850794/remove-top-line-from-tabbar
+    
+    /// 移除顶部分割线
+    func removeTopLine() {
+        if #available(iOS 13.0, *) {
+            let appearance = base.standardAppearance
+            appearance.shadowImage = nil
+            appearance.shadowColor = nil
+            base.standardAppearance = appearance
+        } else {
+            base.shadowImage = UIImage()
+            base.backgroundImage = UIImage()
         }
     }
 }

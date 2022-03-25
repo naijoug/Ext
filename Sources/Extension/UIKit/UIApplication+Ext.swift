@@ -31,13 +31,15 @@ public extension ExtWrapper where Base == UIApplication {
     var bottomHeight: CGFloat { 49 + safeAreaInsets.bottom }
     
     /**
-     系统键盘高度 = (键盘高度 + 安全区域偏移)
+     系统键盘尺寸
+     宽度 = 屏幕宽度
+     高度 = (键盘高度 + 安全区域偏移)
         216 : 没有工具栏
         260 : 有工具栏 (216 + 44)
         Reference:
             - https://developer.apple.com/library/archive/documentation/StringsTextFonts/Conceptual/TextAndWebiPhoneOS/KeyboardManagement/KeyboardManagement.html
-     */
-     var keyboardHeight: CGFloat { 216 + safeAreaInsets.bottom }
+    */
+    var keyboardSize: CGSize { CGSize(width: UIScreen.main.ext.screenWidth, height: 216 + safeAreaInsets.bottom) }
 }
 
 @available(iOSApplicationExtension, unavailable)

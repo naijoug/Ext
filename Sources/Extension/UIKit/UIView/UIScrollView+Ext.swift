@@ -31,20 +31,15 @@ extension ExtWrapper where Base: UIScrollView {
 
 
 public extension UIScrollView {
-    
-    private static var pageViewControllerIndexKey = "pageViewControllerIndexKey"
-    
-    var pageViewControllerIndex: Int? {
+    private static var pageControllerIndexKey: UInt8 = 0
+    var pageControllerIndex: Int? {
         get {
-            Ext.getAssociatedObject(self, key: &UIScrollView.pageViewControllerIndexKey)
+            ext.getAssociatedObject(&Self.pageControllerIndexKey, valueType: Int.self)
         }
         set {
-            if let value = newValue {
-                Ext.setAssociatedObject(self, key: &UIScrollView.pageViewControllerIndexKey, value: value, policy: .retainNonatomic)
-            }
+            ext.setAssociatedObject(&Self.pageControllerIndexKey, value: newValue, policy: .assign)
         }
     }
-    
 }
 
 public extension ExtWrapper where Base: UIPageViewController {

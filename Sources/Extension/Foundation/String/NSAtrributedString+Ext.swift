@@ -8,7 +8,10 @@
 import Foundation
 
 public extension ExtWrapper where Base == NSAttributedString {
-
+    
+    /// 整个富文本串 range
+    var rangOfAll: NSRange { NSRange(location: 0, length: base.length) }
+    
     /// 可变的富文本
     var mutable: NSMutableAttributedString {
         NSMutableAttributedString(attributedString: base)
