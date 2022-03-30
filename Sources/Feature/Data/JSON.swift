@@ -37,16 +37,34 @@ public extension Ext.JSON {
         return nil
     }
     
-    /// 解析 JSON 数据
-    static func parseDict(_ data: Any) -> [String: Any]? {
-        if data is String, let string = data as? String {
-            do {
-                let json = try JSONSerialization.jsonObject(with: Data(string.utf8), options: [.allowFragments, .mutableLeaves])
-                return json as? [String: Any]
-            } catch {
-                Ext.debug("parse JSON failed.", error: error)
-            }
-        } else if data is [String: Any], let json = data as? [String: Any] {
+    /// Dict -> String
+    static func toString(_ dict: [String: Any], prettyPrinted: Bool = false) -> String? {
+        do {
+            let options: JSONSerialization.WritingOptions = prettyPrinted ? [.prettyPrinted, .fragmentsAllowed] : [.fragmentsAllowed]
+            let data = try JSONSerialization.data(withJSONObject: dict, options: options)
+            return String(data: data, encoding: .utf8)
+        } catch {
+            Ext.debug("dict to string failed.", error: error)
+        }
+        return nil
+    }
+    /// String -> Dict
+    static func toDict(_ string: String) -> [String: Any]? {
+        do {
+            let data = Data(string.utf8)
+            let json = try JSONSerialization.jsonObject(with: data, options: [.allowFragments, .mutableLeaves])
+            return json as? [String: Any]
+        } catch {
+            Ext.debug("string to dict failed.", error: error)
+        }
+        return nil
+    }
+    
+    /// any data -> Dict
+    static func toDict(_ anyData: Any) -> [String: Any]? {
+        if anyData is String, let string = anyData as? String {
+            return toDict(string)
+        } else if anyData is [String: Any], let json = anyData as? [String: Any] {
             return json
         }
         return nil

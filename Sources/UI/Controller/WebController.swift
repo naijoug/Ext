@@ -352,7 +352,7 @@ private extension WebView {
         }
         addJSHandler(defaultJSHandlerName) { [weak self] name, body in
             guard let self = `self` else { return }
-            guard let dict = Ext.JSON.parseDict(body) else { return }
+            guard let dict = Ext.JSON.toDict(body) else { return }
             Ext.debug("\(dict)", logEnabled: self.logEnabled)
             guard let method = dict["method"] as? String else {
                 Ext.debug("method not exist.", logEnabled: self.logEnabled)

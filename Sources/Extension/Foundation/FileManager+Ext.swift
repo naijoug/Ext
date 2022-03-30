@@ -50,6 +50,18 @@ public extension ExtWrapper where Base == FileManager {
         }
     }
     
+    
+    /// 读取文件中的字符内容
+    func read(_ url: URL) -> String? {
+        do {
+            guard FileManager.default.fileExists(atPath: url.path) else { return nil }
+            let data = try Data(contentsOf: url)
+            return String(data: data, encoding: .utf8)
+        } catch {
+            Ext.debug("read failed.", error: error, tag: .file, locationEnabled: false)
+            return nil
+        }
+    }
     /// 保存字符串数据到文件
     /// - Parameters:
     ///   - string: 字符串数据
@@ -69,7 +81,7 @@ public extension ExtWrapper where Base == FileManager {
             // 保存数据
             try string.write(to: url, atomically: false, encoding: .utf8)
         } catch {
-            Ext.debug("save failure.", error: error, tag: .file, locationEnabled: false)
+            Ext.debug("save failed.", error: error, tag: .file, locationEnabled: false)
         }
     }
     
