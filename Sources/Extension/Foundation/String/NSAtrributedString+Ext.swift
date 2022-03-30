@@ -7,7 +7,7 @@
 
 import Foundation
 
-public extension ExtWrapper where Base == NSAttributedString {
+public extension ExtWrapper where Base: NSAttributedString {
     
     /// 整个富文本串 range
     var rangOfAll: NSRange { NSRange(location: 0, length: base.length) }
@@ -19,7 +19,7 @@ public extension ExtWrapper where Base == NSAttributedString {
     
 }
 
-public extension ExtWrapper where Base == NSAttributedString {
+public extension ExtWrapper where Base: NSAttributedString {
         
     
     /// 富文本拼接

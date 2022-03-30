@@ -7,7 +7,7 @@
 
 import Foundation
 
-extension Date: ExtCompatible{}
+extension Date: ExtCompatible {}
 
 public extension ExtWrapper where Base == Date {
 

@@ -50,7 +50,7 @@ public extension Networker {
            let httpBody = try? JSONSerialization.data(withJSONObject: params, options: [.sortedKeys]) {
             request.httpBody = httpBody
             request.setValue("application/json; charset=UTF-8", forHTTPHeaderField: "Content-Type")
-            requestMsg += " | \(httpBody.ext.prettyPrintedJSONString ?? "")"
+            requestMsg += " | \(httpBody.ext.toJSONString() ?? "")"
         }
         
         return data(request, msg: requestMsg, handler: handler)
@@ -112,7 +112,7 @@ extension Networker {
                 return
             }
             if let data = data {
-                let rawData = data.ext.prettyPrintedJSONString ?? data.ext.string ?? ""
+                let rawData = data.ext.toJSONString() ?? data.ext.string ?? ""
                 responseMsg += " | \(Ext.Tag.basketball) Data => \(rawData)"
             }
             Ext.debug("Data Response succeeded | \(responseMsg) \n", tag: .success, locationEnabled: false)

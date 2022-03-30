@@ -352,16 +352,16 @@ private extension WebView {
         }
         addJSHandler(defaultJSHandlerName) { [weak self] name, body in
             guard let self = `self` else { return }
-            guard let json = JSON.parse(body) else { return }
-            Ext.debug("\(String(describing: json))", logEnabled: self.logEnabled)
-            guard let method = json["method"] as? String else {
+            guard let dict = Ext.JSON.parseDict(body) else { return }
+            Ext.debug("\(dict)", logEnabled: self.logEnabled)
+            guard let method = dict["method"] as? String else {
                 Ext.debug("method not exist.", logEnabled: self.logEnabled)
                 return
             }
             switch method {
             case "openWeb": // 打开新的网页页面
-                let title = json["title"] as? String
-                guard let urlString = json["url"] as? String else { return }
+                let title = dict["title"] as? String
+                guard let urlString = dict["url"] as? String else { return }
                 Router.shared.toWeb(.url(urlString), title: title)
             case "toRoot": // 回到根控制器
                 Router.shared.topController?.navigationController?.popToRootViewController(animated: true)
