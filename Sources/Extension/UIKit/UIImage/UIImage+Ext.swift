@@ -81,7 +81,11 @@ public extension ExtWrapper where Base == UIImage {
 
 public extension ExtWrapper where Base: UIImage {
     
-    // Reference: https://stackoverflow.com/questions/28517866/how-to-set-the-alpha-of-an-uiimage-in-swift-programmatically
+    /**
+     Reference:
+        - https://stackoverflow.com/questions/28517866/how-to-set-the-alpha-of-an-uiimage-in-swift-programmatically
+        - https://stackoverflow.com/questions/34984966/rounding-uiimage-and-adding-a-border
+     */
     
     /// 返回带透明度图片
     /// - Parameter alpha: 0.0 ~ 1.0
@@ -119,20 +123,41 @@ public extension ExtWrapper where Base: UIImage {
         }
     }
     
+    /// 竖向图片
+    var isPortrait:  Bool { base.size.height > base.size.width }
+    /// 横向图片
+    var isLandscape: Bool { base.size.width > base.size.height }
+    
+    /// 图片添加圆形边框
+    /// - Parameters:
+    ///   - width: 线框宽度
+    ///   - color: 线框颜色
+    func borderRounded(_ width: CGFloat, color: UIColor) -> UIImage? {
+        let short = min(base.size.width, base.size.height)
+        let outRect = CGRect(origin: .zero, size: CGSize(width: short, height: short))
+        return UIGraphicsImageRenderer(size: outRect.size, format: base.imageRendererFormat).image { context in
+            UIBezierPath(ovalIn: outRect).addClip()
+            base.draw(in: outRect)
+            context.cgContext.setStrokeColor(color.cgColor)
+            let line = UIBezierPath(ovalIn: outRect)
+            line.lineWidth = width
+            line.stroke()
+        }
+    }
+    
     /// 裁剪为圆形图片
     var circle: UIImage? {
-        let size = base.size
-        let shotest = min(size.width, size.height)
-        let outputRect = CGRect(x: 0, y: 0, width: shotest, height: shotest)
+        let short = min(base.size.width, base.size.height)
+        let outputRect = CGRect(origin: .zero, size: CGSize(width: short, height: short))
         UIGraphicsBeginImageContextWithOptions(outputRect.size, false, 0)
         defer { UIGraphicsEndImageContext() }
         let context = UIGraphicsGetCurrentContext()
         context?.addEllipse(in: outputRect)
         context?.clip()
-        base.draw(in: CGRect(x: (shotest - size.width)/2,
-                             y: (shotest - size.height)/2,
-                             width: size.width,
-                             height: size.height))
+        base.draw(in: CGRect(x: (short - base.size.width)/2,
+                             y: (short - base.size.height)/2,
+                             width: base.size.width,
+                             height: base.size.height))
         return UIGraphicsGetImageFromCurrentImageContext()
     }
     

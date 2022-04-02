@@ -19,4 +19,24 @@ public extension ExtWrapper where Base == UIFont {
         }
     }
     
+    enum FontKind {
+        /// 常规
+        case regular
+        /// 粗体
+        case bold
+        /// 斜体
+        case italic
+    }
+    
+    /// 字体
+    /// - Parameters:
+    ///   - kind: 字体种类
+    ///   - fontSize: 字体大小
+    static func of(_ kind: FontKind, fontSize: CGFloat) -> UIFont {
+        switch kind {
+        case .regular:  return .systemFont(ofSize: fontSize)
+        case .bold:     return .boldSystemFont(ofSize: fontSize)
+        case .italic:   return .italicSystemFont(ofSize: fontSize)
+        }
+    }
 }
