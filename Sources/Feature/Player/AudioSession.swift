@@ -285,7 +285,7 @@ extension AVAudioSession.Category: CustomStringConvertible {
         case .playAndRecord:    return "playAndRecord"
         case .record:           return "record"
         case .multiRoute:       return "multiRoute"
-        default: return "\(self)"
+        default: return "\(self.rawValue)"
         }
     }
 }
@@ -300,7 +300,7 @@ extension AVAudioSession.Mode: CustomStringConvertible {
         case .moviePlayback:    return "moviePlayback"
         case .videoChat:        return"videoChat"
         case .spokenAudio:      return "spokenAudio"
-        default: return "\(self)"
+        default: return "\(self.rawValue)"
         }
     }
 }
