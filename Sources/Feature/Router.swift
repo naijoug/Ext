@@ -267,3 +267,24 @@ public extension Router {
         goto(vc, mode: mode)
     }
 }
+
+public class ExtActivity: UIActivity {
+    private var title: String
+    private var image: UIImage?
+    private var handler: Ext.VoidHandler?
+    public init(title: String, image: UIImage?, handler: Ext.VoidHandler?) {
+        self.title = title
+        self.image = image
+        self.handler = handler
+        super.init()
+    }
+    
+    public override var activityTitle: String? { title }
+    public override var activityImage: UIImage? { image }
+    public override class var activityCategory: UIActivity.Category { .action }
+    public override func canPerform(withActivityItems activityItems: [Any]) -> Bool { true }
+    public override func perform() {
+        self.handler?()
+        self.activityDidFinish(true)
+    }
+}

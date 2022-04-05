@@ -87,7 +87,7 @@ open class WebController: UIViewController {
 /// 网页资源
 public enum WebResource {
     /// 网页地址
-    case url(_ urlString: String)
+    case url(_ urlString: String, header: [String: String]? = nil)
     /// 网页 html 代码
     case html(_ htmlString: String)
     /// 网页文件
@@ -257,10 +257,14 @@ public extension WebView {
     @discardableResult
     func load(_ resource: WebResource) -> Bool {
         switch resource {
-        case .url(let urlString):
+        case .url(let urlString, let header):
             guard let url = URL(string: urlString) else { return false }
             Ext.debug("open url: \(url.absoluteString)", logEnabled: logEnabled)
-            webView.load(URLRequest(url: url))
+            var request = URLRequest(url: url)
+            for (key, value) in header ?? [:] {
+                request.setValue(value, forHTTPHeaderField: key)
+            }
+            webView.load(request)
         case .html(let htmlString):
             Ext.debug("open html: \(htmlString)", logEnabled: logEnabled)
             webView.loadHTMLString(htmlString, baseURL: nil)

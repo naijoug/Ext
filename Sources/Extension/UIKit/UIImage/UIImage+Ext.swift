@@ -77,6 +77,37 @@ public extension ExtWrapper where Base == UIImage {
                 ])
         }
     }
+    
+    /// 创建文字图片
+    /// - Parameters:
+    ///   - title: 文字
+    ///   - font: 字体大小
+    ///   - color: 文字颜色
+    static func titleColor(_ title: String, bgColor: UIColor, font: UIFont, color: UIColor) -> UIImage? {
+        let size = (title as NSString).size(withAttributes: [.font: font])
+        let rect = CGRect(origin: .zero, size: size)
+        UIGraphicsBeginImageContext(rect.size)
+        defer { UIGraphicsEndImageContext() }
+        let context = UIGraphicsGetCurrentContext()
+        context?.setFillColor(color.cgColor)
+        context?.fill(rect)
+        (title as NSString).draw(
+            in: CGRect(origin: .zero, size: size),
+            withAttributes: [
+                .font: font,
+                .foregroundColor: color
+            ])
+        return UIGraphicsGetImageFromCurrentImageContext()
+        
+//        return UIGraphicsImageRenderer(size: size).image { context in
+//            (title as NSString).draw(
+//                in: CGRect(origin: .zero, size: size),
+//                withAttributes: [
+//                    .font: font,
+//                    .foregroundColor: color
+//                ])
+//        }
+    }
 }
 
 public extension ExtWrapper where Base: UIImage {
