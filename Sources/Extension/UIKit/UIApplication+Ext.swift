@@ -22,6 +22,9 @@ public extension ExtWrapper where Base == UIApplication {
     /// 安全区域 Insets
     var safeAreaInsets: UIEdgeInsets { mainWindow?.safeAreaInsets ?? UIEdgeInsets(top: statusBarHeight, left: 0, bottom: 0, right: 0) }
     
+    /// 是否为全面屏(刘海屏)
+    var isFullscreen: Bool { (mainWindow?.safeAreaInsets.bottom ?? 0) > 0 }
+    
     /// 安全的底部间隙 safeAreaInsets.bottom > 0 ? safeAreaInsets.bottom : bottom
     func safeBottom(_ bottom: CGFloat) -> CGFloat { safeAreaInsets.bottom > 0 ? safeAreaInsets.bottom : bottom }
     
