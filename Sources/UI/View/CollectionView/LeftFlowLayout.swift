@@ -9,7 +9,7 @@ import UIKit
 
 open class LeftFlowLayout: UICollectionViewFlowLayout {
     var delegate: UICollectionViewDelegateFlowLayout? {
-        return self.collectionView?.delegate as? UICollectionViewDelegateFlowLayout
+        self.collectionView?.delegate as? UICollectionViewDelegateFlowLayout
     }
     
     open override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
@@ -20,7 +20,7 @@ open class LeftFlowLayout: UICollectionViewFlowLayout {
                 updatedAttributes.append(attri)
                 return
             }
-            if let updatedAttri = self.layoutAttributesForItem(at: attri.indexPath) {
+            if let updatedAttri = layoutAttributesForItem(at: attri.indexPath) {
                 updatedAttributes.append(updatedAttri)
             }
         }

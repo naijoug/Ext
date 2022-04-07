@@ -363,8 +363,8 @@ public extension ExtWrapper where Base: UIView {
         NSLayoutConstraint.activate([
             line.heightAnchor.constraint(equalToConstant: height),
             line.topAnchor.constraint(equalTo: base.topAnchor, constant: edgeInsets.top),
-            line.leftAnchor.constraint(equalTo: base.leftAnchor, constant: edgeInsets.left),
-            line.rightAnchor.constraint(equalTo: base.rightAnchor, constant: edgeInsets.right)
+            line.leadingAnchor.constraint(equalTo: base.leadingAnchor, constant: edgeInsets.left),
+            line.trailingAnchor.constraint(equalTo: base.trailingAnchor, constant: edgeInsets.right)
         ])
         return line
     }
@@ -379,8 +379,8 @@ public extension ExtWrapper where Base: UIView {
         line.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             line.heightAnchor.constraint(equalToConstant: height),
-            line.leftAnchor.constraint(equalTo: base.leftAnchor, constant: edgeInsets.left),
-            line.rightAnchor.constraint(equalTo: base.rightAnchor, constant: edgeInsets.right),
+            line.leadingAnchor.constraint(equalTo: base.leadingAnchor, constant: edgeInsets.left),
+            line.trailingAnchor.constraint(equalTo: base.trailingAnchor, constant: edgeInsets.right),
             line.bottomAnchor.constraint(equalTo: base.bottomAnchor, constant: edgeInsets.bottom)
         ])
         return line

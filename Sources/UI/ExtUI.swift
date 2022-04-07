@@ -73,6 +73,15 @@ open class ExtImageView: UIImageView {
 
 /// 自定义 TableViewCell (基类)
 open class ExtTableCell: UITableViewCell {
+    
+//    /// 是否 RTL 布局可用
+//    public var enabledRTL: Bool = false {
+//        didSet {
+//            guard enabledRTL else { return }
+//            contentView.ext.flipsHorizontallyIfNeeded()
+//        }
+//    }
+    
     public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -100,6 +109,15 @@ open class ExtTableHeaderFooterView: UITableViewHeaderFooterView {
 
 /// 自定义 CollectionViewCell (基类)
 open class ExtCollectionCell: UICollectionViewCell {
+    
+//    /// 是否 RTL 布局可用
+//    public var enabledRTL: Bool = false {
+//        didSet {
+//            guard enabledRTL else { return }
+//            contentView.ext.flipsHorizontallyIfNeeded()
+//        }
+//    }
+    
     public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -158,8 +176,8 @@ extension Ext {
             wrapperView.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
                 wrapperView.topAnchor.constraint(equalTo: contentView.topAnchor),
-                wrapperView.leftAnchor.constraint(equalTo: contentView.leftAnchor),
-                wrapperView.rightAnchor.constraint(equalTo: contentView.rightAnchor),
+                wrapperView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+                wrapperView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
                 wrapperView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
             ])
         }
@@ -175,8 +193,8 @@ extension Ext {
             wrapperView.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
                 wrapperView.topAnchor.constraint(equalTo: contentView.topAnchor),
-                wrapperView.leftAnchor.constraint(equalTo: contentView.leftAnchor),
-                wrapperView.rightAnchor.constraint(equalTo: contentView.rightAnchor),
+                wrapperView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
+                wrapperView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
                 wrapperView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
             ])
         }
@@ -192,8 +210,8 @@ extension Ext {
             wrapperView.translatesAutoresizingMaskIntoConstraints = false
             NSLayoutConstraint.activate([
                 wrapperView.topAnchor.constraint(equalTo: self.topAnchor),
-                wrapperView.leftAnchor.constraint(equalTo: self.leftAnchor),
-                wrapperView.rightAnchor.constraint(equalTo: self.rightAnchor),
+                wrapperView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+                wrapperView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
                 wrapperView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
             ])
         }
