@@ -9,8 +9,12 @@ import UIKit
 
 /**
  Reference:
+    - https://developer.apple.com/design/human-interface-guidelines/right-to-left/overview/introduction/
+    - https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPInternational/SupportingRight-To-LeftLanguages/SupportingRight-To-LeftLanguages.html
     - https://stackoverflow.com/questions/25598194/aligning-right-to-left-on-uicollectionview
-    -
+    - https://stackoverflow.com/questions/33130331/uicollectionview-ios-9-issue-on-project-with-rtl-languages-support
+    - https://stackoverflow.com/questions/37497610/ios-rtl-improperly-displaying-english-inside-rtl-string
+    - https://www.jianshu.com/p/4fcf4a6710a1
  */
 
 public extension ExtWrapper where Base: UIApplication {
@@ -31,7 +35,11 @@ public extension ExtWrapper where Base: UIView  {
         base.transform = isRTL ? CGAffineTransform(scaleX: -1, y: 1) : .identity
     }
     
-    /// set RTL enabled
+    /**
+     设置 RTL 布局生效
+     特殊说明:
+        UICollectionViewCell & UITableViewCell 需要设置 contentView
+     */
     func enabledRTL() {
         flipsHorizontallyIfNeeded()
     }
@@ -41,8 +49,26 @@ public extension ExtWrapper where Base: UIImage {
     
     /// RTL 图片 (用于进行 LTR 图片翻转)
     var imageRTL: UIImage? {
-        guard let cgImage = base.cgImage, UIView.ext.isRTL else { return base }
-        return UIImage(cgImage: cgImage, scale: base.scale, orientation: .upMirrored)
+        return UIView.ext.isRTL ? base.imageFlippedForRightToLeftLayoutDirection() : base
+        //guard let cgImage = base.cgImage, UIView.ext.isRTL else { return base }
+        //return UIImage(cgImage: cgImage, scale: base.scale, orientation: .upMirrored)
     }
     
+}
+
+public extension ExtWrapper where Base == String {
+
+    /** 是否为包含 RTL 前缀标识的字符串
+     前缀说明
+        \u200E : LTR 布局
+        \u200F : RTL 布局
+     */
+    var isRTLString: Bool {
+        base.hasPrefix("\u{200E}") || base.hasPrefix("\u{200F}")
+    }
+    
+    /// RTL 字符串
+    var stringRTL: String {
+        "\(UIView.ext.isRTL ? "\u{200F}" : "\u{200E}")\(base)\u{200c}"
+    }
 }
