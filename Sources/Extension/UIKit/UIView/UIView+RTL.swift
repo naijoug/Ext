@@ -72,3 +72,10 @@ public extension ExtWrapper where Base == String {
         "\(UIView.ext.isRTL ? "\u{200F}" : "\u{200E}")\(base)\u{200c}"
     }
 }
+
+/// 支持 RTL 的 flow layout
+open class RTLFlowLayout: UICollectionViewFlowLayout {
+    open override var flipsHorizontallyInOppositeLayoutDirection: Bool {
+        UIView.ext.isRTL
+    }
+}

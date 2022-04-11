@@ -13,7 +13,7 @@ import UIKit
  */
 
 /// 可分页布局
-public class PageableFlowLayout: UICollectionViewFlowLayout {
+public class PageableFlowLayout: RTLFlowLayout {
     
     public enum Alignment {
         case left
@@ -33,6 +33,7 @@ public class PageableFlowLayout: UICollectionViewFlowLayout {
     }
     public convenience init(_ alignment: Alignment) {
         self.init()
+        
         self.alignment = alignment
     }
     
@@ -40,7 +41,7 @@ public class PageableFlowLayout: UICollectionViewFlowLayout {
         Ext.debug("\(proposedContentOffset) | velocity: \(velocity)", logEnabled: logEnabled)
         guard let collectionView = self.collectionView,
               let attris = layoutAttributesForElements(in: collectionView.bounds), attris.count > 0 else {
-                  return super.targetContentOffset(forProposedContentOffset: proposedContentOffset, withScrollingVelocity: velocity)
+            return super.targetContentOffset(forProposedContentOffset: proposedContentOffset, withScrollingVelocity: velocity)
         }
         
         Ext.debug("ext: \(ext.pageWidth) | itemSize: \(ext.itemSize) | lineSpacing \(ext.minimumLineSpacing) | interitemSpacing \(ext.minimumInteritemSpacing)", logEnabled: logEnabled)

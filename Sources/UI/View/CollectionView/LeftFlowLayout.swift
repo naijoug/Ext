@@ -7,7 +7,7 @@
 
 import UIKit
 
-open class LeftFlowLayout: UICollectionViewFlowLayout {
+open class LeftFlowLayout: RTLFlowLayout {
     var delegate: UICollectionViewDelegateFlowLayout? {
         self.collectionView?.delegate as? UICollectionViewDelegateFlowLayout
     }

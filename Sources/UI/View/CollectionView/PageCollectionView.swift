@@ -59,7 +59,9 @@ open class PageCollectionView<Item: PageCollectionItem, Cell: PageCollectionCell
 // MARK: - UI
     
     public private(set) lazy var collectionView: UICollectionView = {
-        ext.add(UICollectionView(frame: .zero, collectionViewLayout: PageableFlowLayout(.left))).setup {
+        let layout = PageableFlowLayout( .left)
+        layout.logEnabled = true
+        return ext.add(UICollectionView(frame: .zero, collectionViewLayout: layout)).setup {
             $0.delegate = self
             $0.dataSource = self
             $0.backgroundColor = .clear

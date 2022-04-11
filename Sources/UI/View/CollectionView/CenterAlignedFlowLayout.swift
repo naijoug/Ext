@@ -14,7 +14,7 @@ import UIKit
  */
 
 /// 居中对齐布局
-public class CenterAlignedFlowLayout: UICollectionViewFlowLayout {
+public class CenterAlignedFlowLayout: RTLFlowLayout {
 
     private var attrCache = [IndexPath: UICollectionViewLayoutAttributes]()
 
