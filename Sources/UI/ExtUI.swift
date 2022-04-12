@@ -74,14 +74,6 @@ open class ExtImageView: UIImageView {
 /// 自定义 TableViewCell (基类)
 open class ExtTableCell: UITableViewCell {
     
-//    /// 是否 RTL 布局可用
-//    public var enabledRTL: Bool = false {
-//        didSet {
-//            guard enabledRTL else { return }
-//            contentView.ext.flipsHorizontallyIfNeeded()
-//        }
-//    }
-    
     public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -109,14 +101,6 @@ open class ExtTableHeaderFooterView: UITableViewHeaderFooterView {
 
 /// 自定义 CollectionViewCell (基类)
 open class ExtCollectionCell: UICollectionViewCell {
-    
-//    /// 是否 RTL 布局可用
-//    public var enabledRTL: Bool = false {
-//        didSet {
-//            guard enabledRTL else { return }
-//            contentView.ext.flipsHorizontallyIfNeeded()
-//        }
-//    }
     
     public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
