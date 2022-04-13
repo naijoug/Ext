@@ -12,6 +12,7 @@ import WebKit
  Reference:
     - https://developer.apple.com/documentation/webkit/wkusercontentcontroller
     - https://stackoverflow.com/questions/27105094/how-to-remove-cache-in-wkwebview
+    - https://stackoverflow.com/questions/34185339/wkwebview-javascript-confirm-and-alert-not-working
  */
 
 public extension ExtWrapper where Base: WKWebView {
@@ -295,17 +296,49 @@ public extension WebView {
 // MARK: - WKUIDelegate
 
 extension WebView: WKUIDelegate {
-    public func webViewDidClose(_ webView: WKWebView) {
+    open func webViewDidClose(_ webView: WKWebView) {
         Ext.debug("", logEnabled: logEnabled)
     }
-    public func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
+    open func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
         Ext.debug(message, logEnabled: logEnabled)
+        
+        Router.shared.alert(.alert, title: nil, message: message, actions: [
+            UIAlertAction(title: "Ok", style: .default, handler: { _ in
+                completionHandler()
+            })
+        ])
+        //completionHandler()
     }
-    public func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
+    open func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
         Ext.debug(message, logEnabled: logEnabled)
+        Router.shared.alert(.alert, title: nil, message: message, actions: [
+            UIAlertAction(title: "Ok", style: .default, handler: { _ in
+                completionHandler(true)
+            }),
+            UIAlertAction(title: "Cancel", style: .default, handler: { _ in
+                completionHandler(false)
+            })
+        ])
+        //completionHandler(false)
     }
-    public func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
+    open func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
         Ext.debug("prompt: \(prompt) | defaultText: \(defaultText ?? "")", logEnabled: logEnabled)
+        let alert = UIAlertController(title: nil, message: prompt, preferredStyle: .alert)
+        alert.addTextField { textField in
+            textField.text = defaultText
+        }
+        alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { _ in
+            guard let text = alert.textFields?.first?.text else {
+                completionHandler(defaultText)
+                return
+            }
+            completionHandler(text)
+        }))
+        alert.addAction(UIAlertAction(title: "Cancel", style: .default, handler: { _ in
+            completionHandler(nil)
+        }))
+        Router.shared.goto(alert, mode: .modal())
+        //completionHandler(nil)
     }
 }
 
