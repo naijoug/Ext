@@ -69,6 +69,32 @@ public extension ExtWrapper where Base: UINavigationBar {
             base.standardAppearance = appearance
         }
     }
+    
+    
+    /// 配置导航栏属性
+    /// - Parameters:
+    ///   - titleColor: 文字颜色
+    ///   - font: 文字字体
+    ///   - backgroundColor: 背景颜色
+    ///   - backImage: 返回图片
+    ///   - isTranslucent: 是否半透明 (默认: true)
+    func config(titleColor: UIColor, font: UIFont, backgroundColor: UIColor, backImage: UIImage? = nil, isTranslucent: Bool = true) {
+        base.tintColor = titleColor
+        base.barTintColor = backgroundColor
+        base.isTranslucent = isTranslucent
+        base.titleTextAttributes =  [.foregroundColor: titleColor, .font: font]
+        base.backIndicatorImage = backImage
+        base.backIndicatorTransitionMaskImage = backImage
+        if #available(iOS 15.0, *) {
+            let appearance = UINavigationBarAppearance()
+            appearance.setBackIndicatorImage(backImage, transitionMaskImage: backImage)
+            appearance.titleTextAttributes = [.foregroundColor: titleColor, .font: font]
+            appearance.backgroundColor = backgroundColor
+            appearance.shadowColor = nil
+            base.scrollEdgeAppearance = appearance
+            base.standardAppearance = appearance
+        }
+    }
 }
 
 // MARK: - TabBar

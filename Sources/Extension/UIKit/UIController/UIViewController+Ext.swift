@@ -38,7 +38,7 @@ public extension ExtWrapper where Base: UIViewController {
     /// 控制器是否可见
     var isVisible: Bool {
         // Refrence: https://stackoverflow.com/questions/2777438/how-to-tell-if-uiviewcontrollers-view-is-visible
-        return base.viewIfLoaded?.window != nil
+        base.viewIfLoaded?.window != nil
     }
     
     /// 导航栏返回按钮标题
@@ -50,6 +50,58 @@ public extension ExtWrapper where Base: UIViewController {
     func largeTitle(_ enabled: Bool) {
         base.navigationController?.navigationBar.prefersLargeTitles = enabled
         base.navigationItem.largeTitleDisplayMode = enabled ? .always : .never
+    }
+}
+
+public extension ExtWrapper where Base: UIViewController {
+    enum NavBarPostion {
+        case left
+        case right
+    }
+    
+    /// 设置 pop 关闭页面的导航栏 item 图片
+    /// - Parameters:
+    ///   - image: 图片
+    ///   - position: 导航栏位置
+    func pop(_ image: UIImage?, position: NavBarPostion = .left) {
+        switch position {
+        case .left:
+            base.navigationItem.leftBarButtonItem = base.popBarButtonItem(image)
+        case .right:
+            base.navigationItem.rightBarButtonItem = base.popBarButtonItem(image)
+        }
+    }
+    
+    /// 设置 dismiss 关闭页面的导航栏 item 图片
+    /// - Parameters:
+    ///   - image: 图片
+    ///   - postion: 导航栏位置
+    func dismiss(_ image: UIImage?, position: NavBarPostion = .left) {
+        switch position {
+        case .left:
+            base.navigationItem.leftBarButtonItem = base.dismissBarButtonItem(image)
+        case .right:
+            base.navigationItem.rightBarButtonItem = base.dismissBarButtonItem(image)
+        }
+    }
+}
+
+private extension UIViewController {
+    
+    func popBarButtonItem(_ image: UIImage?) -> UIBarButtonItem {
+        UIBarButtonItem(image: image, style: .plain, target: self, action: #selector(extPopAction))
+    }
+    func dismissBarButtonItem(_ image: UIImage?) -> UIBarButtonItem {
+        UIBarButtonItem(image: image, style: .plain, target: self, action: #selector(extDismissAction))
+    }
+    
+    @objc
+    func extPopAction() {
+        navigationController?.popViewController(animated: true)
+    }
+    @objc
+    func extDismissAction() {
+        dismiss(animated: true, completion: nil)
     }
 }
 

@@ -118,7 +118,7 @@ public extension ExtWrapper where Base == String {
                 if arg0 is Int                              { return base.contains("%d") }
                 else if arg0 is Float || arg0 is Double     { return base.contains("%f") }
                 else if arg0 is String                      { return base.contains("%@") }
-            default: () // todo
+            default: () // TODO: fix more arg
             }
             return true
         }

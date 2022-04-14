@@ -49,9 +49,17 @@ public extension ExtWrapper where Base: UIImage {
     
     /// RTL 图片 (用于进行 LTR 图片翻转)
     var imageRTL: UIImage? {
-        return UIView.ext.isRTL ? base.imageFlippedForRightToLeftLayoutDirection() : base
+        UIView.ext.isRTL ? base.imageFlippedForRightToLeftLayoutDirection() : base
         //guard let cgImage = base.cgImage, UIView.ext.isRTL else { return base }
         //return UIImage(cgImage: cgImage, scale: base.scale, orientation: .upMirrored)
+    }
+    
+}
+public extension ExtWrapper where Base == Bundle {
+    
+    /// 根据图片名字获取 Bundle 中的图片并进行 RTL 适配 (适用于带方向的图片，如: 向右的箭头...)
+    func imageRTL(_ named: String) -> UIImage? {
+        base.ext.image(named)?.ext.imageRTL
     }
     
 }

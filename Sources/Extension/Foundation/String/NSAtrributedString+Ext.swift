@@ -20,7 +20,6 @@ public extension ExtWrapper where Base: NSAttributedString {
 }
 
 public extension ExtWrapper where Base: NSAttributedString {
-        
     
     /// 富文本拼接
     /// - Parameter attris: 富文本数组
@@ -68,15 +67,6 @@ public extension ExtWrapper where Base: NSAttributedString {
     
     /// 富文本图片
     /// - Parameters:
-    ///   - imageNamed: 图片
-    ///   - font: 字体
-    ///   - offsetY: Y 轴偏移
-    static func image(imageNamed: String?, font: UIFont, offsetY: CGFloat = 2) -> NSAttributedString? {
-        guard let imageNamed = imageNamed else { return nil }
-        return NSAttributedString.ext.image(UIImage(named: imageNamed), font: font, offsetY: offsetY)
-    }
-    /// 富文本图片
-    /// - Parameters:
     ///   - image: 图片
     ///   - font: 字体
     ///   - offsetY: Y 轴偏移
@@ -95,21 +85,7 @@ public extension ExtWrapper where Base: NSAttributedString {
         attachment.image = image
         return NSAttributedString(attachment: attachment)
     }
-    
-    /// 图片+文字 富文本
-    /// - Parameters:
-    ///   - imageNamed: 图片名称
-    ///   - text: 文字内容
-    ///   - font: 字体
-    ///   - color: 颜色
-    ///   - offsetY: Y 轴偏移
-    static func imageText(imageNamed: String,
-                          text: String,
-                          font: UIFont,
-                          color: UIColor,
-                          offsetY: CGFloat = 2) -> NSAttributedString {
-        imageText(image: UIImage(named: imageNamed), text: text, font: font, color: color, offsetY: offsetY)
-    }
+
     /// 图片+文字 富文本
     /// - Parameters:
     ///   - image: 图片
@@ -128,20 +104,6 @@ public extension ExtWrapper where Base: NSAttributedString {
         ])
     }
     
-    /// 文字+图片 富文本
-    /// - Parameters:
-    ///   - text: 文字
-    ///   - imageNamed: 图片名称
-    ///   - font: 字体
-    ///   - color: 颜色
-    ///   - offsetY: Y 轴偏移
-    static func textImage(text: String,
-                          imageNamed: String,
-                          font: UIFont,
-                          color: UIColor,
-                          offsetY: CGFloat = 2) -> NSAttributedString {
-        textImage(text: text, image: UIImage(named: imageNamed), font: font, color: color, offsetY: offsetY)
-    }
     /// 文字+图片 富文本
     /// - Parameters:
     ///   - text: 文字
@@ -204,7 +166,6 @@ public extension ExtWrapper where Base: NSAttributedString {
     func addAttribute(_ name: NSAttributedString.Key, value: Any, target: String? = nil) -> NSAttributedString {
         addAttributes([name: value], target: target)
     }
-    
     
     /// 添加属性
     /// - Parameters:
