@@ -87,28 +87,28 @@ public extension ExtWrapper where Base: UIView  {
 extension ExtWrapper where Base: UIView {
     
     public var left: CGFloat {
-        get { return base.frame.origin.x }
+        get { base.frame.origin.x }
         set { base.frame.origin.x = newValue }
     }
     public var right: CGFloat {
-        get { return base.frame.origin.x + base.frame.size.width }
+        get { base.frame.origin.x + base.frame.size.width }
         set { base.frame.origin.x = newValue - base.frame.size.width }
     }
     public var top: CGFloat {
-        get { return base.frame.origin.y }
+        get { base.frame.origin.y }
         set { base.frame.origin.y = newValue }
     }
     public var bottom: CGFloat {
-        get { return base.frame.origin.y + base.frame.size.height }
+        get { base.frame.origin.y + base.frame.size.height }
         set { base.frame.origin.y = newValue - base.frame.size.height }
     }
     
     public var centerX: CGFloat {
-        get { return base.frame.origin.x + base.frame.size.width/2 }
+        get { base.frame.origin.x + base.frame.size.width/2 }
         set { base.frame.origin.x = newValue - base.frame.size.width/2 }
     }
     public var centerY: CGFloat {
-        get { return base.frame.origin.y + base.frame.size.height/2 }
+        get { base.frame.origin.y + base.frame.size.height/2 }
         set { base.frame.origin.y = newValue - base.frame.size.height/2 }
     }
     
