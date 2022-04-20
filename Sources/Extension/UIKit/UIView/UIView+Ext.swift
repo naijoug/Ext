@@ -118,8 +118,8 @@ extension ExtWrapper where Base: UIView {
 
 public extension ExtWrapper where Base: UIView {
     
-    /// 视图是否可见
-    var isVisible: Bool {
+    /// 视图是否在屏幕可见
+    func isVisible(fully: Bool = false, edgeInsets: UIEdgeInsets = .zero) -> Bool {
         guard base.superview != nil, !base.isHidden else { return false }
         guard let window = base.window, window.isKeyWindow else { return false }
         guard let rect = base.superview?.convert(base.frame, to: window) else { return false }
@@ -127,21 +127,14 @@ public extension ExtWrapper where Base: UIView {
         //Ext.debug("rect: \(rect) | \(base.window?.frame ?? .zero) | \(base.superview?.frame ?? .zero)")
         guard !rect.isNull, !rect.isEmpty, !rect.size.equalTo(.zero) else { return false }
         let screenRect = UIScreen.main.bounds
-        let intersectionRect = rect.intersection(screenRect)
-        //Ext.debug("intersectionRect: \(intersectionRect)")
-        guard !intersectionRect.isNull, !intersectionRect.isEmpty, !intersectionRect.size.equalTo(.zero) else {
-            return false
-        }
-        return true
-    }
-    
-    /// 视图是否完成可见
-    var isFullyVisible: Bool {
-        guard isVisible else { return false }
-        guard let window = base.window, let rect = base.superview?.convert(base.frame, to: window) else { return false }
-        let screenRect = UIScreen.main.bounds
-        //Ext.debug("rect: \(rect)")
-        return screenRect.contains(rect)
+        let visibleRect = CGRect(
+            x: edgeInsets.left,
+            y: edgeInsets.top,
+            width: screenRect.width - edgeInsets.left - edgeInsets.right,
+            height: screenRect.height - edgeInsets.top - edgeInsets.bottom
+        )
+        Ext.debug("fully: \(fully) | visibleRect: \(visibleRect) | rect: \(rect) | intersectionRect: \(rect.intersection(screenRect))")
+        return fully ? visibleRect.contains(rect) : visibleRect.intersects(rect)
     }
     
 }
@@ -402,24 +395,24 @@ public extension ExtWrapper where Base: UIView {
     func subtrackMaskView(_ view: UIView, fillBackground: Bool = false) {
         guard let targetFrame = view.superview?.convert(view.frame, to: base) else { return }
         let backgroundColor = view.backgroundColor
-        Ext.debug("sutrack target: \(targetFrame) | backgroundColor: \(String(describing: backgroundColor))")
+        //Ext.debug("sutrack target: \(targetFrame) | backgroundColor: \(String(describing: backgroundColor))")
         
         UIGraphicsBeginImageContextWithOptions(base.bounds.size, false, UIScreen.main.scale)
         defer { UIGraphicsEndImageContext() }
         guard let context = UIGraphicsGetCurrentContext() else { return }
         context.translateBy(x: targetFrame.origin.x, y: targetFrame.origin.y)
         if backgroundColor == nil, fillBackground {
-            Ext.debug("view is alpha & fillBackground")
+            //Ext.debug("view is alpha & fillBackground")
             view.backgroundColor = .white
             view.layer.render(in: context)
             view.backgroundColor = nil
         } else {
-            Ext.debug("view is not alpha")
+            //Ext.debug("view is not alpha")
             view.layer.render(in: context)
         }
         
         let image = UIGraphicsGetImageFromCurrentImageContext()?.ext.subtractMaskImage
-        Ext.debug("view backgroundColor ")
+        //Ext.debug("view backgroundColor ")
         
         let maskView = UIView()
         maskView.frame = base.bounds
@@ -439,7 +432,7 @@ private extension ExtWrapper where Base: UIImage {
         
         let bitmapBytesPerRow = pixelWidth
         
-        Ext.debug("draw bitmap...| scale: \(scale) | pixel: \(pixelWidth) \(pixelHeight) | pixel \(cgImage.width) \(cgImage.height) | \(bitmapBytesPerRow) ")
+        //Ext.debug("draw bitmap...| scale: \(scale) | pixel: \(pixelWidth) \(pixelHeight) | pixel \(cgImage.width) \(cgImage.height) | \(bitmapBytesPerRow) ")
         guard let context = CGContext(data: nil,
                                       width: pixelWidth, height: pixelHeight,
                                       bitsPerComponent: 8, bytesPerRow: bitmapBytesPerRow,
@@ -447,22 +440,22 @@ private extension ExtWrapper where Base: UIImage {
                                       bitmapInfo: CGImageAlphaInfo.alphaOnly.rawValue) else { return nil }
         
         context.draw(cgImage, in: CGRect(x: 0, y: 0, width: CGFloat(pixelWidth), height: CGFloat(pixelHeight)))
-        Ext.debug("222")
+        //Ext.debug("222")
         let startTime = Date()
         if let data = context.data {
             let pixelBuffer = data.bindMemory(to: UInt8.self, capacity: pixelHeight * bitmapBytesPerRow)
-            Ext.debug("data: \(data) | type: \(data) | pixelBuffer: \(pixelBuffer)")
+            //Ext.debug("data: \(data) | type: \(data) | pixelBuffer: \(pixelBuffer)")
             for y in 0..<pixelHeight {
                 for x in 0..<bitmapBytesPerRow {
                     let val = pixelBuffer[y*bitmapBytesPerRow + x]
                     pixelBuffer[y*bitmapBytesPerRow + x] = 255 - val
                 }
             }
-            Ext.debug("date end | pixelBuffer [0, 0]: \(pixelBuffer[0]) | [x: y] [\(bitmapBytesPerRow - 1), \(pixelHeight - 1)]")
+            //Ext.debug("date end | pixelBuffer [0, 0]: \(pixelBuffer[0]) | [x: y] [\(bitmapBytesPerRow - 1), \(pixelHeight - 1)]")
         }
-        Ext.debug("333 clacDuration: \(Date().timeIntervalSince(startTime))")
+        Ext.debug("subtract mask image duration: \(Date().timeIntervalSince(startTime))", logEnabled: Ext.logEnabled)
         guard let maskCGImage = context.makeImage() else { return nil }
-        Ext.debug("444")
+        //Ext.debug("444")
         return UIImage(cgImage: maskCGImage)
     }
 }

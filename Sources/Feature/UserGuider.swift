@@ -24,12 +24,14 @@ public final class UserGuider {
     ///   - downImage: 向下的引导图片
     ///   - targetView: 目标视图 (需要镂空的定位的视图)
     ///   - hitView: 点击视图 (可点击事件穿透的视图)
+    ///   - visibleEdgeInsets: 屏幕可视区域边距
     ///   - fillBackground: 是否需要填充视图
     ///   - offset: 位置偏移
     ///   - hideHandler: 点击隐藏回调
     public func guide(_ tip: NSAttributedString,
                       upImage: UIImage? = nil, downImage: UIImage? = nil,
                       targetView: UIView?, hitView: UIView? = nil,
+                      visibleEdgeInsets: UIEdgeInsets = .zero,
                       fillBackground: Bool = false,
                       offset: CGPoint = CGPoint(x: 5, y: 10),
                       hideHandler: Ext.VoidHandler? = nil) {
@@ -39,9 +41,9 @@ public final class UserGuider {
             self.currentView = nil
         }
         
-        Ext.debug("guide tip: \(tip) | target: \(String(describing: targetView)) | isVisiable: \(targetView?.ext.isVisible ?? false)", logEnabled: logEnabled)
+        Ext.debug("guide tip: \(tip) | target: \(String(describing: targetView)) | isVisiable: \(targetView?.ext.isVisible(fully: true, edgeInsets: visibleEdgeInsets) ?? false)", logEnabled: logEnabled)
         
-        guard let targetView = targetView, targetView.frame.size != .zero, targetView.ext.isVisible,
+        guard let targetView = targetView, targetView.frame.size != .zero, targetView.ext.isVisible(fully: true, edgeInsets: visibleEdgeInsets),
               let containerView = UIApplication.shared.ext.mainWindow else { return }
         
         let guideView = GuideView(tip, upImage: upImage, downImage: downImage)
