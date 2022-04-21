@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name            = "Ext"
-  spec.version         = "0.3.0"
+  spec.version         = "0.4.0"
   spec.summary      = "Some useful Swift extensions."
   spec.description  = <<-DESC
                     Some useful extensions for Swift.
@@ -15,17 +15,11 @@ Pod::Spec.new do |spec|
   spec.swift_version = "5.0"
   spec.requires_arc = true
   spec.source_files = "Sources"
-  spec.default_subspecs = 'Core', 'Extension', 'UI', 'Feature'
-    
-  spec.subspec 'Core' do |ss|
-    ss.source_files = 'Sources/Core/*.swift'
-  end
+  spec.default_subspecs = 'Extension', 'UI', 'Feature'
   
   spec.subspec 'Extension' do |ss|
-    ss.source_files = 'Sources/Extension/**/*'
+    ss.source_files = ['Sources/Ext.swift', 'Sources/Extension/**/*']
     ss.frameworks = 'UIKit', 'AVKit'
-    
-    ss.dependency 'Ext/Core'
   end
   
   spec.subspec 'UI' do |ss|
