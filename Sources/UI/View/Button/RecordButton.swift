@@ -53,16 +53,16 @@ public class RecordButton: ExtView {
     private var innerCircle: UIView!
     
     private lazy var iconImageView: UIImageView = {
-        ext.add(UIImageView()).setup {
-            $0.contentMode = .center
-            $0.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                $0.topAnchor.constraint(equalTo: self.topAnchor),
-                $0.bottomAnchor.constraint(equalTo: self.bottomAnchor),
-                $0.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-                $0.trailingAnchor.constraint(equalTo: self.trailingAnchor)
-            ])
-        }
+        let imageView = ext.add(UIImageView())
+        imageView.contentMode = .center
+        imageView.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            imageView.topAnchor.constraint(equalTo: self.topAnchor),
+            imageView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
+            imageView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+            imageView.trailingAnchor.constraint(equalTo: self.trailingAnchor)
+        ])
+        return imageView
     }()
     
     public override func setupUI() {

@@ -204,6 +204,8 @@ open class WebView: ExtView {
         return indicator
     }()
     
+    private var topController: UIViewController? { UIApplication.shared.ext.topViewController() }
+    
 // MARK: -
     
     deinit {
@@ -301,28 +303,41 @@ extension WebView: WKUIDelegate {
     }
     open func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
         Ext.debug(message, logEnabled: logEnabled)
-        
-        Router.shared.alert(.alert, title: nil, message: message, actions: [
-            UIAlertAction(title: "Ok", style: .default, handler: { _ in
-                completionHandler()
-            })
-        ])
         //completionHandler()
+        guard let topController = topController else {
+            completionHandler()
+            return
+        }
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { _ in
+            completionHandler()
+        }))
+        topController.present(alert, animated: true)
+        
     }
     open func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
         Ext.debug(message, logEnabled: logEnabled)
-        Router.shared.alert(.alert, title: nil, message: message, actions: [
-            UIAlertAction(title: "Ok", style: .default, handler: { _ in
-                completionHandler(true)
-            }),
-            UIAlertAction(title: "Cancel", style: .default, handler: { _ in
-                completionHandler(false)
-            })
-        ])
         //completionHandler(false)
+        guard let topController = topController else {
+            completionHandler(false)
+            return
+        }
+        let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: { _ in
+            completionHandler(true)
+        }))
+        alert.addAction(UIAlertAction(title: "Cancel", style: .default, handler: { _ in
+            completionHandler(false)
+        }))
+        topController.present(alert, animated: true)
     }
     open func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
         Ext.debug("prompt: \(prompt) | defaultText: \(defaultText ?? "")", logEnabled: logEnabled)
+        //completionHandler(nil)
+        guard let topController = topController else {
+            completionHandler(nil)
+            return
+        }
         let alert = UIAlertController(title: nil, message: prompt, preferredStyle: .alert)
         alert.addTextField { textField in
             textField.text = defaultText
@@ -337,8 +352,7 @@ extension WebView: WKUIDelegate {
         alert.addAction(UIAlertAction(title: "Cancel", style: .default, handler: { _ in
             completionHandler(nil)
         }))
-        Router.shared.goto(alert, mode: .modal())
-        //completionHandler(nil)
+        topController.present(alert, animated: true)
     }
 }
 
@@ -390,7 +404,7 @@ private extension WebView {
         }
         addJSHandler(defaultJSHandlerName) { [weak self] name, body in
             guard let self = `self` else { return }
-            guard let dict = Ext.JSON.toDict(body) else { return }
+            guard let dict = self.prase(body) else { return }
             Ext.debug("\(dict)", logEnabled: self.logEnabled)
             guard let method = dict["method"] as? String else {
                 Ext.debug("method not exist.", logEnabled: self.logEnabled)
@@ -400,13 +414,29 @@ private extension WebView {
             case "openWeb": // 打开新的网页页面
                 let title = dict["title"] as? String
                 guard let urlString = dict["url"] as? String else { return }
-                Router.shared.toWeb(.url(urlString), title: title)
+                let web = WebController(.url(urlString))
+                web.title = title
+                self.topController?.navigationController?.pushViewController(web, animated: true)
             case "toRoot": // 回到根控制器
-                Router.shared.topController?.navigationController?.popToRootViewController(animated: true)
+                self.topController?.navigationController?.popToRootViewController(animated: true)
             default:
                 Ext.debug("method: \(method) not implement.", logEnabled: self.logEnabled)
             }
         }
     }
     
+    private func prase(_ body: Any) -> [String: Any]? {
+        if body is String, let string = body as? String {
+            do {
+                let data = Data(string.utf8)
+                let json = try JSONSerialization.jsonObject(with: data, options: [.allowFragments, .mutableLeaves])
+                return json as? [String: Any]
+            } catch {
+                Ext.debug("parse web js body to dict failed.", error: error, logEnabled: self.logEnabled)
+            }
+        } else if body is [String: Any], let json = body as? [String: Any] {
+            return json
+        }
+        return nil
+    }
 }

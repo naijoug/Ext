@@ -176,8 +176,8 @@ public extension ExtWrapper where Base: NSAttributedString {
         if let target = target {
             range = (base.string as NSString).range(of: target)
         }
-        return NSMutableAttributedString(attributedString: base).setup {
-            $0.addAttributes(attrs, range: range)
-        }
+        let mAttri = NSMutableAttributedString(attributedString: base)
+        mAttri.addAttributes(attrs, range: range)
+        return mAttri
     }
 }

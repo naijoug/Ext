@@ -17,16 +17,16 @@ public class TitleSwitch: ExtControl {
     
     /// 文字
     private lazy var titleLabel: UILabel = {
-        ext.add(UILabel()).setup {
-            $0.font = titleFont
-        }
+        let label = ext.add(UILabel())
+        label.font = titleFont
+        return label
     }()
     /// 开关纽扣
     private lazy var toggle: UIView = {
-        ext.add(UIView(), backgroundColor: .white).setup {
-            $0.isUserInteractionEnabled = false
-            $0.ext.roundCorner(radius: toggleWH/2)
-        }
+        let toggle = ext.add(UIView(), backgroundColor: .white)
+        toggle.isUserInteractionEnabled = false
+        toggle.ext.roundCorner(radius: toggleWH/2)
+        return toggle
     }()
     
     public override func layoutSubviews() {

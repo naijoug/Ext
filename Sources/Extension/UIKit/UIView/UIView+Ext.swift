@@ -118,6 +118,11 @@ extension ExtWrapper where Base: UIView {
 
 public extension ExtWrapper where Base: UIView {
     
+    /**
+     Reference:
+        - https://stackoverflow.com/questions/1536923/determine-if-uiview-is-visible-to-the-user
+     */
+    
     /// 视图是否在屏幕可见
     func isVisible(fully: Bool = false, edgeInsets: UIEdgeInsets = .zero) -> Bool {
         guard base.superview != nil, !base.isHidden else { return false }

@@ -61,15 +61,15 @@ open class PageCollectionView<Item: PageCollectionItem, Cell: PageCollectionCell
     public private(set) lazy var collectionView: UICollectionView = {
         let layout = PageableFlowLayout( .left)
         layout.logEnabled = true
-        return ext.add(UICollectionView(frame: .zero, collectionViewLayout: layout)).setup {
-            $0.delegate = self
-            $0.dataSource = self
-            $0.backgroundColor = .clear
-            $0.decelerationRate = .fast
-            $0.showsHorizontalScrollIndicator = false
-            $0.ext.registerClass(Cell.self)
-            $0.contentInset = UIEdgeInsets(top: 0, left: leftOffset, bottom: 0, right: rightOffset)
-        }
+        let collectionView = ext.add(UICollectionView(frame: .zero, collectionViewLayout: layout))
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.backgroundColor = .clear
+        collectionView.decelerationRate = .fast
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.ext.registerClass(Cell.self)
+        collectionView.contentInset = UIEdgeInsets(top: 0, left: leftOffset, bottom: 0, right: rightOffset)
+        return collectionView
     }()
     
     open override func setupUI() {
