@@ -30,7 +30,17 @@ public extension ExtWrapper where Base: UIViewController {
 
 // MARK: -
 
+private extension UIViewController {
+    /// do nothing for lazy view controller active
+    func active() { }
+}
+
 public extension ExtWrapper where Base: UIViewController {
+    
+    /// do nothing for lazy view controller active
+    func active() {
+        base.active()
+    }
     
     /// 控制器视图是否加载
     var isViewLoaded: Bool { base.viewIfLoaded != nil }
@@ -63,7 +73,7 @@ public extension ExtWrapper where Base: UIViewController {
     /// - Parameters:
     ///   - image: 图片
     ///   - position: 导航栏位置
-    func pop(_ image: UIImage?, position: NavBarPostion = .left) {
+    func setPopImage(_ image: UIImage?, position: NavBarPostion = .left) {
         switch position {
         case .left:
             base.navigationItem.leftBarButtonItem = base.popBarButtonItem(image)

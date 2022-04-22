@@ -12,6 +12,7 @@ import AVFoundation
  Reference:
     - https://developer.apple.com/documentation/avfoundation/media_playback_and_selection
     - https://stackoverflow.com/questions/38867190/how-can-i-check-if-my-avplayer-is-buffering
+    - https://github.com/neekeetab/CachingPlayerItem
  */
 
 public protocol ExtPlayerDelegate: AnyObject {

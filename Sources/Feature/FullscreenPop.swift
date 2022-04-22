@@ -1,8 +1,8 @@
 //
-//  UINavigationController+FullscreenPop.swift
+//  FullscreenPop.swift
 //  Ext
 //
-//  Created by naijoug on 2022/3/24.
+//  Created by guojian on 2022/4/22.
 //
 
 import UIKit
@@ -12,28 +12,25 @@ import UIKit
     - https://github.com/forkingdog/FDFullscreenPopGesture
  */
 
-public extension ExtWrapper where Base: UIViewController {
+public extension Ext {
+    /// 是否启动全屏 pop 功能
+    private(set) static var isFullscreenPopEnabled: Bool = false
+    
     /// 启用全屏 pop 功能
     static func fullscreenPopEnabled() {
+        isFullscreenPopEnabled = true
         UINavigationController.fullscreenPop()
     }
 }
 
-public extension UIViewController {
-    private static var isInteractivePopDisabledKey: UInt8 = 0
-    private static var interactivePopMaxDistanceToLeftEdgeKey: UInt8 = 0
+public extension ExtWrapper where Base: UIViewController {
     
-    /// pop 手势不可用
-    var isInteractivePopDisabled: Bool {
-        get { ext.getAssociatedObject(&Self.isInteractivePopDisabledKey, valueType: Bool.self) ?? false }
-        set { ext.setAssociatedObject(&Self.isInteractivePopDisabledKey, value: newValue, policy: .retainNonatomic) }
+    private var isInteractivePopDisabled: Bool { base.isInteractivePopDisabled }
+    
+    func interactionPopDisabled(_ disabled: Bool) {
+        base.isInteractivePopDisabled = disabled
     }
     
-    /// pop 手势允许的距离屏幕左边最大距离
-    var interactivePopMaxDistanceToLefeEdge: CGFloat {
-        get { ext.getAssociatedObject(&Self.interactivePopMaxDistanceToLeftEdgeKey, valueType: CGFloat.self) ?? 0 }
-        set { ext.setAssociatedObject(&Self.interactivePopMaxDistanceToLeftEdgeKey, value: newValue, policy: .retainNonatomic) }
-    }
 }
 
 public extension ExtWrapper where Base: UINavigationController {
@@ -49,7 +46,24 @@ public extension ExtWrapper where Base: UINavigationController {
     }
 }
 
-// MARK: -
+// MARK: - Private
+
+private extension UIViewController {
+    private static var isInteractivePopDisabledKey: UInt8 = 0
+    private static var interactivePopMaxDistanceToLeftEdgeKey: UInt8 = 0
+    
+    /// pop 手势不可用
+    var isInteractivePopDisabled: Bool {
+        get { ext.getAssociatedObject(&Self.isInteractivePopDisabledKey, valueType: Bool.self) ?? false }
+        set { ext.setAssociatedObject(&Self.isInteractivePopDisabledKey, value: newValue, policy: .retainNonatomic) }
+    }
+    
+    /// pop 手势允许的距离屏幕左边最大距离
+    var interactivePopMaxDistanceToLefeEdge: CGFloat {
+        get { ext.getAssociatedObject(&Self.interactivePopMaxDistanceToLeftEdgeKey, valueType: CGFloat.self) ?? 0 }
+        set { ext.setAssociatedObject(&Self.interactivePopMaxDistanceToLeftEdgeKey, value: newValue, policy: .retainNonatomic) }
+    }
+}
 
 private extension UINavigationController {
     static var fullscreenPopGestureRecognizerKey: UInt8 = 0
