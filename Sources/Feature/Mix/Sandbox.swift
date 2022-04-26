@@ -65,7 +65,7 @@ public extension Sandbox {
     - https://github.com/music4kid/AirSandbox
  */
 
-private class FileController: TableController {
+private class FileController: UITableViewController {
     
     /// 根路径
     private static let rootPath = NSHomeDirectory()
@@ -177,13 +177,19 @@ private extension FileItem {
     var title: String { "\(type.rawValue) \(name)" }
 }
 
-private class FileCell: ExtTableCell {
+private class FileCell: UITableViewCell {
     
     private var titleLabel: UILabel!
     
-    override func setupUI() {
-        super.setupUI()
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
         
+        setupUI()
+    }
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    
+    private func setupUI() {
         titleLabel  = contentView.ext.addLabel(font: UIFont.boldSystemFont(ofSize: 17), color: .darkGray, multiline: true)
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false

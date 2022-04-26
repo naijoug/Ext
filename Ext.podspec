@@ -13,11 +13,17 @@ Pod::Spec.new do |spec|
   spec.ios.deployment_target  = '11.0'
   spec.swift_version          = "5.0"
   spec.requires_arc           = true
-  spec.default_subspecs       = 'Extension', 'UI', 'Feature'
+  spec.default_subspecs       = 'UI', 'Feature'
+  
+  spec.subspec 'Core' do |ss|
+    ss.source_files = 'Sources/Core/**/*'
+  end
   
   spec.subspec 'Extension' do |ss|
-    ss.source_files = ['Sources/Ext.swift', 'Sources/Extension/**/*']
+    ss.source_files = 'Sources/Extension/**/*'
     ss.frameworks = 'UIKit', 'AVKit'
+    
+    ss.dependency 'Ext/Core'
   end
   
   spec.subspec 'UI' do |ss|
@@ -30,7 +36,7 @@ Pod::Spec.new do |spec|
   spec.subspec 'Feature' do |ss|
     ss.source_files = 'Sources/Feature/**/*'
     
-    ss.dependency 'Ext/UI'
+    ss.dependency 'Ext/Extension'
   end
   
 end

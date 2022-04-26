@@ -62,7 +62,7 @@ public final class UserGuider {
 }
 
 /// 引导视图
-private class GuideView: ExtView {
+private class GuideView: UIView {
     
     /// 点击隐藏的区域
     private var hitFrame: CGRect = .zero
@@ -136,6 +136,8 @@ private class GuideView: ExtView {
         self.upImage = upImage
         self.downImage = downImage
         super.init(frame: .zero)
+        
+        setupUI()
     }
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
@@ -143,9 +145,7 @@ private class GuideView: ExtView {
     deinit {
         Ext.debug("tip: \(titleLabel.text ?? "")", tag: .recycle, logEnabled: logEnabled)
     }
-    override func setupUI() {
-        super.setupUI()
-        
+    func setupUI() {
         topView.ext.active()
         bottomView.ext.active()
         leftView.ext.active()

@@ -46,17 +46,17 @@ public class PageController: UIViewController {
 // MARK: - UI
     
     private lazy var pageController: UIPageViewController = {
-        ext.add(UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil)).setup {
-            $0.delegate = self
-            $0.dataSource = self
-            $0.view.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                $0.view.topAnchor.constraint(equalTo: self.view.topAnchor),
-                $0.view.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
-                $0.view.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-                $0.view.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
-            ])
-        }
+        let controller = ext.add(UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal, options: nil))
+        controller.delegate = self
+        controller.dataSource = self
+        controller.view.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            controller.view.topAnchor.constraint(equalTo: self.view.topAnchor),
+            controller.view.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
+            controller.view.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
+            controller.view.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
+        ])
+        return controller
     }()
     
 // MARK: - Lifecycle
