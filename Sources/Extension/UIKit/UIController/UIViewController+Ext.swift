@@ -86,7 +86,7 @@ public extension ExtWrapper where Base: UIViewController {
     /// - Parameters:
     ///   - image: 图片
     ///   - postion: 导航栏位置
-    func dismiss(_ image: UIImage?, position: NavBarPostion = .left) {
+    func setDismissImage(_ image: UIImage?, position: NavBarPostion = .left) {
         switch position {
         case .left:
             base.navigationItem.leftBarButtonItem = base.dismissBarButtonItem(image)

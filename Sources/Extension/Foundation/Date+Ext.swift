@@ -45,13 +45,18 @@ public extension ExtWrapper where Base == Date {
         return format(type.rawValue)
     }
     
+    /**
+     Reference:
+        - https://developer.apple.com/documentation/foundation/dateformatter
+        - https://stackoverflow.com/questions/31469172/show-am-pm-in-capitals-in-swift
+     */
+    
     /// Date -> String
     ///
     /// - Parameter dateFormat: 日期格式 [eg: yyyy-MM-dd HH:mm:ss SSS]
     /// - Returns: String
     func format(_ dateFormat: String) -> String {
         let formatter = DateFormatter()
-        // Reference: https://developer.apple.com/documentation/foundation/dateformatter
         formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = dateFormat
         return formatter.string(from: base)
@@ -78,7 +83,7 @@ public extension ExtWrapper where Base == Date {
         return Date(timeIntervalSince1970: timestamp)
     }
     
-    /// 该时间
+    ///
     func dateWith(day: Int? = nil, hour: Int? = nil, minute: Int? = nil, second: Int? = nil) -> Date {
         let components = DateComponents(day: day, hour: hour, minute: minute, second: second)
         return Calendar.current.date(byAdding: components, to: base) ?? base
