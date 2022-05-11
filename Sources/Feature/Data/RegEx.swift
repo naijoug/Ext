@@ -27,4 +27,19 @@ public extension Ext.RegEx {
     func isValid(_ string: String) -> Bool {
         NSPredicate(format:"SELF MATCHES %@", self.rawValue).evaluate(with: string)
     }
+    
+}
+
+public extension Ext.RegEx {
+    
+    /// 字符串是否匹配正则
+    /// - Parameters:
+    ///   - string: 字符串
+    ///   - pattern: 正则模式串
+    static func isVaild(_ string: String, pattern: String) -> Bool {
+        guard let regEx = try? NSRegularExpression(pattern: pattern, options: []) else { return false }
+        let results = regEx.matches(in: string, range: NSRange(location: 0, length: string.utf16.count))
+        return !results.isEmpty
+    }
+    
 }

@@ -80,6 +80,14 @@ extension Networker {
     
 }
 
+public extension ExtWrapper where Base: Swift.Error {
+    
+    var nsError: NSError { base as NSError }
+    
+}
+
+//public
+
 /**
  Reference:
     - https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Status

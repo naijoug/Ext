@@ -66,7 +66,7 @@ open class PlaceholderTextView: UITextView {
 
 }
 
-extension UITextView {
+public extension UITextView {
     
     /// 插入富文本
     /// - Parameters:

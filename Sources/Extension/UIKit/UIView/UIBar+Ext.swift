@@ -26,7 +26,6 @@ public extension ExtWrapper where Base: UINavigationBar {
         base.setValue(true, forKey: "hidesShadow")
         if #available(iOS 15.0, *) {
             let appearance = UINavigationBarAppearance()
-            appearance.configureWithDefaultBackground()
             appearance.shadowColor = nil // 用于去掉底部分割线
             base.scrollEdgeAppearance = appearance
             base.standardAppearance = appearance
