@@ -7,6 +7,36 @@
 
 import UIKit
 
+public extension Ext {
+    /// 功能
+    enum Feature {
+        case lifecycle
+        case unique
+        case fullscreenPop
+    }
+    
+    private static var features = [Feature]()
+    /// 激活功能
+    static func active(_ features: [Feature]) {
+        Ext.features = features
+        features.forEach { $0.active() }
+    }
+}
+extension Ext.Feature {
+    var isActive: Bool { Ext.features.contains(where: { $0 == self }) }
+    
+    fileprivate func active() {
+        switch self {
+        case .lifecycle:
+            UIViewController.ext.lifecycle()
+        case .unique:
+            UIViewController.ext.unique()
+        case .fullscreenPop:
+            UINavigationController.ext.fullscreenPop()
+        }
+    }
+}
+
 // MARK: - Storyboard
 
 public extension ExtWrapper where Base: UIViewController {
@@ -64,7 +94,8 @@ public extension ExtWrapper where Base: UIViewController {
 }
 
 public extension ExtWrapper where Base: UIViewController {
-    enum NavBarPostion {
+    /// 导航栏图片位置
+    enum ImagePostion {
         case left
         case right
     }
@@ -73,7 +104,7 @@ public extension ExtWrapper where Base: UIViewController {
     /// - Parameters:
     ///   - image: 图片
     ///   - position: 导航栏位置
-    func setPopImage(_ image: UIImage?, position: NavBarPostion = .left) {
+    func setPopImage(_ image: UIImage?, position: ImagePostion = .left) {
         switch position {
         case .left:
             base.navigationItem.leftBarButtonItem = base.popBarButtonItem(image)
@@ -86,7 +117,7 @@ public extension ExtWrapper where Base: UIViewController {
     /// - Parameters:
     ///   - image: 图片
     ///   - postion: 导航栏位置
-    func setDismissImage(_ image: UIImage?, position: NavBarPostion = .left) {
+    func setDismissImage(_ image: UIImage?, position: ImagePostion = .left) {
         switch position {
         case .left:
             base.navigationItem.leftBarButtonItem = base.dismissBarButtonItem(image)
@@ -144,10 +175,12 @@ public extension ExtWrapper where Base: UIViewController {
 public extension ExtWrapper where Base: UINavigationController {
     
     /**
-     导航控制器的根控制器
      Reference:
         - https://stackoverflow.com/questions/1792858/how-do-i-get-the-rootviewcontroller-from-a-pushed-controller
+        - https://stackoverflow.com/questions/10281545/removing-viewcontrollers-from-navigation-stack
      */
+    
+    /// 导航控制器的根控制器
     var rootViewController: UIViewController? { base.viewControllers.first }
     
     /// 删除导航 stack 控制器
@@ -161,17 +194,17 @@ public extension ExtWrapper where Base: UINavigationController {
     ///
     /// - Parameter clss: 控制器类型列表
     func removeControllers(_ clss: [AnyClass]) {
-        var vcs = base.viewControllers
-        let current = vcs.removeLast()
-        for (index, vc) in vcs.enumerated().reversed() {
+        var controllers = base.viewControllers
+        let current = controllers.removeLast()
+        for (index, controller) in controllers.enumerated().reversed() {
             for cls in clss {
-                if vc.isMember(of: cls) {
-                    vcs.remove(at: index)
+                if controller.isMember(of: cls) {
+                    controllers.remove(at: index)
                 }
             }
         }
-        vcs.append(current)
-        base.setViewControllers(vcs, animated: false)
+        controllers.append(current)
+        base.setViewControllers(controllers, animated: false)
     }
     
     /// 打印当前导航堆栈

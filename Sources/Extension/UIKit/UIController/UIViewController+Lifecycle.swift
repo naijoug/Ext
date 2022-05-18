@@ -7,10 +7,7 @@
 
 import UIKit
 
-public extension ExtWrapper where Base: UIViewController {
-    
-    /// 控制类名
-    var className: String { "\(type(of: base))" }
+extension ExtWrapper where Base: UIViewController {
     
     /// Debug UIViewController Lifecycle
     static func lifecycle() {
@@ -50,7 +47,7 @@ private extension ExtWrapper where Base: UIViewController {
     
     func log(_ lifecycle: Lifecycle) {
         guard isValid else { return }
-        Ext.debug("\(lifecycle.title) \t | \(className)", tag: .custom(lifecycle.tag), locationEnabled: false)
+        Ext.debug("\(lifecycle.title) \t | \(typeName)", tag: .custom(lifecycle.tag), locationEnabled: false)
     }
 }
 
@@ -84,7 +81,7 @@ private extension UIViewController {
     func lifecycle_viewDidLoad() {
         let deallocator = Deallocator { [weak self] in
             guard let `self` = self else { return }
-            Ext.debug("Deallocated: \(self.ext.className)", tag: .recycle)
+            Ext.debug("Deallocated: \(self.ext.typeName)", tag: .recycle)
         }
         ext.setAssociatedObject(&Self.deallocatorKey, value: deallocator, policy: .retainNonatomic)
         
@@ -116,7 +113,7 @@ private extension UIViewController {
 private extension ExtWrapper where Base: UIViewController {
     /// 是否为 UIKit 系统控制器
     private var isUIKit: Bool {
-        let name = className
+        let name = typeName
         let map = [ // 系统控制器表
             "UIInputWindowController": true,
             "UIAlertController": true,
@@ -129,7 +126,7 @@ private extension ExtWrapper where Base: UIViewController {
     }
     /// 是否为 DoKit 控制器
     private var isDoKit: Bool {
-        let name = className
+        let name = typeName
         return name.hasPrefix("Doraemon") && name.hasSuffix("Controller")
     }
     

@@ -1,8 +1,8 @@
 //
-//  FullscreenPop.swift
+//  UIViewController+FullscreenPop.swift
 //  Ext
 //
-//  Created by guojian on 2022/4/22.
+//  Created by naijoug on 2022/5/18.
 //
 
 import UIKit
@@ -12,14 +12,21 @@ import UIKit
     - https://github.com/forkingdog/FDFullscreenPopGesture
  */
 
-public extension Ext {
-    /// 是否启动全屏 pop 功能
-    private(set) static var isFullscreenPopEnabled: Bool = false
-    
-    /// 启用全屏 pop 功能
-    static func fullscreenPopEnabled() {
-        isFullscreenPopEnabled = true
+extension ExtWrapper where Base: UINavigationController {
+    /// 全屏 pop 功能
+    static func fullscreenPop() {
         UINavigationController.fullscreenPop()
+    }
+    
+    /// 全屏 pop 手势
+    var fullscreenPopGestureRecognizer: UIPanGestureRecognizer {
+        guard let pan = base.ext.getAssociatedObject(&Base.fullscreenPopGestureRecognizerKey, valueType: UIPanGestureRecognizer.self) else {
+            let pan = UIPanGestureRecognizer()
+            pan.maximumNumberOfTouches = 1
+            base.ext.setAssociatedObject(&Base.fullscreenPopGestureRecognizerKey, value: pan, policy: .retainNonatomic)
+            return pan
+        }
+        return pan
     }
 }
 
@@ -31,19 +38,6 @@ public extension ExtWrapper where Base: UIViewController {
         base.isInteractivePopDisabled = disabled
     }
     
-}
-
-public extension ExtWrapper where Base: UINavigationController {
-    /// 全屏 pop 手势
-    var fullscreenPopGestureRecognizer: UIPanGestureRecognizer {
-        guard let pan = base.ext.getAssociatedObject(&Base.fullscreenPopGestureRecognizerKey, valueType: UIPanGestureRecognizer.self) else {
-            let pan = UIPanGestureRecognizer()
-            pan.maximumNumberOfTouches = 1
-            base.ext.setAssociatedObject(&Base.fullscreenPopGestureRecognizerKey, value: pan, policy: .retainNonatomic)
-            return pan
-        }
-        return pan
-    }
 }
 
 // MARK: - Private

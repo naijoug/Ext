@@ -9,11 +9,16 @@ import UIKit
 
 public extension ExtWrapper where Base: UIBarItem {
     
-    // Reference: https://stackoverflow.com/questions/14318368/uibarbuttonitem-how-can-i-find-its-frame
+    /**
+     Reference:
+        - https://stackoverflow.com/questions/14318368/uibarbuttonitem-how-can-i-find-its-frame
+        - https://stackoverflow.com/questions/24236823/how-to-adjust-tab-bar-badge-position
+     */
     
     /// 返回 UIBarItem 的视图
-    var view: UIView? { return base.value(forKey: "view") as? UIView }
-    
+    var view: UIView? { base.value(forKey: "view") as? UIView }
+    /// 返回 UIBarItem 的 badgeView
+    var badgeView: UIView? { view?.subviews.first(where: { NSStringFromClass($0.classForCoder) == "_UIBadgeView" }) }
 }
 
 // MARK: - NavigationBar

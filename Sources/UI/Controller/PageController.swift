@@ -77,7 +77,7 @@ extension PageController: UIGestureRecognizerDelegate {
      */
     
     private func setupPan() {
-        guard Ext.isFullscreenPopEnabled else { return }
+        guard Ext.Feature.fullscreenPop.isActive else { return }
         guard let scrollView = pageController.ext.scrollView else { return }
         let pan = UIPanGestureRecognizer()
         pan.delegate = self
