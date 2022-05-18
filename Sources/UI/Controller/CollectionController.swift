@@ -53,7 +53,7 @@ extension CollectionController {
     }
 }
 
-// MARK: - Delegate
+// MARK: - DataSource & Delegate
 
 extension CollectionController: UICollectionViewDataSource {
     

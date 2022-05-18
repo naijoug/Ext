@@ -52,6 +52,10 @@ public extension String {
     func substring(toIndex: Int) -> String {
         return self[0 ..< max(0, toIndex)]
     }
+    
+    func substring(with nsRange: NSRange) -> String {
+        self[nsRange.location..<(nsRange.location + nsRange.length)]
+    }
 }
 
 public extension ExtWrapper where Base == String {
@@ -188,22 +192,6 @@ public extension ExtWrapper where Base == String {
     var emojis: [Character] { base.filter { $0.ext.isEmoji } }
     /// 表情
     var emojiScalars: [UnicodeScalar] { base.filter { $0.ext.isEmoji }.flatMap { $0.unicodeScalars } }
-    
-    
-    
-    /// 正则表达式替换
-    /// - Parameters:
-    ///   - pattern: 匹配的正则表达式
-    ///   - with: 替换字符
-    ///   - options:
-    func regexReplace(pattern: String,
-                      with: String,
-                      options: NSRegularExpression.Options = [.caseInsensitive]) -> String {
-        guard let regex = try? NSRegularExpression(pattern: pattern, options: options) else { return base }
-        return regex.stringByReplacingMatches(in: base, options: [],
-                                              range: NSRange(location: 0, length: base.count),
-                                              withTemplate: with)
-    }
 }
 
 // MARK: - Crypto

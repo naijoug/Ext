@@ -27,11 +27,6 @@ public extension Ext.RegEx {
     func isValid(_ string: String) -> Bool {
         NSPredicate(format:"SELF MATCHES %@", self.rawValue).evaluate(with: string)
     }
-    
-}
-
-public extension Ext.RegEx {
-    
     /// 字符串是否匹配正则
     /// - Parameters:
     ///   - string: 字符串
@@ -42,4 +37,43 @@ public extension Ext.RegEx {
         return !results.isEmpty
     }
     
+}
+
+public extension Ext.RegEx {
+    struct MatchResult {
+        public let range: NSRange
+        public let match: String
+    }
+    
+    /// 正则解析文本
+    /// - Parameters:
+    ///   - text: 文本
+    ///   - pattern: 正则模式串
+    /// - Returns: 解析匹配结果(倒序)
+    static func parse(_ text: String, pattern: String) -> [MatchResult]? {
+        guard let regEx = try? NSRegularExpression(pattern: pattern, options: []) else { return nil }
+        let results = regEx.matches(in: text, options: [], range: NSRange(location: 0, length: text.utf16.count))
+                            .reversed()
+                            .compactMap({
+                                MatchResult(range: $0.range, match: text.substring(with: $0.range))
+                            })
+        return results
+    }
+    
+    
+    /// 正则替换
+    /// - Parameters:
+    ///   - text: 要处理的文本
+    ///   - with: 替换字符
+    ///   - pattern: 正则模式串
+    ///   - options: 正则选项
+    func replace(_ text: String, with: String, pattern: String,
+                 options: NSRegularExpression.Options = [.caseInsensitive]) -> String {
+        guard let regex = try? NSRegularExpression(pattern: pattern, options: options) else { return text }
+        return regex.stringByReplacingMatches(
+            in: text, options: [],
+            range: NSRange(location: 0, length: text.count),
+            withTemplate: with
+        )
+    }
 }

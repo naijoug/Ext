@@ -347,7 +347,9 @@ private extension ExtPlayer {
         Ext.debug("didPlayToEnd", logEnabled: logEnabled)
         Ext.debug("didPlayToEnd, \(self)")
         // play to end, seek to start
-        avPlayer.seek(to: .zero)
+        if item.duration.seconds > 0 {
+            avPlayer.seek(to: .zero)
+        }
         status = .playToEnd
     }
     @objc
@@ -527,6 +529,7 @@ extension AVPlayerItem {
         var msg = super.description
         if let url = asset.ext.url { msg += " | \(url.ext.log)" }
         msg += " | status \(status)"
+        msg += " | duration \(duration.seconds)"
         msg += " | isPlaybackBufferEmpty: \(isPlaybackBufferEmpty)"
         msg += " | isPlaybackLikelyToKeepUp: \(isPlaybackLikelyToKeepUp)"
         msg += " | isPlaybackBufferFull: \(isPlaybackBufferFull)"

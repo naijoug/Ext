@@ -36,6 +36,21 @@ public extension RouterParam {
     func mode() -> Router.Mode? { nil }
 }
 
+/// 可路由协议
+public protocol Routable {
+    /// 注册 route 功能
+    static func register()
+}
+
+public extension Router {
+    /// 注册可路由模块
+    static func register(_ routes: [Routable.Type]) {
+        routes.forEach { route in
+            route.register()
+        }
+    }
+}
+
 /// 简单路由
 public final class Router {
     public static let shared = Router()

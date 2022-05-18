@@ -79,7 +79,7 @@ extension TableController {
     
 }
 
-// MARK: - Table
+// MARK: - DataSource & Delegate
 
 extension TableController: UITableViewDataSource {
     open func numberOfSections(in tableView: UITableView) -> Int { 1 }
