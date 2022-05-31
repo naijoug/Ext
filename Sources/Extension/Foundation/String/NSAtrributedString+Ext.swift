@@ -20,6 +20,25 @@ public extension ExtWrapper where Base: NSAttributedString {
 }
 
 public extension ExtWrapper where Base: NSAttributedString {
+    /// 遍历富文本
+    func enumerate(in range: NSRange? = nil, handler: ([NSAttributedString.Key : Any], NSRange, UnsafeMutablePointer<ObjCBool>) -> Void) {
+        base.enumerateAttributes(in: range ?? base.ext.rangOfAll, options: []) { attri, range, stop in
+            handler(attri, range, stop)
+        }
+    }
+    
+    /// 解码富文本附件
+    func decodeAttachments() -> [Any] {
+        var items = [Any]()
+        enumerate { attri, _, _ in
+            guard let attachment = attri[.attachment] else { return }
+            items.append(attachment)
+        }
+        return items
+    }
+}
+
+public extension ExtWrapper where Base: NSAttributedString {
     
     /// 富文本拼接
     /// - Parameter attris: 富文本数组

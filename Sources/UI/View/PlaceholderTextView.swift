@@ -101,4 +101,14 @@ public extension UITextView {
             self.selectedRange = NSRange(location: range.location + attri.length, length: 0)
         }
     }
+    
+    /// 替换富文本
+    func replace(_ attri: NSAttributedString, in range: NSRange) {
+        // 当前光标位置
+        let mAttri = attributedText?.ext.mutable ?? NSMutableAttributedString()
+        mAttri.replaceCharacters(in: range, with: attri)
+        self.attributedText = mAttri
+        
+        self.selectedRange = NSRange(location: range.location + attri.length, length: 0)
+    }
 }
