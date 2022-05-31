@@ -12,7 +12,7 @@ open class CollectionController: BaseScrollController {
     open override var scrollView: UIScrollView { collectionView }
     
     public private(set) lazy var collectionView: UICollectionView = {
-        let collectionView = view.ext.add(UICollectionView(frame: .zero, collectionViewLayout: layout))
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.delegate = self
         collectionView.dataSource = self
         configCollection(collectionView)
@@ -21,8 +21,8 @@ open class CollectionController: BaseScrollController {
     
     open override func viewDidLoad() {
         super.viewDidLoad()
-        
-        layoutCollection()
+        view.addSubview(collectionView)
+        layoutCollection(collectionView)
     }
 }
 
@@ -33,7 +33,9 @@ extension CollectionController {
     /// collectionView 布局 (默认: FlowLayout)
     @objc
     open var layout: UICollectionViewLayout {
-        UICollectionViewFlowLayout()
+        let layout = UICollectionViewFlowLayout()
+        layout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
+        return layout
     }
     
     /// 配置 collection
@@ -42,10 +44,10 @@ extension CollectionController {
     
     /// 布局 collection
     @objc
-    open func layoutCollection() {
+    open func layoutCollection(_ collectionView: UICollectionView) {
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            collectionView.topAnchor.constraint(equalTo: view.topAnchor),
             collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
@@ -56,7 +58,6 @@ extension CollectionController {
 // MARK: - DataSource & Delegate
 
 extension CollectionController: UICollectionViewDataSource {
-    
     open func numberOfSections(in collectionView: UICollectionView) -> Int {
         1
     }
@@ -68,6 +69,5 @@ extension CollectionController: UICollectionViewDataSource {
     }
 }
 
-extension CollectionController: UICollectionViewDelegate {
-    
-}
+extension CollectionController: UICollectionViewDelegate {}
+extension CollectionController: UICollectionViewDelegateFlowLayout {}

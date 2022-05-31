@@ -41,15 +41,14 @@ open class TableController: BaseScrollController {
         tableView.dataSource = self
         tableView.ext.registerClass(UnknownCell.self)
         tableView.tableFooterView = UIView()
-        self.configTable(tableView)
+        configTable(tableView)
         return tableView
     }()
     
     open override func viewDidLoad() {
         super.viewDidLoad()
         view.addSubview(tableView)
-        
-        layoutTable()
+        layoutTable(tableView)
     }
 }
 
@@ -67,7 +66,7 @@ extension TableController {
     
     /// 布局 TableView
     @objc
-    open func layoutTable() {
+    open func layoutTable(_ tableView: UITableView) {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.topAnchor),

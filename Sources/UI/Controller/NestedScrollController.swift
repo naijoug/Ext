@@ -15,9 +15,9 @@ import UIKit
 /// 嵌套内部滚动视图协议
 public protocol NestedInnerViewScrollable {
     /// 内部滚动的视图
-    var scrollView: UIScrollView { get }
+    var innerScrollView: UIScrollView { get }
     /// 内部视图滚动回调
-    var didScrollHandler: Ext.VoidHandler? { get set }
+    var didInnerScrollHandler: Ext.VoidHandler? { get set }
 }
 
 /// 可嵌套滚动视图
@@ -85,11 +85,11 @@ open class NestedScrollController: UIViewController {
     public var innerItems = [NestedInnerViewScrollable]() {
         didSet {
             for var item in innerItems {
-                nestedScrollView.scrollRecongnizers.append(contentsOf: item.scrollView.gestureRecognizers ?? [])
-                item.scrollView.showsVerticalScrollIndicator = true
-                item.didScrollHandler = { [weak self] in
+                nestedScrollView.scrollRecongnizers.append(contentsOf: item.innerScrollView.gestureRecognizers ?? [])
+                item.innerScrollView.showsVerticalScrollIndicator = true
+                item.didInnerScrollHandler = { [weak self] in
                     guard let `self` = self else { return }
-                    self.innerScrollViewDidScroll(item.scrollView)
+                    self.innerScrollViewDidScroll(item.innerScrollView)
                 }
             }
         }
@@ -148,8 +148,8 @@ extension NestedScrollController: UIScrollViewDelegate {
             
             // 调整所有子滚动视图偏移到顶端
             for item in innerItems {
-                guard scrollView != item.scrollView else { continue }
-                item.scrollView.contentOffset.y = 0
+                guard scrollView != item.innerScrollView else { continue }
+                item.innerScrollView.contentOffset.y = 0
             }
         }
         // 更新指示条显示状态
