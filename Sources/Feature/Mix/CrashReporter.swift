@@ -57,6 +57,12 @@ private extension CrashReporter {
     /// 保存 crash 内容
     func save(_ crash: [String: Any]) {
         guard let crashUrl = crashURL else { return }
+        let date = Date()
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss SSS"
+        var crash = crash
+        crash["timestamp"] = date.timeIntervalSince1970
+        crash["time"] = formatter.string(from: date)
         DispatchQueue.global().async {
             let crashString = Ext.JSON.toString(crash, prettyPrinted: true) ?? "\(crash)"
             FileManager.default.ext.save(crashString, to: crashUrl)
