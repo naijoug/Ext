@@ -131,6 +131,23 @@ open class ExtCollectionReusableView: UICollectionReusableView {
 
 extension Ext {
     
+    open class WrapperNavBar<T: UIView>: ExtNavBar {
+        public private(set) var wrapperView: T!
+        
+        open override func setupUI() {
+            super.setupUI()
+            
+            wrapperView = ext.add(T())
+            wrapperView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                wrapperView.topAnchor.constraint(equalTo: self.topAnchor),
+                wrapperView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
+                wrapperView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+                wrapperView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
+            ])
+        }
+    }
+    
     open class WrapperTableCell<T: UIView>: ExtTableCell {
         public private(set) var wrapperView: T!
         
