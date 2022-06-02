@@ -43,6 +43,13 @@ public class PageController: UIViewController {
         }
     }
     
+    /// 是否可以滑动
+    public var isScrollEnabled: Bool = true {
+        didSet {
+            pageController.ext.scrollView?.isScrollEnabled = isScrollEnabled
+        }
+    }
+    
 // MARK: - UI
     
     private lazy var pageController: UIPageViewController = {
