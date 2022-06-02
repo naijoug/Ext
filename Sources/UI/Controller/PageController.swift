@@ -113,6 +113,13 @@ extension PageController: UIGestureRecognizerDelegate {
         Ext.debug("isInteractivePopDisabled: \(currentIndex != 0) | currentIndex: \(currentIndex)", tag: .fire)
     }
     
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        var gestures = [UIGestureRecognizer]()
+        controllers.compactMap({ $0 as? BaseScrollController }).forEach {
+            gestures.append(contentsOf: $0.scrollView.gestureRecognizers ?? [])
+        }
+        return gestures.contains(otherGestureRecognizer)
+    }
     public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         guard let gesture = gestureRecognizer as? UIPanGestureRecognizer else { return true }
         let translation = gesture.translation(in: gestureRecognizer.view)
