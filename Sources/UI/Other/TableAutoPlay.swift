@@ -170,26 +170,17 @@ public extension TableAutoPlay {
         case .didEndDragging(_, let decelerate):
             guard !decelerate else { return }
             Ext.debug("拖拽无减速，直接静止", logEnabled: logEnabled)
-            innerScrollEnd()
+            scrollToEnd()
         case .willBeginDecelerating:
             Ext.debug("停止拖拽，开始减速", logEnabled: logEnabled)
         case .didEndDecelerating:
             Ext.debug("拖拽之后减速停止", logEnabled: logEnabled)
-            innerScrollEnd()
+            scrollToEnd()
         }
     }
     
 }
 private extension TableAutoPlay {
-    
-    func innerScrollEnd() {
-        Ext.debug("isDragScrolling: \(isDragScrolling)", logEnabled: logEnabled)
-        guard isDragScrolling else { return }
-        isDragScrolling = false
-        
-        scrollToEnd()
-    }
-    
     /// 正在手指拖拽
     @objc
     func scrollTracking() {
@@ -200,16 +191,16 @@ private extension TableAutoPlay {
     /// 滚动结束
     @objc
     func scrollToEnd() {
+        Ext.debug("isDragScrolling: \(isDragScrolling)", logEnabled: logEnabled)
+        guard isDragScrolling else { return }
+        isDragScrolling = false
         guard !isStopping else { return }
         Ext.debug("处理滚动结束...", logEnabled: logEnabled)
         playBest()
     }
     /// 滚动到顶部
     @objc
-    func scrollToTop() {
-        
-    }
-    
+    func scrollToTop() {}
 }
 
 // MARK: - Visiable
