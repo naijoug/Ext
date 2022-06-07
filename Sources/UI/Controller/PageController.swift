@@ -124,7 +124,8 @@ extension PageController: UIGestureRecognizerDelegate {
         guard let gesture = gestureRecognizer as? UIPanGestureRecognizer else { return true }
         let translation = gesture.translation(in: gestureRecognizer.view)
         Ext.debug("translation: \(translation) | \(currentIndex) | \(isTransitioning)", tag: .fire)
-        guard translation.x <= 0 else {
+        guard translation.x != 0 else { return false }
+        guard translation.x < 0 else {
             return currentIndex == 0 && !isTransitioning
         }
         return currentIndex == (controllers.count - 1) && !isTransitioning

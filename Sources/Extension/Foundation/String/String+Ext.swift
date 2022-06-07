@@ -221,7 +221,7 @@ extension ExtWrapper where Base == String {
         }
         return digestData.map { String(format: "%02hhx", $0) }.joined()
     }
-
+    
     /// base64 编码
     public func base64Encoded() -> String? {
         return base.data(using: .utf8)?.base64EncodedString()
