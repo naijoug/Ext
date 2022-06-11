@@ -69,7 +69,7 @@ public final class Router {
     
     /// modal 模式导航控制器包装
     public lazy var modalWrapper: Ext.FuncHandler<UIViewController, UINavigationController> = {
-        { NavigationController(rootViewController: $0) }
+        { UINavigationController(rootViewController: $0) }
     }()
 }
 
@@ -269,17 +269,6 @@ public extension Router {
     func toSystemShare(_ activityItems: [Any]?, activities: [UIActivity]? = nil, handler: Ext.ResultDataHandler<String>? = nil) {
         guard let vc = systemShare(activityItems, activities: activities, handler: handler) else { return }
         goto(vc, mode: .modal())
-    }
-    
-    /// 进入内嵌浏览器
-    /// - Parameter resource: 网页资源
-    /// - Parameter title: 导航栏标题
-    /// - Parameter mode: 跳转模式
-    func toWeb(_ resource: WebResource, title: String? = nil, mode: Mode = .push()) {
-        let vc = WebController(resource)
-        vc.title = title
-        vc.isModal = mode.isModal
-        goto(vc, mode: mode)
     }
 }
 

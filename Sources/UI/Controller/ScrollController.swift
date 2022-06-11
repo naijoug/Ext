@@ -132,3 +132,151 @@ extension BaseScrollController: UIScrollViewDelegate {
         scrollHandler?(.didEndDecelerating(scrollView))
     }
 }
+
+// MARK: - ScrollView Dragger
+
+/**
+ ScrollView 拖拽逻辑处理
+ > 说明 : 上下滑动 ScrollView, 调整 TargetView 的高度
+  | ----------- |
+  |  TargetView |
+  | ----------- |
+  |  ScrollView |
+  | ----------- |
+ **/
+public class ScrollViewDragger {
+    
+    /**
+     Reference:
+        - https://stackoverflow.com/questions/2543670/finding-the-direction-of-scrolling-in-a-uiscrollview
+     */
+    
+    /// 拖拽位置
+    private var dragOffsetY: CGFloat = 0
+    
+    /// 是否打印日志
+    public var logEnabled: Bool = false
+    
+    private var minRatio: CGFloat = 0
+    private var maxRatio: CGFloat = 0
+    
+    /// 目标调整高度视图
+    private weak var targetView: UIView?
+    /// 高度更新回调
+    private var updateHandler: Ext.DataHandler<CGFloat>?
+    
+    public init(_ targetView: UIView, updateHandler: Ext.DataHandler<CGFloat>?) {
+        self.targetView = targetView
+        self.updateHandler = updateHandler
+    }
+    
+    /// 处理滚动状态
+    public func handle(_ status: ScrollViewStatus, minRatio: CGFloat, maxRatio: CGFloat) {
+        self.minRatio = minRatio
+        self.maxRatio = maxRatio
+        guard minRatio > 0, maxRatio > 0, maxRatio > minRatio else { return }
+        //Ext.debug("status: \(status)", logEnabled: scrollLog)
+        switch status {
+        case .willBeginDragging(let scrollView):
+            Ext.debug("will begin draging dragOffsetY: \(dragOffsetY)", logEnabled: logEnabled)
+            // 记录拖拽位置
+            dragOffsetY = scrollView.contentOffset.y
+        case .didScroll(let scrollView):
+            guard scrollView.isDragging, scrollView.isTracking else { return }
+            //Ext.debug("\(scrollView.isDragging) | \(scrollView.isTracking)", logEnabled: scrollLog)
+            let vel = scrollView.panGestureRecognizer.velocity(in: scrollView)
+            let deltaY = scrollView.contentOffset.y - dragOffsetY
+            Ext.debug("didScroll | deltaY: \(deltaY) | vel: \(vel)", logEnabled: logEnabled)
+            self.handleDragging(scrollView, deltaY: deltaY)
+        case .willEndDragging(let scrollView, let velocity, let targetContentOffset):
+            let targetOffsetY = targetContentOffset.pointee.y
+            let deltaY = targetOffsetY - dragOffsetY
+            Ext.debug("willEndDragging | dragOffsetY: \(dragOffsetY) | targetOffsetY: \(targetOffsetY) | deltaY: \(deltaY) | vel: \(velocity)", logEnabled: logEnabled)
+            self.handleDragging(scrollView, deltaY: deltaY, velocityY: velocity.y, isEnd: true)
+        default: ()
+        }
+    }
+    
+    private func handleDragging(_ scrollView: UIScrollView, deltaY: CGFloat, velocityY: CGFloat = 0, isEnd: Bool = false) {
+        guard let targetView = targetView else { return }
+        
+        let offsetY = scrollView.contentOffset.y
+        Ext.debug("isEnd: \(isEnd) | deltaY: \(deltaY) | dragOffsetY: \(dragOffsetY) | offsetY: \(offsetY)", logEnabled: logEnabled)
+        guard deltaY != 0 else { return }
+        
+        let currentW = targetView.frame.width.rounded()
+        let currentH = targetView.frame.height.rounded()
+        guard currentW > 0 else { return }
+        
+        if offsetY == 0, dragOffsetY != 0 {
+            dragOffsetY = offsetY
+            Ext.debug("回零", logEnabled: logEnabled)
+            return
+        }
+        
+        let minH = (minRatio * currentW).rounded()
+        let maxH = (maxRatio * currentW).rounded()
+        
+        var targetH = max(minH, min(maxH, currentH - deltaY)).rounded()
+        
+        Ext.debug("height: \(minH) ~ \(maxH) | currentH \(currentH) -> targetH \(targetH)", logEnabled: logEnabled)
+        
+        guard isEnd else {
+            Ext.debug("拖动中:", logEnabled: logEnabled)
+            if deltaY > 0 {
+                let upEnabled = currentH > minH
+                Ext.debug("     向上推 \(upEnabled)", logEnabled: logEnabled)
+                guard upEnabled else { return }
+            } else {
+                let downEnabled = currentH < maxH
+                Ext.debug("     向下拉 \(downEnabled)", logEnabled: logEnabled)
+                guard downEnabled else { return }
+            }
+            guard currentH != targetH else { return }
+            Ext.debug("     目标视图高度改变: \(currentH) -> \(targetH)", logEnabled: logEnabled)
+            
+            scrollView.contentOffset.y = dragOffsetY
+            updateHandler?(targetH)
+            return
+        }
+        Ext.debug("拖动结束:", logEnabled: logEnabled)
+        if velocityY == 0 {
+            Ext.debug("     无加速度", logEnabled: logEnabled)
+            if targetH < minH {
+                Ext.debug("     最小化", logEnabled: logEnabled)
+                targetH = minH
+            } else {
+                Ext.debug("     最小 ~ 最大中间", logEnabled: logEnabled)
+                guard offsetY <= 0 else { return }
+            }
+        } else {
+            Ext.debug("     有加速度 \(velocityY)", logEnabled: logEnabled)
+            if velocityY > 0 { // 向上
+                Ext.debug("     向上推", logEnabled: logEnabled)
+                targetH = minH
+            } else { // 向下
+                Ext.debug("     向下拉 \(targetH)", logEnabled: logEnabled)
+                guard offsetY <= 0 else { return }
+                targetH = maxH
+            }
+        }
+        adjust(targetView, targetH: targetH)
+    }
+    
+    /// 调整高度
+    private func adjust(_ targetView: UIView, targetH: CGFloat, completion handler: Ext.VoidHandler? = nil) {
+        let currentH = targetView.frame.height.rounded()
+        guard currentH != targetH else {
+            Ext.debug("不需要改变高度", logEnabled: logEnabled)
+            handler?()
+            return
+        }
+        Ext.debug("目标视图改变高度... \(currentH) -> \(targetH)", logEnabled: logEnabled)
+        UIView.animate(withDuration: 0.3) {
+            self.updateHandler?(targetH)
+            targetView.superview?.layoutIfNeeded()
+        } completion: { _ in
+            handler?()
+        }
+    }
+}

@@ -153,13 +153,18 @@ private extension Ext {
     private static func logToFile(_ message: String) {
         // Reference: https://stackoverflow.com/questions/27327067/append-text-or-data-to-text-file-in-swift
         guard let cachesUrl = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return }
-        let logUrl = cachesUrl.appendingPathComponent("Logs", isDirectory: true)
-        FileManager.default.ext.createIfNotExists(logUrl)
-        let fileName = "Ext_\(Date().ext.format(type: .yyyy_MM_dd)).log"
-        let logFile = logUrl.appendingPathComponent(fileName)
+        let logFolder = cachesUrl.appendingPathComponent("Logs", isDirectory: true)
+        if !FileManager.default.fileExists(atPath: logFolder.path) {
+            try? FileManager.default.createDirectory(atPath: logFolder.path, withIntermediateDirectories: true)
+        }
+        let date = Date()
+        let formatter = DateFormatter()
         
-        let timestamp = Date().ext.format(type: .HH_mm_ss_SSS)
-        guard let data = (timestamp + ": " + message + "\n").data(using: String.Encoding.utf8) else { return }
+        formatter.dateFormat = "yyyy-MM-dd"
+        let logFile = logFolder.appendingPathComponent("Ext_\(formatter.string(from: date)).log")
+        
+        formatter.dateFormat = "HH:mm:ss SSS"
+        guard let data = (formatter.string(from: date) + " | " + message + "\n").data(using: String.Encoding.utf8) else { return }
         
         if FileManager.default.fileExists(atPath: logFile.path) {
             if let fileHandle = try? FileHandle(forWritingTo: logFile) {
@@ -168,14 +173,16 @@ private extension Ext {
                 fileHandle.closeFile()
             }
         } else {
-            try? data.write(to: logFile, options: .atomicWrite)
+            try? data.write(to: logFile)
         }
     }
     
     /// 日志内容
     private static func logMessage<T>(_ message: T, error: Swift.Error? = nil, tag: Tag = .normal, locationEnabled: Bool = true,
                                       file: String = #file, line: Int = #line, function: String = #function) -> String {
-        var log = "Debug \(Date().ext.logTime) \(tag)"
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss SSS"
+        var log = "Debug \(formatter.string(from: Date())) \(tag)"
         if locationEnabled { log += " 【\(codeLocation(file: file, line: line, function: function))】" }
         log += " \(message)"
         if let error = error { log += " \(Tag.error) \(error.localizedDescription)" }

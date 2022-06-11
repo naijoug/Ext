@@ -43,6 +43,13 @@ public class PageController: UIViewController {
         }
     }
     
+    /// 是否可以滑动
+    public var isScrollEnabled: Bool = true {
+        didSet {
+            pageController.ext.scrollView?.isScrollEnabled = isScrollEnabled
+        }
+    }
+    
 // MARK: - UI
     
     private lazy var pageController: UIPageViewController = {
@@ -106,11 +113,19 @@ extension PageController: UIGestureRecognizerDelegate {
         Ext.debug("isInteractivePopDisabled: \(currentIndex != 0) | currentIndex: \(currentIndex)", tag: .fire)
     }
     
+    public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        var gestures = [UIGestureRecognizer]()
+        controllers.compactMap({ $0 as? BaseScrollController }).forEach {
+            gestures.append(contentsOf: $0.scrollView.gestureRecognizers ?? [])
+        }
+        return gestures.contains(otherGestureRecognizer)
+    }
     public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         guard let gesture = gestureRecognizer as? UIPanGestureRecognizer else { return true }
         let translation = gesture.translation(in: gestureRecognizer.view)
         Ext.debug("translation: \(translation) | \(currentIndex) | \(isTransitioning)", tag: .fire)
-        guard translation.x <= 0 else {
+        guard translation.x != 0 else { return false }
+        guard translation.x < 0 else {
             return currentIndex == 0 && !isTransitioning
         }
         return currentIndex == (controllers.count - 1) && !isTransitioning

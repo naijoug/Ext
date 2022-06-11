@@ -50,6 +50,8 @@ open class TableController: BaseScrollController {
         view.addSubview(tableView)
         layoutTable(tableView)
     }
+    
+    private var cellHeights = [IndexPath: CGFloat]()
 }
 
 // MARK: - Override
@@ -99,6 +101,21 @@ extension TableController: UITableViewDelegate {
     
     open func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+    }
+    
+    /**
+     Solution:
+        - https://stackoverflow.com/questions/28244475/reloaddata-of-uitableview-with-dynamic-cell-heights-causes-jumpy-scrolling
+        - https://stackify.dev/822926-uitableview-is-jumping-when-i-insert-new-rows
+        - https://developer.apple.com/forums/thread/86703
+        - https://github.com/smileyborg/TableViewCellWithAutoLayoutiOS8/issues/26
+        - https://medium.com/compass-true-north/solved-uitableview-jumps-on-cell-deletion-9a43fdec8de0
+     */
+    open func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        cellHeights[indexPath] = cell.frame.size.height
+    }
+    open func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+        cellHeights[indexPath] ?? UITableView.automaticDimension
     }
     
 //    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {

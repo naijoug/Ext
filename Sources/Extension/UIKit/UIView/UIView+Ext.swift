@@ -395,6 +395,7 @@ public extension ExtWrapper where Base: UIView {
 /**
  Reference:
     - http://www.lymanli.com/2018/11/10/subtract-mask/
+    - https://github.com/lmf12/MFSubtractMask
     - https://stackoverflow.com/questions/31661023/change-color-of-certain-pixels-in-a-uiimage
  */
 

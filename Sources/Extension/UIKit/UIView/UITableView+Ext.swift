@@ -108,13 +108,23 @@ public extension ExtWrapper where Base: UITableView {
         })
     }
     
+    /// 刷新数据 & 滚动到最底部
+    func reloadDataToBottom(_ animated: Bool = true) {
+        UIView.animate(withDuration: 0, animations: {
+            base.reloadData()
+        }, completion:{ _ in
+            scrollTo(.bottom, animated: animated)
+        })
+    }
+    
+    
     enum Position {
         case top
         case bottom
     }
     
     func scrollTo(_ postion: Position, animated: Bool = true) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(300)) {
+        DispatchQueue.main.asyncAfter(deadline: animated ? (.now() + .milliseconds(300)) : .now()) {
             let numberOfSections = base.numberOfSections
             guard numberOfSections > 0 else { return }
             switch postion {
