@@ -8,9 +8,7 @@
 import UIKit
 
 public protocol PageControllerDelegate: AnyObject {
-    
     func pageController(_ controller: PageController, didAction action: PageController.Action)
-    
 }
 
 public class PageController: UIViewController {

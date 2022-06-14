@@ -105,59 +105,22 @@ public extension ExtWrapper where Base == Date {
     }
 }
 
-extension ExtWrapper where Base == Date {
+public extension ExtWrapper where Base == Date {
 
     /**
-        - Reference: https://stackoverflow.com/questions/43663622/is-a-date-in-same-week-month-year-of-another-date-in-swift
+     Reference:
+        - https://stackoverflow.com/questions/43663622/is-a-date-in-same-week-month-year-of-another-date-in-swift
         - https://github.com/melvitax/DateHelper
      */
     
-    /// 日期状态
-    public enum DateStatus {
-        /// 其它时间
-        case normal
-        /// 今年
-        case thisYear
-        /// 上个月
-        case lastMonth
-        /// 本月
-        case thisMonth
-        /// 上周
-        case lastWeek
-        /// 本周
-        case thisWeek
-        /// 前天
-        case twoDaysAgo
-        /// 昨天
-        case yesterday
-        /// 今天
-        case today
-        /// 明天
-        case tomorrow
-    }
-    
-    /// 日期状态
-    public var status: DateStatus {
-        if isTomorrow         { return .tomorrow }
-        if isToday            { return .today }
-        if isYesterday        { return .yesterday }
-        if isTwoDaysAgo       { return .twoDaysAgo }
-        if isThisWeek         { return .thisWeek }
-        if isLastWeek         { return .lastWeek }
-        if isThisMonth        { return .thisMonth }
-        if isLastMonth        { return .lastMonth }
-        if isThisYear         { return .thisYear }
-        return .normal
-    }
-    
     /// 未来时间
-    public var isFuture: Bool { base > Date() }
+    var isFuture: Bool { base > Date() }
     /// 过去时间
-    public var isPast:   Bool { base < Date() }
+    var isPast:   Bool { base < Date() }
     
     /// 日期组成 [年、月、日、周、时、分、秒]
-    public var dateComponents: DateComponents {
-        return Calendar.current.dateComponents([.year, .month, .day, .weekday, .hour, .minute, .second], from: base)
+    var dateComponents: DateComponents {
+        Calendar.current.dateComponents([.year, .month, .day, .weekday, .hour, .minute, .second], from: base)
     }
     
     /// 明天
