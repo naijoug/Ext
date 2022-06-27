@@ -83,7 +83,7 @@ public extension ExtWrapper where Base == Date {
         return Date(timeIntervalSince1970: timestamp)
     }
     
-    ///
+    /// 当前时间基础上调整时间
     func dateWith(day: Int? = nil, hour: Int? = nil, minute: Int? = nil, second: Int? = nil) -> Date {
         let components = DateComponents(day: day, hour: hour, minute: minute, second: second)
         return Calendar.current.date(byAdding: components, to: base) ?? base
@@ -96,6 +96,18 @@ public extension ExtWrapper where Base == Date {
         let second = calendar.component(.second, from: base)
         let components = DateComponents(hour: 1, minute: -minute, second: -second)
         return calendar.date(byAdding: components, to: base) ?? base
+    }
+    
+    
+    /// 当前时间与目标时间戳相差天数
+    /// - Parameter timestamp: 时间戳
+    /// - Returns: 返回相差天数
+    static func days(with timestamp: TimeInterval?) -> Int? {
+        guard let timestamp = timestamp, let date = dateTime(timestamp) else { return nil }
+        let current = Date()
+        let isFuture = timestamp > current.timeIntervalSince1970
+        let components = Calendar.current.dateComponents([.day], from: isFuture ? current : date, to: isFuture ? date : current)
+        return components.day
     }
     
     static func dayTo(_ timestamp: TimeInterval?) -> Int? {
