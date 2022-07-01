@@ -159,10 +159,11 @@ public extension ExtWrapper where Base: UIView {
     ///   - opaque: 是否透明背景
     ///   - scale: 缩放比例
     func uiImage(opaque: Bool = false, scale: CGFloat = UIScreen.main.scale) -> UIImage? {
+        base.layoutIfNeeded()
         let render = UIGraphicsImageRenderer(bounds: base.bounds)
         return render.image { context in
-            base.drawHierarchy(in: base.bounds, afterScreenUpdates: true)
-            //base.layer.render(in: context.cgContext)
+            //base.drawHierarchy(in: base.bounds, afterScreenUpdates: true) // 该方法会存在截取 UIView 快照失败的情况
+            base.layer.render(in: context.cgContext)
         }
 //        UIGraphicsBeginImageContextWithOptions(base.bounds.size, opaque, scale)
 //        defer { UIGraphicsEndImageContext() }

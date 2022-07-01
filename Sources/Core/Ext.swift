@@ -19,6 +19,11 @@ public extension Ext {
         #endif
     }
     
+    /**
+     Reference
+        - https://stackoverflow.com/questions/24869481/how-to-detect-if-app-is-being-built-for-device-or-simulator-in-swift
+     */
+    
     // 模拟器环境
     static var isSimulator: Bool {
         #if targetEnvironment(simulator)

@@ -8,15 +8,11 @@
 import Foundation
 
 public extension ExtWrapper where Base: NSAttributedString {
-    
     /// 整个富文本串 range
     var rangOfAll: NSRange { NSRange(location: 0, length: base.length) }
     
     /// 可变的富文本
-    var mutable: NSMutableAttributedString {
-        NSMutableAttributedString(attributedString: base)
-    }
-    
+    var mutable: NSMutableAttributedString { NSMutableAttributedString(attributedString: base) }
 }
 
 public extension ExtWrapper where Base: NSAttributedString {
@@ -42,12 +38,15 @@ public extension ExtWrapper where Base: NSAttributedString {
     
     /// 富文本拼接
     /// - Parameter attris: 富文本数组
-    static func attris(_ attris: [NSAttributedString?]) -> NSAttributedString {
+    /// - Parameter space: 富文本之间是否加入空格(默认: false)
+    static func attris(_ attris: [NSAttributedString?], space: Bool = false) -> NSAttributedString {
+        let items = attris.compactMap({ $0 })
         let mAttri = NSMutableAttributedString()
-        for attri in attris {
-            if let attri = attri {
-                mAttri.append(attri)
+        for i in 0..<items.count {
+            if space, i != 0 {
+                mAttri.append(NSAttributedString.ext.text(" ", font: UIFont.systemFont(ofSize: 11), color: .clear))
             }
+            mAttri.append(items[i])
         }
         return mAttri
     }
@@ -102,6 +101,7 @@ public extension ExtWrapper where Base: NSAttributedString {
         // bounds -> offseY 取反
         attachment.bounds = CGRect(x: 0, y: -offsetY, width: attachW, height: attachH)
         attachment.image = image
+        Ext.debug("attchment: \(attachment) | image: \(image)")
         return NSAttributedString(attachment: attachment)
     }
 
