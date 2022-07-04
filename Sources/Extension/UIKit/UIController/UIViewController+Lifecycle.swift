@@ -116,6 +116,8 @@ private extension ExtWrapper where Base: UIViewController {
         let name = typeName
         let map = [ // 系统控制器表
             "UIInputWindowController": true,
+            "UISystemKeyboardDockController": true,
+            "_UIRemoteInputViewController": true,
             "UIAlertController": true,
             "UINavigationController": true,
             "QLPreviewController": true,

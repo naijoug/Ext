@@ -11,7 +11,8 @@ import SystemConfiguration
 /**
  Reference:
     - https://developer.apple.com/documentation/xcode/understanding-the-exception-types-in-a-crash-report
-    - https://developer.apple.com/forums/thread/68031
+    - [Implementing Your Own Crash Reporter](https://developer.apple.com/forums/thread/113742)
+    - [In Swift, how do I capture every error and send it to a webservice?](https://developer.apple.com/forums/thread/68031)
     - https://github.com/MerchV/iOSCrashReporter
     - https://github.com/xiaoyi6409/XYCrashManager
  */
@@ -95,7 +96,7 @@ private extension CrashReporter {
     /// 注册异常处理
     func registerExceptionHandler() {
         NSSetUncaughtExceptionHandler { (exception: NSException) in
-            let crash = ["Exception": [
+            let crash = ["exception": [
                 "name": "\(exception.name)",
                 "reason": "\(exception.reason ?? "")",
                 "stackSymbols": exception.callStackSymbols,
@@ -119,7 +120,7 @@ private extension CrashReporter {
                     SIGBUS:     "SIGBUS"
                 ]
                 
-                let crash = ["Signal": [
+                let crash = ["signal": [
                     "name": "\(sigDict[sig] ?? "\(sig)")",
                     "stackSymbols": Thread.callStackSymbols
                 ]]

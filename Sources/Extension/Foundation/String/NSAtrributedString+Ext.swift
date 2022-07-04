@@ -101,7 +101,6 @@ public extension ExtWrapper where Base: NSAttributedString {
         // bounds -> offseY 取反
         attachment.bounds = CGRect(x: 0, y: -offsetY, width: attachW, height: attachH)
         attachment.image = image
-        Ext.debug("attchment: \(attachment) | image: \(image)")
         return NSAttributedString(attachment: attachment)
     }
 
