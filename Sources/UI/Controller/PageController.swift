@@ -23,11 +23,13 @@ public class PageController: UIViewController {
     
 // MARK: - Status
     
+    public var logEnabled: Bool = false
+    
     /// 当前页面索引
     public private(set) var currentIndex: Int = 0 {
         didSet {
             guard oldValue != currentIndex else { return }
-            Ext.debug("\(oldValue) -> \(currentIndex)")
+            Ext.debug("\(oldValue) -> \(currentIndex)", logEnabled: logEnabled)
             reloadPan()
         }
     }
@@ -36,7 +38,7 @@ public class PageController: UIViewController {
     private var isTransitioning: Bool = false {
         didSet {
             guard oldValue != isTransitioning else { return }
-            Ext.debug("\(oldValue) -> \(isTransitioning)")
+            Ext.debug("\(oldValue) -> \(isTransitioning)", logEnabled: logEnabled)
             reloadPan()
         }
     }
@@ -89,12 +91,12 @@ extension PageController: UIGestureRecognizerDelegate {
         scrollView.addGestureRecognizer(pan)
         
         if let gesture = navigationController?.ext.fullscreenPopGestureRecognizer {
-            Ext.debug("fullscreen gesture : \(gesture)")
+            Ext.debug("fullscreen gesture : \(gesture)", logEnabled: logEnabled)
             scrollView.panGestureRecognizer.require(toFail: gesture)
             pan.require(toFail: gesture)
         }
         if let gesture = navigationController?.interactivePopGestureRecognizer {
-            Ext.debug("page gesture : \(gesture)")
+            Ext.debug("page gesture : \(gesture)", logEnabled: logEnabled)
             scrollView.panGestureRecognizer.require(toFail: gesture)
         }
     }
@@ -104,11 +106,11 @@ extension PageController: UIGestureRecognizerDelegate {
         self.ext.interactionPopDisabled(currentIndex != 0)
         var parent: UIViewController? = self.parent
         while parent != nil {
-            Ext.debug("parent: \(String(describing: parent))")
+            Ext.debug("parent: \(String(describing: parent))", logEnabled: logEnabled)
             parent?.ext.interactionPopDisabled(currentIndex != 0)
             parent = parent?.parent
         }
-        Ext.debug("isInteractivePopDisabled: \(currentIndex != 0) | currentIndex: \(currentIndex)", tag: .fire)
+        Ext.debug("isInteractivePopDisabled: \(currentIndex != 0) | currentIndex: \(currentIndex)", tag: .fire, logEnabled: logEnabled)
     }
     
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
@@ -121,7 +123,7 @@ extension PageController: UIGestureRecognizerDelegate {
     public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         guard let gesture = gestureRecognizer as? UIPanGestureRecognizer else { return true }
         let translation = gesture.translation(in: gestureRecognizer.view)
-        Ext.debug("translation: \(translation) | \(currentIndex) | \(isTransitioning)", tag: .fire)
+        Ext.debug("translation: \(translation) | \(currentIndex) | \(isTransitioning)", tag: .fire, logEnabled: logEnabled)
         guard translation.x != 0 else { return false }
         guard translation.x < 0 else {
             return currentIndex == 0 && !isTransitioning
@@ -141,7 +143,7 @@ public extension PageController {
             currentIndex = index
         }
         pageController.setViewControllers([controllers[currentIndex]], direction: .forward, animated: false, completion: nil)
-        Ext.debug("\(index) - \(currentIndex) | \(controllers[currentIndex])")
+        Ext.debug("\(index) - \(currentIndex) | \(controllers[currentIndex])", logEnabled: logEnabled)
     }
     
     /// 滚动到指定索引页面
@@ -149,12 +151,12 @@ public extension PageController {
         guard index != currentIndex else { return }
         guard 0 <= index, index < controllers.count else { return }
         let isForward = index >= currentIndex
-        Ext.debug("page to \(index)")
+        Ext.debug("page to \(index)", logEnabled: logEnabled)
         self.isTransitioning = true
         currentIndex = index
         pageController.setViewControllers([controllers[index]], direction: isForward ? .forward : .reverse, animated: true) { [weak self] completed in
             guard let `self` = self, completed else { return }
-            Ext.debug("page to \(index) end.")
+            Ext.debug("page to \(index) end.", logEnabled: self.logEnabled)
             self.isTransitioning = false
         }
     }
@@ -181,7 +183,7 @@ extension PageController: UIPageViewControllerDelegate {
         if completed, let controller = pageViewController.viewControllers?.first,
            let index = controllers.firstIndex(of: controller) {
             isTransitioning = false
-            Ext.debug("index: \(index)")
+            Ext.debug("index: \(index)", logEnabled: logEnabled)
             self.currentIndex = index
             delegate?.pageController(self, didAction: .scrollTo(index))
         }
