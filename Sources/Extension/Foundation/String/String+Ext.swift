@@ -121,7 +121,7 @@ public extension ExtWrapper where Base == String {
                 let arg0 = arguments[0]
                 if arg0 is Int                              { return base.contains("%d") }
                 else if arg0 is Float || arg0 is Double     { return base.contains("%f") }
-                else if arg0 is String                      { return base.contains("%@") }
+                else if arg0 is String                      { return base.contains("%@") || base.contains("%1$@") }
             default: () // TODO: fix more arg
             }
             return true
