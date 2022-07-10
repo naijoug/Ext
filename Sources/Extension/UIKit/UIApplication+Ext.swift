@@ -97,21 +97,37 @@ public extension ExtWrapper where Base == UIApplication {
     
     /// 系统功能页面
     enum SystemFeature {
-        case album
+        /// 打开应用设置
         case setting
+        /// 打开相册
+        case album
+        /// 打开 AppStore 应用页面
+        case appstore(_ appID: String)
+        /// 打电话
+        case tel(_ phoneNumber: String)
+        /// 发短信
+        case sms(_ phoneNumber: String)
+        /// 发邮件
+        case email(_ email: String, subject: String, body: String)
+        
+        var urlString: String {
+            switch self {
+            case .setting:              return UIApplication.openSettingsURLString
+            case .album:                return "photos-redirect://"
+            case .appstore(let appID):  return "itms-apps://itunes.apple.com/app/id\(appID)"
+            case .tel(let phoneNumber): // telprompt: 私有 api
+                return "tel://\(phoneNumber)"
+            case .sms(let phoneNumber): return "sms://\(phoneNumber)"
+            case .email(let email, let subject, let body):
+                return "mailto:\(email)?subject=\(subject)&body=\(body)"
+            }
+        }
     }
     
     /// 打开系统功能页面
     /// - Parameter feature: 功能页面
     func open(_ feature: SystemFeature) {
-        var url: URL?
-        switch feature {
-        case .album:
-            url = URL(string:"photos-redirect://")
-        case .setting:
-            url = URL(string: UIApplication.openSettingsURLString)
-        }
-        guard let url = url else { return }
+        guard let url = URL(string: feature.urlString) else { return }
         base.open(url, options: [:], completionHandler: nil)
     }
     

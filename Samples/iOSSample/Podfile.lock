@@ -1,13 +1,13 @@
 PODS:
-  - Ext (0.2.0):
-    - Ext/Extension (= 0.2.0)
-    - Ext/Feature (= 0.2.0)
-    - Ext/UI (= 0.2.0)
-  - Ext/Extension (0.2.0)
-  - Ext/Feature (0.2.0):
+  - Ext (0.5.0):
+    - Ext/Feature (= 0.5.0)
+    - Ext/UI (= 0.5.0)
+  - Ext/Core (0.5.0)
+  - Ext/Extension (0.5.0):
+    - Ext/Core
+  - Ext/Feature (0.5.0):
     - Ext/Extension
-    - Ext/UI
-  - Ext/UI (0.2.0):
+  - Ext/UI (0.5.0):
     - Ext/Extension
 
 DEPENDENCIES:
@@ -18,8 +18,8 @@ EXTERNAL SOURCES:
     :path: "../../../Ext"
 
 SPEC CHECKSUMS:
-  Ext: 67d8f5f15a28fc7ee870161d4052e7cad639a327
+  Ext: 3c7734bdc150e4c7b91ca3951e6631812994e46a
 
 PODFILE CHECKSUM: 7cf1508a62a599b7d6c87273c82124961e0c7116
 
-COCOAPODS: 1.10.1
+COCOAPODS: 1.11.3
