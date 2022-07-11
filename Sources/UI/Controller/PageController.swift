@@ -103,14 +103,15 @@ extension PageController: UIGestureRecognizerDelegate {
     
     private func reloadPan() {
         guard !isTransitioning else { return }
-        self.ext.interactionPopDisabled(currentIndex != 0)
+        let isInteractivePopDisabled = isScrollEnabled && (currentIndex != 0)
+        self.ext.interactionPopDisabled(isInteractivePopDisabled)
         var parent: UIViewController? = self.parent
         while parent != nil {
             Ext.debug("parent: \(String(describing: parent))", logEnabled: logEnabled)
-            parent?.ext.interactionPopDisabled(currentIndex != 0)
+            parent?.ext.interactionPopDisabled(isInteractivePopDisabled)
             parent = parent?.parent
         }
-        Ext.debug("isInteractivePopDisabled: \(currentIndex != 0) | currentIndex: \(currentIndex)", tag: .fire, logEnabled: logEnabled)
+        Ext.debug("isInteractivePopDisabled: \(isInteractivePopDisabled) | currentIndex: \(currentIndex)", tag: .fire, logEnabled: logEnabled)
     }
     
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
@@ -121,7 +122,7 @@ extension PageController: UIGestureRecognizerDelegate {
         return gestures.contains(otherGestureRecognizer)
     }
     public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        guard let gesture = gestureRecognizer as? UIPanGestureRecognizer else { return true }
+        guard isScrollEnabled, let gesture = gestureRecognizer as? UIPanGestureRecognizer else { return false }
         let translation = gesture.translation(in: gestureRecognizer.view)
         Ext.debug("translation: \(translation) | \(currentIndex) | \(isTransitioning)", tag: .fire, logEnabled: logEnabled)
         guard translation.x != 0 else { return false }
