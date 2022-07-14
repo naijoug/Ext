@@ -104,6 +104,9 @@ public extension ExtWrapper where Base == UIApplication {
         /// 打开 AppStore 应用页面
         case appstore(_ appID: String)
         /// 打电话
+        ///
+        /// tel: 直接跳到拨号界面，不能返回原应用
+        /// telprompt: 私有 API，拨号之前会弹框询问用户是否拨号，拨完后能自动回到原应用
         case tel(_ phoneNumber: String)
         /// 发短信
         case sms(_ phoneNumber: String)

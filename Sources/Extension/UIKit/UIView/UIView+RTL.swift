@@ -15,6 +15,7 @@ import UIKit
     - https://stackoverflow.com/questions/33130331/uicollectionview-ios-9-issue-on-project-with-rtl-languages-support
     - https://stackoverflow.com/questions/37497610/ios-rtl-improperly-displaying-english-inside-rtl-string
     - https://www.jianshu.com/p/4fcf4a6710a1
+    - https://stackoverflow.com/questions/53987344/support-nsdirectionaledgeinsets-for-uibuttons-contenedgeinsets
  */
 
 public extension ExtWrapper where Base: UIApplication {
@@ -42,6 +43,32 @@ public extension ExtWrapper where Base: UIView  {
      */
     func enabledRTL() {
         flipsHorizontallyIfNeeded()
+    }
+}
+
+extension UIEdgeInsets: ExtCompatible {}
+public extension ExtWrapper where Base == UIEdgeInsets {
+    /// UIEdgeInsets --> NSDirectionalEdgeInsets
+    var directionalEdgeInsets: NSDirectionalEdgeInsets {
+        NSDirectionalEdgeInsets(
+            top: base.top,
+            leading: UIView.ext.isRTL ? base.right : base.left,
+            bottom: base.bottom,
+            trailing: UIView.ext.isRTL ? base.left : base.right
+        )
+    }
+}
+
+extension NSDirectionalEdgeInsets: ExtCompatible {}
+public extension ExtWrapper where Base == NSDirectionalEdgeInsets {
+    /// NSDirectionalEdgeInsets --> UIEdgeInsets
+    var uiEdgeInsets: UIEdgeInsets {
+        UIEdgeInsets(
+            top: base.top,
+            left: UIView.ext.isRTL ? base.trailing : base.leading,
+            bottom: base.bottom,
+            right: UIView.ext.isRTL ? base.leading : base.trailing
+        )
     }
 }
 

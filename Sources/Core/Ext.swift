@@ -252,7 +252,7 @@ extension Ext.Tag: CustomStringConvertible {
         case .normal:           return "# "
         case .success:          return "✅"
         case .failure:          return "🚫"
-        case .warning:          return ""
+        case .warning:          return "⚠️"
         case .error:            return "❌"
         
         case .video:            return "🎥"
