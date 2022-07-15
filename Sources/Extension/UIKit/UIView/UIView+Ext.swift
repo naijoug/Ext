@@ -80,6 +80,16 @@ public extension ExtWrapper where Base: UIView  {
         highView.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
     }
     
+    
+    func constraintToEdges(_ view: UIView, insets: NSDirectionalEdgeInsets = .zero) {
+        base.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            base.topAnchor.constraint(equalTo: view.topAnchor, constant: insets.top),
+            base.bottomAnchor.constraint(equalTo: view.bottomAnchor, constant: insets.bottom),
+            base.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: insets.leading),
+            base.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: insets.trailing)
+        ])
+    }
 }
 
 // MARK: - Frame
