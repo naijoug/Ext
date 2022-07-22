@@ -42,6 +42,7 @@ public class ExtAudioPlayer: NSObject {
     public private(set) var avPlayer: AVAudioPlayer?
     /// 定时器
     private var timer: CADisplayLink?
+//    private var timer: Timer?
     
     /// 播放资源 urls
     private var urls = [URL]()
@@ -80,6 +81,10 @@ private extension ExtAudioPlayer {
         Ext.debug("start timer...")
         timer = CADisplayLink(target: self, selector: #selector(timerAction))
         timer?.add(to: .current, forMode: .common)
+        
+//        let timer = Timer(timeInterval: 0.1, target: self, selector: #selector(timerAction), userInfo: nil, repeats: true)
+//        RunLoop.main.add(timer, forMode: .common)
+//        self.timer = timer
     }
     func stopTimer() {
         guard timer != nil else { return }
@@ -90,8 +95,11 @@ private extension ExtAudioPlayer {
     }
     @objc
     func timerAction() {
-        guard let avPlayer = self.avPlayer, !avPlayer.duration.isNaN else { return }
-        //Ext.debug("currentTime: \(avPlayer.currentTime) | duration: \(avPlayer.duration)")
+        guard let avPlayer = self.avPlayer, !avPlayer.duration.isNaN else {
+            Ext.debug("avPlayer duration: \(avPlayer?.duration ?? 0)")
+            return
+        }
+        Ext.debug("currentTime: \(avPlayer.currentTime) | duration: \(avPlayer.duration)")
         delegate?.extAudioPlayer(self, timeStatus: .progress(avPlayer.currentTime, duration: avPlayer.duration))
         
         guard isMeteringEnabled else { return }
@@ -173,7 +181,8 @@ public extension ExtAudioPlayer {
             player.delegate = self
             player.isMeteringEnabled = isMeteringEnabled
             player.currentTime = time ?? 0
-            player.play()
+            //player.play()
+            //player.play(atTime: time ?? 0)
             Ext.debug("play audio url: \(player.currentTime) -> \(time ?? 0) | device \(player.deviceCurrentTime) | \(url.path)")
             
             delegate?.extAudioPlayer(self, status: .playing)

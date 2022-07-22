@@ -62,10 +62,13 @@ extension BaseRecorder: Recorder {
     public func startRecording(_ path: String, maxDuration: Int64, handler: Ext.DataHandler<RecordAction>?) {
         self.maxDuration = maxDuration
         self.recordHandler = handler
-        Ext.debug("start record duration: \(TimeInterval(self.maxDuration) / 1000_000) | \(self.maxDuration) | path: \(path)", tag: .custom("⏺"), logEnabled: logEnabled)
+        Ext.debug("start record duration: \(TimeInterval(self.maxDuration / 1000_000)) | \(self.maxDuration) | path: \(path)", tag: .custom("⏺"), logEnabled: logEnabled)
         
+        let url = URL(fileURLWithPath: path)
         // 如果文件已存在，先删除
-        FileManager.default.ext.remove(URL(fileURLWithPath: path))
+        FileManager.default.ext.remove(url)
+        // 如果文件所在文件夹不存在，创建
+        FileManager.default.ext.createIfNotExists(url.deletingLastPathComponent())
         
         guard startRecord(path) else {
             Ext.debug("start record failed.", tag: .error, logEnabled: logEnabled)

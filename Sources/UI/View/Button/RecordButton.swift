@@ -56,12 +56,7 @@ public class RecordButton: ExtView {
         let imageView = ext.add(UIImageView())
         imageView.contentMode = .center
         imageView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            imageView.topAnchor.constraint(equalTo: self.topAnchor),
-            imageView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
-            imageView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-            imageView.trailingAnchor.constraint(equalTo: self.trailingAnchor)
-        ])
+        imageView.ext.constraintToEdges(self)
         return imageView
     }()
     
