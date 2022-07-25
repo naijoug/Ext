@@ -40,35 +40,38 @@ public class ExtAudioPlayer: NSObject {
 // MARK: - Player
     
     public private(set) var avPlayer: AVAudioPlayer?
+    
     /// 定时器
     private var timer: CADisplayLink?
-//    private var timer: Timer?
     
     /// 播放资源 urls
     private var urls = [URL]()
     /// 正在播放资源的索引
     private var playIndex: Int = -1
-}
-extension ExtAudioPlayer: AVAudioPlayerDelegate {
-    public func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
-        Ext.debug("audio 播放出错 \(error?.localizedDescription ?? "")")
-        delegate?.extAudioPlayer(self, status: .failed(error))
-    }
-    public func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        Ext.debug("audio 播放完成 \(flag)")
-        
-        stopTimer()
-        avPlayer?.stop()
-        avPlayer = nil
-        
-        guard playIndex == urls.count - 1 else {
-            Ext.debug("播放下一个资源")
-            self.play()
-            return
+    
+    /// 播放指定路径音频
+    private func playAudio(_ url: URL, time: TimeInterval? = nil) {
+        do {
+            if avPlayer != nil {
+                avPlayer?.stop()
+                avPlayer = nil
+            }
+            
+            let player = try AVAudioPlayer(contentsOf: url)
+            self.avPlayer = player
+            player.delegate = self
+            player.isMeteringEnabled = isMeteringEnabled
+            player.currentTime = time ?? 0
+            player.play()
+//            player.play(atTime: time ?? 0)
+            Ext.debug("play audio url: \(player.currentTime) -> \(time ?? 0) | device \(player.deviceCurrentTime) | \(url.path)")
+            
+            delegate?.extAudioPlayer(self, status: .playing)
+            startTimer()
+        } catch {
+            Ext.debug("播放音频失败")
+            delegate?.extAudioPlayer(self, status: .failed(error))
         }
-        playIndex = -1
-        Ext.debug("全部播放完成.")
-        self.delegate?.extAudioPlayer(self, status: .playEnd)
     }
 }
 
@@ -81,10 +84,6 @@ private extension ExtAudioPlayer {
         Ext.debug("start timer...")
         timer = CADisplayLink(target: self, selector: #selector(timerAction))
         timer?.add(to: .current, forMode: .common)
-        
-//        let timer = Timer(timeInterval: 0.1, target: self, selector: #selector(timerAction), userInfo: nil, repeats: true)
-//        RunLoop.main.add(timer, forMode: .common)
-//        self.timer = timer
     }
     func stopTimer() {
         guard timer != nil else { return }
@@ -108,6 +107,29 @@ private extension ExtAudioPlayer {
         let db = CGFloat(pow(10, (0.06 * average))) // 分贝
         //Ext.debug("average: \(average) | db: \(db)")
         delegate?.extAudioPlayer(self, timeStatus: .level(db))
+    }
+}
+
+extension ExtAudioPlayer: AVAudioPlayerDelegate {
+    public func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
+        Ext.debug("audio 播放出错 \(error?.localizedDescription ?? "")")
+        delegate?.extAudioPlayer(self, status: .failed(error))
+    }
+    public func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
+        Ext.debug("audio 播放完成 \(flag)")
+        
+        stopTimer()
+        avPlayer?.stop()
+        avPlayer = nil
+        
+        guard playIndex == urls.count - 1 else {
+            Ext.debug("播放下一个资源")
+            self.play()
+            return
+        }
+        playIndex = -1
+        Ext.debug("全部播放完成.")
+        self.delegate?.extAudioPlayer(self, status: .playEnd)
     }
 }
 
@@ -151,8 +173,9 @@ public extension ExtAudioPlayer {
     /// 暂停播放
     func pause() {
         stopTimer()
-        avPlayer?.pause()
         
+        guard isPlaying else { return }
+        avPlayer?.pause()
         delegate?.extAudioPlayer(self, status: .paused)
         Ext.debug("暂停播放")
     }
@@ -166,30 +189,5 @@ public extension ExtAudioPlayer {
         avPlayer?.stop()
         avPlayer = nil
         Ext.debug("停止播放，清空播放器")
-    }
-    
-    /// 播放指定路径音频
-    private func playAudio(_ url: URL, time: TimeInterval? = nil) {
-        do {
-            if avPlayer != nil {
-                avPlayer?.stop()
-                avPlayer = nil
-            }
-            
-            let player = try AVAudioPlayer(contentsOf: url)
-            self.avPlayer = player
-            player.delegate = self
-            player.isMeteringEnabled = isMeteringEnabled
-            player.currentTime = time ?? 0
-            //player.play()
-            //player.play(atTime: time ?? 0)
-            Ext.debug("play audio url: \(player.currentTime) -> \(time ?? 0) | device \(player.deviceCurrentTime) | \(url.path)")
-            
-            delegate?.extAudioPlayer(self, status: .playing)
-            startTimer()
-        } catch {
-            Ext.debug("播放音频失败")
-            delegate?.extAudioPlayer(self, status: .failed(error))
-        }
     }
 }

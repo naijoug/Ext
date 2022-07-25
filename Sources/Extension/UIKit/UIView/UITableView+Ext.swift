@@ -130,7 +130,10 @@ public extension ExtWrapper where Base: UITableView {
             switch postion {
             case .top:
                 let numberOfRows = base.numberOfRows(inSection: 0)
-                guard numberOfRows > 0 else { return }
+                guard numberOfRows > 0 else {
+                    base.scrollToRow(at: IndexPath(row: NSNotFound, section: 0), at: .top, animated: animated)
+                    return
+                }
                 base.scrollToRow(at: IndexPath(row: 0, section: 0), at: .top, animated: animated)
             case .bottom:
                 let numberOfRows = base.numberOfRows(inSection: numberOfSections - 1)
