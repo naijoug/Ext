@@ -55,15 +55,7 @@ public extension Ext {
     typealias ResultDataHandler<T> = ResultHandler<T, Swift.Error>
     
 }
-public extension Result {
-    /// 是否成功
-    var isSucceeded: Bool {
-        switch self {
-        case .failure: return false
-        case .success: return true
-        }
-    }
-}
+
 extension Ext {
     /**
      Reference :

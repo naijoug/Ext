@@ -40,6 +40,10 @@ public class RecordButton: ExtView {
         }
     }
     
+    /// 检测音频权限
+    public var isCheckAudioPermission = false
+    public var unauthHandler: Ext.VoidHandler?
+    
 // MARK: - UI
     
     /// 定时器
@@ -151,14 +155,16 @@ private extension RecordButton {
     @objc
     func tap(_ gesture: UITapGestureRecognizer) {
         guard isEnabled, gesture.state == .ended else { return }
-        isRecording = !isRecording
-        delegate?.recordButton(self, didAction: .tap(isRecording))
+        checkPermission { [weak self] in
+            guard let `self` = self else { return }
+            self.isRecording = !self.isRecording
+            self.delegate?.recordButton(self, didAction: .tap(self.isRecording))
+        }
     }
     /// 长按手势
     @objc
     func longPress(_ gesture: UILongPressGestureRecognizer) {
         guard isEnabled, longPressEnabled else { return }
-        
         switch gesture.state {
         case .began:
             isRecording = true
@@ -168,6 +174,23 @@ private extension RecordButton {
             isRecording = false
             delegate?.recordButton(self, didAction: .longPress(false))
         default: break
+        }
+    }
+    
+    private func checkPermission(_ handler: Ext.VoidHandler?) {
+        guard isCheckAudioPermission else {
+            handler?()
+            return
+        }
+        Ext.Permission.microphone { [weak self] status in
+            guard let `self` = self else { return }
+            guard status.isAuthorized else {
+                Ext.debug("麦克风未授权")
+                self.unauthHandler?()
+                return
+            }
+            Ext.debug("麦克风授权")
+            handler?()
         }
     }
 }

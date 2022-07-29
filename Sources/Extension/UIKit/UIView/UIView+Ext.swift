@@ -343,12 +343,39 @@ public extension ExtWrapper where Base: UIView {
     /// - Parameters:
     ///   - subView: 子视图
     ///   - backgroundColor: 背景颜色
-    func add<T: UIView>(_ subView: T, backgroundColor: UIColor? = nil) -> T {
-        base.addSubview(subView)
+    func add<T: UIView>(_ subview: T, backgroundColor: UIColor? = nil) -> T {
+        base.addSubview(subview)
         if let backgroundColor = backgroundColor {
-            subView.backgroundColor = backgroundColor
+            subview.backgroundColor = backgroundColor
         }
-        return subView
+        return subview
+    }
+    
+    /// 插入子视图位置
+    enum InsertPosition {
+        /// 在 subview 上面插入
+        case above(_ subview: UIView)
+        /// 在 subview 下面插入
+        case below(_ subview: UIView)
+        /// 在指定索引位置插入
+        case at(_ index: Int)
+    }
+    
+    
+    /// 插入子视图
+    /// - Parameters:
+    ///   - subView: 子视图
+    ///   - position: 插入位置
+    func insert<T: UIView>(_ subview: T, position: InsertPosition) -> T {
+        switch position {
+        case .above(let aboveSubview):
+            base.insertSubview(subview, aboveSubview: aboveSubview)
+        case .below(let belowSubview):
+            base.insertSubview(subview, belowSubview: belowSubview)
+        case .at(let index):
+            base.insertSubview(subview, at: index)
+        }
+        return subview
     }
     
     /// 添加 Label
@@ -360,9 +387,7 @@ public extension ExtWrapper where Base: UIView {
                   color: UIColor,
                   multiline: Bool = false) -> UILabel {
         let label = add(UILabel())
-        label.font = font
-        label.textColor = color
-        label.numberOfLines = multiline ? 0 : 1
+        label.ext.config(font: font, color: color, multiline: multiline)
         return label
     }
     

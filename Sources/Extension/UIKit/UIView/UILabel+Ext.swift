@@ -9,7 +9,23 @@ import UIKit
 
 public extension ExtWrapper where Base == UILabel {
     
-    /** Reference:
+    /// 配置 label 属性
+    /// - Parameters:
+    ///   - font: 字体
+    ///   - color: 颜色
+    ///   - alignment: 对齐方式 (默认: 左对齐)
+    ///   - multiline: 是否多行显示 (默认: 单行显示)
+    func config(font: UIFont, color: UIColor, alignment: NSTextAlignment = .left, multiline: Bool = false) {
+        base.font = font
+        base.textColor = color
+        base.textAlignment = alignment
+        base.numberOfLines = multiline ? 0 : 1
+    }
+    
+    /**
+     UILabel 点击事件
+     
+     Reference:
         - https://stackoverflow.com/questions/1256887/create-tap-able-links-in-the-nsattributedstring-of-a-uilabel
         - https://www.codementor.io/@nguyentruongky/hyperlink-label-qv2k8rpk9
      */

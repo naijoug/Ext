@@ -207,6 +207,13 @@ public extension ExtWrapper where Base: UINavigationController {
         base.setViewControllers(controllers, animated: false)
     }
     
+    /// 设置当前当前控制为栈顶控制器
+    func toTopController() {
+        guard base.viewControllers.count > 1 else { return }
+        let current = base.viewControllers.removeLast()
+        base.setViewControllers([current], animated: false)
+    }
+    
     /// 打印当前导航堆栈
     func logControllers() {
         for vc in base.viewControllers.reversed() {
