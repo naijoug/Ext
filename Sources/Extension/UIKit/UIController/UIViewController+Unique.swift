@@ -29,8 +29,8 @@ private extension UniqueController {
         let count = controllers.count
         let prev = controllers[count - 2]
         let current = controllers[count - 1]
-        Ext.debug("\(prev.ext.typeName) -> \(current.ext.typeName) | prev: \(prev) -> current: \(current)")
-        guard prev.ext.typeName == current.ext.typeName else { return }
+        Ext.debug("\(prev.ext.typeFullName) -> \(current.ext.typeName) | prev: \(prev) -> current: \(current)")
+        guard prev.ext.typeFullName == current.ext.typeFullName else { return }
         Ext.debug("type equal => ")
         guard let prevUnique = prev as? UniqueController,
               let currentUnique = current as? UniqueController else { return }
@@ -50,7 +50,7 @@ private extension UIViewController {
     @objc
     func unique_viewDidLoad() {
         unique_viewDidLoad()
-        Ext.debug("unique", tag: .target)
+        Ext.debug("unique", tag: .target, logEnabled: false)
         (self as? UniqueController)?.remove()
     }
 }

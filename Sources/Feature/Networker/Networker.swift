@@ -17,7 +17,7 @@ public enum HttpMethod: String {
 }
 
 /// 数据回调
-public typealias DataHandler = Ext.DataHandler<(Data?, URLResponse?, Error?)>
+public typealias DataHandler = Ext.DataHandler<(Data?, URLResponse?, Swift.Error?)>
 /// 进度回调
 public typealias ProgressHandler = (_ progress: Double, _ speed: Double) -> Void
 
@@ -51,7 +51,23 @@ public final class Networker: NSObject {
     /// 下载任务列表
     private var downloadTasks = [String: [DownloadTask]]()
 }
- 
+
+public extension Networker {
+    /// 网络错误
+    enum Error: Swift.Error {
+        /// 未知错误
+        case unknown
+        /// 无效的 URL
+        case invalidURL
+        /// 非 HTTP 响应体
+        case nonHTTPResponse(response: URLResponse)
+        /// HTTP 响应失败 (statusCode != 200...299)
+        case httpResponseFailed(response: HTTPURLResponse, data: Data?)
+        /// JSON 解析错误
+        case jsonDeserializationError(error: Swift.Error)
+    }
+}
+
 extension Networker {
     
     /// 添加一个下载任务
@@ -103,14 +119,14 @@ public extension ExtWrapper where Base: Swift.Error {
     - 415 Unsupported Media Type : ContentType 有误
  */
 
-extension HTTPURLResponse {
+extension ExtWrapper where Base == HTTPURLResponse {
     /// 是否成功响应
-    var isResponseOK: Bool { (200...299).contains(self.statusCode) }
+    var isSucceeded: Bool { 200 ..< 300 ~= base.statusCode }
     
     /// HTTP 状态描述
     var statusMessage: String {
         var message = ""
-        switch self.statusCode {
+        switch base.statusCode {
         case 200: message = "OK"
         case 206: message = "Partial Content"
         
@@ -120,10 +136,6 @@ extension HTTPURLResponse {
         case 415: message = "Unsupported Media Type"
         default: ()
         }
-        return "【statusCode == \(self.statusCode)\(message.isEmpty ? "" : " | \(message)")】"
-    }
-    
-    open override var description: String {
-        return "\(statusMessage)"
+        return "【statusCode == \(base.statusCode)\(message.isEmpty ? "" : " | \(message)")】"
     }
 }

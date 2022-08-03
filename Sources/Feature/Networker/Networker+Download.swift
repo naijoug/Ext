@@ -94,7 +94,7 @@ extension Networker: URLSessionDownloadDelegate {
         }
     }
     /// download error
-    public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
+    public func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Swift.Error?) {
         guard let downloadTasks = remove(for: task.currentRequest?.url) else { return }
         let date = Date()
         for downloadTask in downloadTasks {
@@ -116,7 +116,7 @@ private extension DownloadTask {
     func successHandler(_ date: Date, session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         let downloadUrlString = downloadTask.currentRequest?.url?.absoluteString ?? ""
         let elapsed = date.timeIntervalSince(startTime)
-        guard let httpResponse = downloadTask.response as? HTTPURLResponse, httpResponse.isResponseOK else {
+        guard let httpResponse = downloadTask.response as? HTTPURLResponse, httpResponse.ext.isSucceeded else {
             let statusCode = (downloadTask.response as? HTTPURLResponse)?.statusCode ?? -110
             Ext.debug("Download failed. \(elapsed) | \(downloadUrlString) | statusCode !≈ 200, \(statusCode)",
                       tag: .failure, logEnabled: Networker.shared.downloadLogged, locationEnabled: false)

@@ -61,7 +61,7 @@ public extension String {
 public extension ExtWrapper where Base == String {
     
     /// 去除前后空格 & 换行
-    var trim: String? { return base.trimmingCharacters(in: .whitespacesAndNewlines) }
+    var trim: String { base.trimmingCharacters(in: .whitespacesAndNewlines) }
     
     /// NSRange in text
     func nsRange(in text: String) -> NSRange { (text as NSString).range(of: base) }

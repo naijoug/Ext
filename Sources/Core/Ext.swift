@@ -213,6 +213,7 @@ public extension Ext {
         case debug
         case programmer
         
+        case ok
         case pin
         case sos
         case fix
@@ -262,6 +263,7 @@ extension Ext.Tag: CustomStringConvertible {
         case .debug:            return "🪲"
         case .programmer:       return "🐵"
             
+        case .ok:               return "👌"
         case .pin:              return "📌"
         case .sos:              return "🆘"
         case .fix:              return "🛠"

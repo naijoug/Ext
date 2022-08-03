@@ -24,14 +24,15 @@ public extension ExtWrapper where Base == Data {
     
     /// Data 转化为 JSON
     ///
-    /// - Parameter isPrettyPrinted: 漂亮打印格式
-    func toJSONString(_ isPrettyPrinted: Bool = false) -> String? {
+    /// - Parameter isPrettyPrinted: 漂亮打印格式(换行展开)
+    /// - Parameter errorLogged: JSON 解析失败是否打印错误日志 (默认: 打印)
+    func toJSONString(_ isPrettyPrinted: Bool = false, errorLogged: Bool = true) -> String? {
         do {
             let object = try JSONSerialization.jsonObject(with: base, options: [])
             let data = try JSONSerialization.data(withJSONObject: object, options: isPrettyPrinted ? [.prettyPrinted] : [])
             return String(data: data, encoding: .utf8)
         } catch {
-            Ext.debug("JSON deserialization error", error: error)
+            Ext.debug("JSON deserialization error", error: error, logEnabled: errorLogged, locationEnabled: false)
             return nil
         }
     }

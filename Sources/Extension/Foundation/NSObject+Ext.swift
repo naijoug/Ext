@@ -15,8 +15,10 @@ public extension ExtWrapper where Base: NSObject {
      */
     
     var typeName: String { String(describing: type(of: base)) }
-    
     static var typeName: String { String(describing: Base.self) }
+
+    var typeFullName: String { String(reflecting: type(of: base)) }
+    static var typeFullName: String { String(reflecting: Base.self) }
 }
 
 // MARK: - Associated Object

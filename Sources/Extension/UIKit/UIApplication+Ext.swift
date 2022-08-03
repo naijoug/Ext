@@ -82,7 +82,7 @@ public extension ExtWrapper where Base == UIApplication {
         if let presented = controller?.presentedViewController {
             return topViewController(presented)
         }
-        print("\(String(describing: controller))")
+        Ext.debug("\(controller?.ext.typeFullName ?? "")", tag: .custom("⛰"), locationEnabled: false)
         return controller
     }
 }
