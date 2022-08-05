@@ -7,6 +7,21 @@
 
 import UIKit
 
+public extension ExtWrapper where Base: UITableViewCell {
+    /// 注册 Nib Cell
+    static func registerNib(_ tableView: UITableView) {
+        tableView.register(Base.ext.nib, forCellReuseIdentifier: Base.ext.identifier)
+    }
+    /// 注册自定义 Cell
+    static func registerClass(_ tableView: UITableView) {
+        tableView.register(Base.self, forCellReuseIdentifier: Base.ext.identifier)
+    }
+    
+    /// 从缓存池中取出 Cell
+    static func dequeueReusable(_ tableView: UITableView, for indexPath: IndexPath) -> Base {
+        tableView.dequeueReusableCell(withIdentifier: Base.ext.identifier, for: indexPath) as! Base
+    }
+}
 public extension ExtWrapper where Base: UITableView {
     /// 注册 Nib Cell
     func registerNib<T>(_ cellType: T.Type) where T: UITableViewCell {
@@ -17,10 +32,6 @@ public extension ExtWrapper where Base: UITableView {
         base.register(cellType, forCellReuseIdentifier: cellType.ext.identifier)
     }
     
-    /// 从缓存池中取出 Cell
-    func dequeueReusableCell<T>(_ cellType: T.Type) -> T where T: UITableViewCell {
-        base.dequeueReusableCell(withIdentifier: cellType.ext.identifier) as! T
-    }
     /// 从缓存池中取出 Cell
     func dequeueReusableCell<T>(_ cellType: T.Type, for indexPath: IndexPath) -> T where T: UITableViewCell {
         base.dequeueReusableCell(withIdentifier: cellType.ext.identifier, for: indexPath) as! T

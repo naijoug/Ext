@@ -38,8 +38,22 @@ public extension ExtWrapper where Base: UICollectionViewFlowLayout {
     var pageWidth: CGFloat { itemSize.width + minimumLineSpacing }
 }
 
-public extension ExtWrapper where Base: UICollectionView {
+public extension ExtWrapper where Base: UICollectionViewCell {
+    /// 注册 Nib Cell
+    static func registerNib(_ collectionView: UICollectionView) {
+        collectionView.register(Base.ext.nib, forCellWithReuseIdentifier: Base.ext.identifier)
+    }
+    /// 注册自定义 Cell
+    static func registerClass(_ collectionView: UICollectionView) {
+        collectionView.register(Base.self, forCellWithReuseIdentifier: Base.ext.identifier)
+    }
     
+    /// 从缓存池中取出 Cell
+    static func dequeueReusable(_ collectionView: UICollectionView, for indexPath: IndexPath) -> Base {
+        collectionView.dequeueReusableCell(withReuseIdentifier: Base.ext.identifier, for: indexPath) as! Base
+    }
+}
+public extension ExtWrapper where Base: UICollectionView {
     /// 注册 Nib Cell
     func registerNib<T>(_ cellType: T.Type) where T: UICollectionViewCell {
         base.register(cellType.ext.nib, forCellWithReuseIdentifier: cellType.ext.identifier)
@@ -53,25 +67,40 @@ public extension ExtWrapper where Base: UICollectionView {
     func dequeueReusableCell<T>(_ cellType: T.Type, for indexPath: IndexPath) -> T where T: UICollectionViewCell {
         base.dequeueReusableCell(withReuseIdentifier: cellType.ext.identifier, for: indexPath) as! T
     }
-    
-    func registerReusableHeaderView<T>(_ viewType: T.Type) where T: UICollectionReusableView {
-        registerReusableView(viewType, ofKind: UICollectionView.elementKindSectionHeader)
+}
+public extension Ext {
+    enum CollectionViewElementKindSection {
+        /// UICollectionView header
+        case header
+        /// UICollectionView footer
+        case footer
+        
+        fileprivate var uiKind: String {
+            switch self {
+            case .header: return UICollectionView.elementKindSectionHeader
+            case .footer: return UICollectionView.elementKindSectionFooter
+            }
+        }
     }
-    func registerReusableFooterView<T>(_ viewType: T.Type) where T: UICollectionReusableView {
-        registerReusableView(viewType, ofKind: UICollectionView.elementKindSectionFooter)
+}
+public extension ExtWrapper where Base: UICollectionReusableView {
+    /// 注册 UICollectionView header footer
+    static func register(_ collectionView: UICollectionView, kind: Ext.CollectionViewElementKindSection) {
+        collectionView.register(Base.self, forSupplementaryViewOfKind: kind.uiKind, withReuseIdentifier: Base.ext.identifier)
     }
-    func registerReusableView<T>(_ viewType: T.Type, ofKind: String) where T: UICollectionReusableView {
-        base.register(viewType, forSupplementaryViewOfKind: ofKind, withReuseIdentifier: viewType.ext.identifier)
+    /// 从缓存池中取出 header footer
+    static func dequeueReusable(_ collectionView: UICollectionView, kind: Ext.CollectionViewElementKindSection, for indexPath: IndexPath) -> Base {
+        collectionView.dequeueReusableSupplementaryView(ofKind: kind.uiKind, withReuseIdentifier: Base.ext.identifier, for: indexPath) as! Base
     }
-    
-    func dequeueReusableHeaderView<T>(_ viewType: T.Type, for indexPath: IndexPath) -> T where T: UICollectionReusableView {
-        dequeueReusableView(viewType, ofKind: UICollectionView.elementKindSectionHeader, for: indexPath)
+}
+public extension ExtWrapper where Base: UICollectionView {
+    /// 注册 UICollectionView header footer
+    func registerReusableView<T>(_ viewType: T.Type, kind: Ext.CollectionViewElementKindSection) where T: UICollectionReusableView {
+        base.register(viewType, forSupplementaryViewOfKind: kind.uiKind, withReuseIdentifier: viewType.ext.identifier)
     }
-    func dequeueReusableFooterView<T>(_ viewType: T.Type, for indexPath: IndexPath) -> T where T: UICollectionReusableView {
-        dequeueReusableView(viewType, ofKind: UICollectionView.elementKindSectionFooter, for: indexPath)
-    }
-    func dequeueReusableView<T>(_ viewType: T.Type, ofKind: String, for indexPath: IndexPath) -> T where T: UICollectionReusableView {
-        base.dequeueReusableSupplementaryView(ofKind: ofKind, withReuseIdentifier: viewType.ext.identifier, for: indexPath) as! T
+    /// 从缓存池中取出 header footer
+    func dequeueReusableView<T>(_ viewType: T.Type, kind: Ext.CollectionViewElementKindSection, for indexPath: IndexPath) -> T where T: UICollectionReusableView {
+        base.dequeueReusableSupplementaryView(ofKind: kind.uiKind, withReuseIdentifier: viewType.ext.identifier, for: indexPath) as! T
     }
 }
 

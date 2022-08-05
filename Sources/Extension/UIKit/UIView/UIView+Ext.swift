@@ -81,6 +81,10 @@ public extension ExtWrapper where Base: UIView  {
     }
     
     
+    /// 相对于 view 四周进行自动布局
+    /// - Parameters:
+    ///   - view: 参照视图
+    ///   - insets: 四周偏移
     func constraintToEdges(_ view: UIView, insets: NSDirectionalEdgeInsets = .zero) {
         base.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([

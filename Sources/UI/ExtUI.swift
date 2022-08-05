@@ -132,89 +132,57 @@ open class ExtCollectionReusableView: UICollectionReusableView {
 extension Ext {
     
     open class WrapperNavBar<T: UIView>: ExtNavBar {
-        public private(set) var wrapperView: T!
+        public private(set) lazy var wrapperView = ext.add(T())
+        open var wrapperInsets: NSDirectionalEdgeInsets { .zero }
         
         open override func setupUI() {
             super.setupUI()
             
-            wrapperView = ext.add(T())
-            wrapperView.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                wrapperView.topAnchor.constraint(equalTo: self.topAnchor),
-                wrapperView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-                wrapperView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-                wrapperView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
-            ])
+            wrapperView.ext.constraintToEdges(self, insets: wrapperInsets)
         }
     }
     
     open class WrapperTableCell<T: UIView>: ExtTableCell {
-        public private(set) var wrapperView: T!
-        
-        open var wrapperInsets: UIEdgeInsets { .zero }
+        public private(set) lazy var wrapperView = contentView.ext.add(T())
+        open var wrapperInsets: NSDirectionalEdgeInsets { .zero }
         
         open override func setupUI() {
             super.setupUI()
             
-            wrapperView = contentView.ext.add(T())
-            wrapperView.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                wrapperView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: wrapperInsets.top),
-                wrapperView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: wrapperInsets.left),
-                wrapperView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -wrapperInsets.right),
-                wrapperView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -wrapperInsets.bottom)
-            ])
+            wrapperView.ext.constraintToEdges(contentView, insets: wrapperInsets)
         }
     }
 
     open class WrapperTableHeaderFooterView<T: UIView>: ExtTableHeaderFooterView {
-        public private(set) var wrapperView: T!
+        public private(set) lazy var wrapperView = contentView.ext.add(T())
+        open var wrapperInsets: NSDirectionalEdgeInsets { .zero }
         
         open override func setupUI() {
             super.setupUI()
             
-            wrapperView = contentView.ext.add(T())
-            wrapperView.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                wrapperView.topAnchor.constraint(equalTo: contentView.topAnchor),
-                wrapperView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-                wrapperView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-                wrapperView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
-            ])
+            wrapperView.ext.constraintToEdges(contentView, insets: wrapperInsets)
         }
     }
     
     open class WrapperCollectionCell<T: UIView>: ExtCollectionCell {
-        public private(set) var wrapperView: T!
+        public private(set) lazy var wrapperView = contentView.ext.add(T())
+        open var wrapperInsets: NSDirectionalEdgeInsets { .zero }
         
         open override func setupUI() {
             super.setupUI()
             
-            wrapperView = contentView.ext.add(T())
-            wrapperView.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                wrapperView.topAnchor.constraint(equalTo: contentView.topAnchor),
-                wrapperView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
-                wrapperView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
-                wrapperView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
-            ])
+            wrapperView.ext.constraintToEdges(contentView, insets: wrapperInsets)
         }
     }
 
     open class WrapperCollectionReusableView<T: UIView>: ExtCollectionReusableView {
-        public private(set) var wrapperView: T!
+        public private(set) lazy var wrapperView = ext.add(T())
+        open var wrapperInsets: NSDirectionalEdgeInsets { .zero }
         
         open override func setupUI() {
             super.setupUI()
             
-            wrapperView = ext.add(T())
-            wrapperView.translatesAutoresizingMaskIntoConstraints = false
-            NSLayoutConstraint.activate([
-                wrapperView.topAnchor.constraint(equalTo: self.topAnchor),
-                wrapperView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-                wrapperView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
-                wrapperView.bottomAnchor.constraint(equalTo: self.bottomAnchor)
-            ])
+            wrapperView.ext.constraintToEdges(self, insets: wrapperInsets)
         }
     }
 }
