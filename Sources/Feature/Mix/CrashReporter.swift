@@ -75,15 +75,15 @@ private extension CrashReporter {
             handler(nil)
             return
         }
-        var crash: [String: Any]?
-        DispatchQueue.ext.asyncDo {
+        DispatchQueue.global().async {
             guard let crashString = FileManager.default.ext.read(crashUrl) else {
                 handler(nil)
                 return
             }
-            crash = Ext.JSON.toDict(crashString)
-        } done: {
-            handler(crash)
+            let crash = Ext.JSON.toDict(crashString)
+            DispatchQueue.main.async {
+                handler(crash)
+            }
         }
     }
     /// 清理 crash 内容

@@ -26,10 +26,11 @@ public extension ExtWrapper where Base == FileManager {
     ///   - url: 文件 url
     ///   - handler: 删除完成回调
     func remove(_ url: URL?, handler: @escaping Ext.VoidHandler) {
-        DispatchQueue.ext.asyncDo {
+        DispatchQueue.global().async {
             remove(url)
-        } done: {
-            handler()
+            DispatchQueue.main.async {
+                handler()
+            }
         }
     }
     

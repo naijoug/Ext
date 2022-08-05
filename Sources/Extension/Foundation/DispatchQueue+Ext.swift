@@ -16,20 +16,6 @@ public extension ExtWrapper where Base == DispatchQueue {
     func after(delay: TimeInterval, handler: @escaping Ext.VoidHandler) {
         base.asyncAfter(deadline: .now() + delay, execute: handler)
     }
-    
-    /// 异步队列做一些事情，然后回调主队列
-    /// - Parameters:
-    ///   - something: 异步完成的操作(全局队列)
-    ///   - done: 完成回调(回到主队列)
-    static func asyncDo(_ something: @escaping Ext.VoidHandler, done: @escaping Ext.VoidHandler) {
-        DispatchQueue.global().async {
-            something()
-            DispatchQueue.main.sync {
-                done()
-            }
-        }
-    }
-    
 }
 
 public extension ExtWrapper where Base == DispatchQueue {
