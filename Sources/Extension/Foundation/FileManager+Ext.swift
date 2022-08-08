@@ -16,7 +16,7 @@ public extension ExtWrapper where Base == FileManager {
         do {
             try base.removeItem(at: url)
         } catch {
-            Ext.debug("remove \(url.absoluteString) failure.", error: error, tag: .file, locationEnabled: false)
+            Ext.debug("remove \(url.absoluteString) failed.", error: error, tag: .file, locationEnabled: false)
         }
     }
     
