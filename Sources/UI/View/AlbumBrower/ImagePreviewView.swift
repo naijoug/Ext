@@ -1,5 +1,5 @@
 //
-//  ImageBrower.swift
+//  ImagePreviewView.swift
 //  Ext
 //
 //  Created by naijoug on 2022/5/10.

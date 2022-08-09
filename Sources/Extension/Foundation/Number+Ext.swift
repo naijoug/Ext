@@ -42,3 +42,16 @@ public extension ExtWrapper where Base == Double {
         return formater.string(from: NSNumber(value: base)) ?? String(format: "%.\(decimal)f", base)
     }
 }
+
+public extension ExtWrapper where Base == TimeInterval {
+    /// 时长串 xx:xx:xx
+    var timeString: String {
+        let total = Int(ceil(base))
+        let second = total % 60
+        let minute = (total / 60) % 60
+        let hour = total / 60 / 60
+        Ext.debug("total: \(total) | hour: \(hour) minute: \(minute) | second: \(second)")
+        let formater = "%02d"
+        return "\(hour > 0 ? "\(formater.ext.format(hour)):" : "")\(formater.ext.format(minute)):\(formater.ext.format(second))"
+    }
+}

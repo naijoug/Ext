@@ -94,6 +94,15 @@ public extension ExtWrapper where Base: UIView  {
             base.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: insets.trailing)
         ])
     }
+    
+    /// 相对于 view 中心店进行自动布局
+    func constraintToCenter(_ view: UIView, offset: UIOffset = .zero) {
+        base.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            base.centerXAnchor.constraint(equalTo: view.centerXAnchor, constant: offset.horizontal),
+            base.centerYAnchor.constraint(equalTo: view.centerYAnchor, constant: offset.vertical)
+        ])
+    }
 }
 
 // MARK: - Frame

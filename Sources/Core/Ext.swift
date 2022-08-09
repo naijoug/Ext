@@ -182,7 +182,7 @@ private extension Ext {
         var log = "Debug \(formatter.string(from: Date())) \(tag)"
         if locationEnabled { log += " 【\(codeLocation(file: file, line: line, function: function))】" }
         log += " \(message)"
-        if let error = error { log += " \(Tag.error) \(error.localizedDescription)" }
+        if let error = error { log += " \(Tag.error) \(error)" }
         return log
     }
 }

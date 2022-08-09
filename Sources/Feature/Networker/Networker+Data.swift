@@ -66,7 +66,7 @@ public extension Networker {
                 return
             }
             let dataString = data.ext.toJSONString() ?? data.ext.string ?? ""
-            responseLog += " | \(Ext.Tag.basketball) Data => \(dataString)"
+            responseLog += " | \(httpResponse.ext.isSucceeded ? "✅" : "❎【\(httpResponse.statusCode)】") Data => \(dataString)"
             Ext.debug("Data Response | \(responseLog) \n", tag: .ok, locationEnabled: false)
             queue.async { handler(.success((httpResponse, data))) }
         }

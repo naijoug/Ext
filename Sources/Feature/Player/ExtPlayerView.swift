@@ -125,23 +125,13 @@ open class ExtPlayerView: UIView {
     
     private lazy var playerView: ApplePlayerView = {
         let playerView = ext.add(ApplePlayerView())
-        playerView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            playerView.topAnchor.constraint(equalTo: self.topAnchor),
-            playerView.bottomAnchor.constraint(equalTo: self.bottomAnchor),
-            playerView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-            playerView.trailingAnchor.constraint(equalTo: self.trailingAnchor)
-        ])
+        playerView.ext.constraintToEdges(self)
         return playerView
     }()
     
     private lazy var indicatorView: UIActivityIndicatorView = {
         let indicatorView = ext.add(UIActivityIndicatorView(style: .whiteLarge))
-        indicatorView.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            indicatorView.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-            indicatorView.centerYAnchor.constraint(equalTo: self.centerYAnchor)
-        ])
+        indicatorView.ext.constraintToCenter(self)
         return indicatorView
     }()
     
