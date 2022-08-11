@@ -98,18 +98,20 @@ public extension AlbumManager {
     /// - Parameters:
     ///   - asset: 资源
     ///   - size: 图片尺寸
-    func requestImage(_ asset: PHAsset, size: CGSize = CGSize(width: 200, height: 200), handler: @escaping Ext.ResultDataHandler<UIImage>) {
+    func requestImage(_ asset: PHAsset, size: CGSize = CGSize(width: 200, height: 200), queue: DispatchQueue = .main, handler: @escaping Ext.ResultDataHandler<UIImage>) {
         let options = PHImageRequestOptions()
         options.deliveryMode = .highQualityFormat
         options.isNetworkAccessAllowed = true
         options.isSynchronous = false
         phManager.requestImage(for: asset, targetSize: size, contentMode: .aspectFill, options: options) { image, userInfo in
             Ext.debug("request image | \(userInfo ?? [:])")
-            guard let image = image else {
-                handler(.failure(Ext.Error.inner("request image error.")))
-                return
+            queue.async {
+                guard let image = image else {
+                    handler(.failure(Ext.Error.inner("request image error.")))
+                    return
+                }
+                handler(.success(image))
             }
-            handler(.success(image))
         }
     }
     
@@ -117,56 +119,66 @@ public extension AlbumManager {
     /// - Parameters:
     ///   - asset: 相册资源
     ///   - handler: 图片数据
-    func requestImage(_ asset: PHAsset, handler: @escaping Ext.ResultDataHandler<Data>) {
+    func requestImage(_ asset: PHAsset, queue: DispatchQueue = .main, handler: @escaping Ext.ResultDataHandler<Data>) {
         let options = PHImageRequestOptions()
         options.isNetworkAccessAllowed = true
         options.deliveryMode = .highQualityFormat
         if #available(iOS 13, *) {
             phManager.requestImageDataAndOrientation(for: asset, options: options) { data, identifier, orientation, userInfo in
                 Ext.debug("\(identifier ?? "") | \(orientation) | \(userInfo ?? [:])")
-                guard let data = data else {
-                    handler(.failure(Ext.Error.inner("request image data error.")))
-                    return
+                queue.async {
+                    guard let data = data else {
+                        handler(.failure(Ext.Error.inner("request image data error.")))
+                        return
+                    }
+                    handler(.success(data))
                 }
-                handler(.success(data))
             }
         } else {
             phManager.requestImageData(for: asset, options: options) { data, identifier, orientation, userInfo in
                 Ext.debug("\(identifier ?? "") | \(orientation) | \(userInfo ?? [:])")
-                guard let data = data else {
-                    handler(.failure(Ext.Error.inner("request image data error.")))
-                    return
+                queue.async {
+                    guard let data = data else {
+                        handler(.failure(Ext.Error.inner("request image data error.")))
+                        return
+                    }
+                    handler(.success(data))
                 }
-                handler(.success(data))
             }
         }
     }
     
-    func requestPlayerItem(_ asset: PHAsset, handler: @escaping Ext.ResultDataHandler<AVPlayerItem>) {
+    func requestPlayerItem(_ asset: PHAsset, queue: DispatchQueue = .main, handler: @escaping Ext.ResultDataHandler<AVPlayerItem>) {
         let options = PHVideoRequestOptions()
         options.isNetworkAccessAllowed = true
         options.deliveryMode = .highQualityFormat
         phManager.requestPlayerItem(forVideo: asset, options: options) { playerItem, userInfo in
             Ext.debug("request playerItem | \(userInfo ?? [:])")
-            guard let playerItem = playerItem else {
-                handler(.failure(Ext.Error.inner("request playerItem error.")))
-                return
+            queue.async {
+                guard let playerItem = playerItem else {
+                    handler(.failure(Ext.Error.inner("request playerItem error.")))
+                    return
+                }
+                handler(.success(playerItem))
             }
-            handler(.success(playerItem))
         }
     }
     
-    func requestAVAsset(_ asset: PHAsset, handler: @escaping Ext.ResultDataHandler<AVAsset>) {
+    func requestAVAsset(_ asset: PHAsset, queue: DispatchQueue = .main, handler: @escaping Ext.ResultDataHandler<AVAsset>) {
         let options = PHVideoRequestOptions()
         options.isNetworkAccessAllowed = true
         options.deliveryMode = .highQualityFormat
         phManager.requestAVAsset(forVideo: asset, options: options) { avAsset, audioMix, userInfo in
-            Ext.debug("request avAsset | \(String(describing: avAsset)) | \(audioMix) | \(userInfo)")
-            guard let avAsset = avAsset else {
-                handler(.failure(Ext.Error.inner("request avAsset error.")))
-                return
+            queue.async {
+                Ext.debug("request avAsset | \(String(describing: avAsset)) | \(String(describing: audioMix)) | \(userInfo)")
+                queue.async {
+                    guard let avAsset = avAsset else {
+                        handler(.failure(Ext.Error.inner("request avAsset error.")))
+                        return
+                    }
+                    handler(.success(avAsset))
+                }
             }
-            handler(.success(avAsset))
         }
     }
 }
