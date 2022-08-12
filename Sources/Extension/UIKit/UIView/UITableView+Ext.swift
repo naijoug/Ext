@@ -22,6 +22,16 @@ public extension ExtWrapper where Base: UITableViewCell {
         tableView.dequeueReusableCell(withIdentifier: Base.ext.identifier, for: indexPath) as! Base
     }
 }
+public extension ExtWrapper where Base: UITableViewHeaderFooterView {
+    /// 注册自定义 HeaderFooterView
+    static func registerClass(_ tableView: UITableView) {
+        tableView.register(Base.self, forHeaderFooterViewReuseIdentifier: Base.ext.identifier)
+    }
+    /// 从缓存池中取出 HeaderFooterView
+    static func dequeueReusable(_ tableView: UITableView) -> Base {
+        tableView.dequeueReusableHeaderFooterView(withIdentifier: Base.ext.identifier) as! Base
+    }
+}
 public extension ExtWrapper where Base: UITableView {
     /// 注册 Nib Cell
     func registerNib<T>(_ cellType: T.Type) where T: UITableViewCell {
