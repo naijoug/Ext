@@ -19,12 +19,14 @@ public typealias ProductsCompletionHandler  = Ext.ResultDataHandler<[SKProduct]>
 /// IAP 支付结果回调
 public typealias PaymentCompletionHandler   = Ext.ResultDataHandler<SKPaymentTransaction>
 
-extension SKProduct {
+public extension ExtWrapper where Base: SKProduct {
+    /// 本地化处理价格
     var localizedPrice: String? {
         let formatter = NumberFormatter()
+        formatter.formatterBehavior = .behavior10_4
         formatter.numberStyle = .currency
-        formatter.locale = priceLocale
-        return formatter.string(from: price)
+        formatter.locale = base.priceLocale
+        return formatter.string(from: base.price)
     }
 }
 
@@ -100,7 +102,7 @@ extension IAPHelper: SKProductsRequestDelegate {
         let products = response.products
         handleProducts(products, error: nil)
         
-        print(productLogTitle)
+        print(SKProduct.logTitle)
         for product in products {
             print(product.log)
         }
@@ -118,7 +120,7 @@ extension IAPHelper: SKProductsRequestDelegate {
 extension IAPHelper: SKPaymentTransactionObserver {
     
     public func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
-        print(transactionLogTitle)
+        print(SKPaymentTransaction.logTitle)
         for transaction in transactions {
             print(transaction.log)
             
@@ -165,9 +167,9 @@ extension IAPHelper: SKPaymentTransactionObserver {
 
 // MARK: - Log
 
-extension IAPHelper {
+private extension SKProduct {
     /// 产品日志标题
-    fileprivate var productLogTitle: String {
+    static var logTitle: String {
         var log = "Product: \t"
         log += "ProductIdentifier \t"
         log += "Title \t"
@@ -177,17 +179,6 @@ extension IAPHelper {
         log += "CurrencySymbol \t"
         return log
     }
-    /// 交易日志标题
-    fileprivate var transactionLogTitle: String {
-        var log = "Tx: \t"
-        log += "ProductIdentifier \t"
-        log += "Identifier \t"
-        log += "State \t"
-        return log
-    }
-}
-
-fileprivate extension SKProduct {
     /// 产品日志
     var log: String {
         var log = "Product: \t"
@@ -200,7 +191,15 @@ fileprivate extension SKProduct {
         return log
     }
 }
-fileprivate extension SKPaymentTransaction {
+private extension SKPaymentTransaction {
+    /// 交易日志标题
+    static var logTitle: String {
+        var log = "Tx: \t"
+        log += "ProductIdentifier \t"
+        log += "Identifier \t"
+        log += "State \t"
+        return log
+    }
     /// 交易日志
     var log: String {
         var log = "Tx: \t"

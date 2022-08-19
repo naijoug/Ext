@@ -44,7 +44,7 @@ public extension Networker {
     ///   - handler: 数据响应
     @discardableResult
     func data(queue: DispatchQueue = .main, request: URLRequest, appendLog: String? = nil,
-              handler: @escaping Ext.ResultDataHandler<(response: HTTPURLResponse, data: Data)>) -> URLSessionDataTask? {
+              handler: @escaping Ext.ResultDataHandler<(response: HTTPURLResponse, data: Data)>) -> URLSessionDataTask {
         let requestTime = Date()
         let requestLog = request.ext.log + (appendLog ?? "")
         let logEnabled = self.logEnabled

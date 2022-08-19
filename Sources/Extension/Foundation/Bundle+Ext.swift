@@ -17,15 +17,20 @@ public extension ExtWrapper where Base == Bundle {
     
     /// Bundle
     /// - Parameters:
-    ///   - cls: bundle Class
-    ///   - bundleName: bundle 名
+    ///   - cls: 类名 (不能为嵌套内部类)
+    ///   - bundleName: bundle 名 (如果 cls != nil，默认是 cls 所在的模块名)
     /// - Returns: 如果 bundle 不存在，返回 mainBundle
-    static func bundle(for cls: AnyClass? = nil, bundleName: String) -> Bundle {
+    static func bundle(for cls: AnyClass? = nil, bundleName: String? = nil) -> Bundle {
         var bundle = Bundle.main
-        if let cls = cls { bundle = Bundle(for: cls) }
-        let bundlePath = bundle.path(forResource: bundleName, ofType: "bundle")
-        //Ext.debug("bundlePath: \(bundlePath ?? "")", locationEnabled: false)
-        guard let path = bundlePath else { return Bundle.main }
+        var name = bundleName
+        if let cls = cls {
+            bundle = Bundle(for: cls)
+            name = name ?? String(reflecting: cls).components(separatedBy: ".").first
+        }
+        guard let path = bundle.path(forResource: name, ofType: "bundle") else {
+            Ext.debug("bundle path error. bundlePath: \(bundle.bundlePath) | bundleName: \(name ?? "")", tag: .error, locationEnabled: false)
+            return Bundle.main
+        }
         return Bundle(path: path) ?? .main
     }
     

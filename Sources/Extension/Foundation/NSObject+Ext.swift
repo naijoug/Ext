@@ -8,7 +8,6 @@
 import Foundation
 
 public extension ExtWrapper where Base: NSObject {
-    
     /**
      Reference:
         - https://stackoverflow.com/questions/24494784/get-class-name-of-object-as-string-in-swift

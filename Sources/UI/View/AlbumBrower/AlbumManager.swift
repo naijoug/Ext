@@ -98,6 +98,7 @@ public extension AlbumManager {
     /// - Parameters:
     ///   - asset: 资源
     ///   - size: 图片尺寸
+    ///   - queue: 回调所在队列 (默认: 主队列)
     func requestImage(_ asset: PHAsset, size: CGSize = CGSize(width: 200, height: 200), queue: DispatchQueue = .main, handler: @escaping Ext.ResultDataHandler<UIImage>) {
         let options = PHImageRequestOptions()
         options.deliveryMode = .highQualityFormat
@@ -118,6 +119,7 @@ public extension AlbumManager {
     /// 请求图片数据
     /// - Parameters:
     ///   - asset: 相册资源
+    ///   - queue: 回调所在队列 (默认: 主队列)
     ///   - handler: 图片数据
     func requestImage(_ asset: PHAsset, queue: DispatchQueue = .main, handler: @escaping Ext.ResultDataHandler<Data>) {
         let options = PHImageRequestOptions()
@@ -148,6 +150,12 @@ public extension AlbumManager {
         }
     }
     
+    
+    /// 请求播放 item
+    /// - Parameters:
+    ///   - asset: 相册资源
+    ///   - queue: 回调所在队列 (默认: 主队列)
+    ///   - handler: AVPlayerItem
     func requestPlayerItem(_ asset: PHAsset, queue: DispatchQueue = .main, handler: @escaping Ext.ResultDataHandler<AVPlayerItem>) {
         let options = PHVideoRequestOptions()
         options.isNetworkAccessAllowed = true
@@ -164,13 +172,19 @@ public extension AlbumManager {
         }
     }
     
+    
+    /// 请求 AVAsset 资源
+    /// - Parameters:
+    ///   - asset: 相册资源
+    ///   - queue: 回调所在队列 (默认: 主队列)
+    ///   - handler: AVAsset
     func requestAVAsset(_ asset: PHAsset, queue: DispatchQueue = .main, handler: @escaping Ext.ResultDataHandler<AVAsset>) {
         let options = PHVideoRequestOptions()
         options.isNetworkAccessAllowed = true
         options.deliveryMode = .highQualityFormat
         phManager.requestAVAsset(forVideo: asset, options: options) { avAsset, audioMix, userInfo in
             queue.async {
-                Ext.debug("request avAsset | \(String(describing: avAsset)) | \(String(describing: audioMix)) | \(userInfo)")
+                Ext.debug("request avAsset | \(String(describing: avAsset)) | \(String(describing: audioMix)) | \(userInfo ?? [:])")
                 queue.async {
                     guard let avAsset = avAsset else {
                         handler(.failure(Ext.Error.inner("request avAsset error.")))
