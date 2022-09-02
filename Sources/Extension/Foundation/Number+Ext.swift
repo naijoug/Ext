@@ -11,6 +11,15 @@ extension Int: ExtCompatible {}
 extension Float: ExtCompatible {}
 extension Double: ExtCompatible {}
 
+public extension ExtWrapper where Base == Int {
+    /// 毫秒 -> 秒
+    var msecToSec: TimeInterval { TimeInterval(base) / 1000.0 }
+}
+public extension ExtWrapper  where Base == TimeInterval {
+    /// 秒 -> 毫秒
+    var secToMsec: Int { Int(Darwin.round(base * 1000)) }
+}
+
 public extension ExtWrapper where Base == Float {
     
     /// 保留小数位

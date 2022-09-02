@@ -9,10 +9,12 @@ import AVKit
 
 open class CameraPreviewView: ExtView {
     
+    private lazy var videoDevice = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .front)
+    
     private lazy var session: AVCaptureSession = {
         let session = AVCaptureSession()
-        if let videoDevice = AVCaptureDevice.default(for: .video),
-            let videoInput = try? AVCaptureDeviceInput(device: videoDevice) {
+        if let videoDevice = videoDevice,
+           let videoInput = try? AVCaptureDeviceInput(device: videoDevice) {
             session.addInput(videoInput)
         }
         return session
