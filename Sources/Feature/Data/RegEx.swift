@@ -25,7 +25,7 @@ public extension Ext.RegEx {
     /// 字符串是否有效
     /// - Parameter string: 校验的字符串
     func isValid(_ string: String) -> Bool {
-        NSPredicate(format:"SELF MATCHES %@", self.rawValue).evaluate(with: string)
+        NSPredicate(format:"SELF MATCHES %@", rawValue).evaluate(with: string)
     }
     /// 字符串是否匹配正则
     /// - Parameters:
@@ -52,7 +52,7 @@ public extension Ext.RegEx {
     /// - Returns: 解析匹配结果(倒序)
     static func parse(_ text: String, pattern: String) -> [MatchResult]? {
         guard let regEx = try? NSRegularExpression(pattern: pattern, options: []) else { return nil }
-        let results = regEx.matches(in: text, options: [], range: NSRange(location: 0, length: text.utf16.count))
+        let results = regEx.matches(in: text, options: [], range: NSRange(text.startIndex..., in: text))
                             .reversed()
                             .compactMap({
                                 MatchResult(range: $0.range, match: text.substring(with: $0.range))

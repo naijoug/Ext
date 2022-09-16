@@ -32,7 +32,7 @@ extension ExtWrapper where Base: UINavigationController {
 
 public extension ExtWrapper where Base: UIViewController {
     
-    private var isInteractivePopDisabled: Bool { base.isInteractivePopDisabled }
+    var isInteractivePopDisabled: Bool { base.isInteractivePopDisabled }
     
     func interactionPopDisabled(_ disabled: Bool) {
         base.isInteractivePopDisabled = disabled

@@ -33,6 +33,8 @@ public class PageController: UIViewController {
             reloadPan()
         }
     }
+    /// 全屏 pop 是否失效
+    public var isInteractivePopDisabled: Bool = false
     
     /// 是否正在切换 page
     private var isTransitioning: Bool = false {
@@ -90,19 +92,19 @@ extension PageController: UIGestureRecognizerDelegate {
         pan.delegate = self
         scrollView.addGestureRecognizer(pan)
         
-        if let gesture = navigationController?.ext.fullscreenPopGestureRecognizer {
+        if !isInteractivePopDisabled, let gesture = navigationController?.ext.fullscreenPopGestureRecognizer {
             Ext.debug("fullscreen gesture : \(gesture)", logEnabled: logEnabled)
             scrollView.panGestureRecognizer.require(toFail: gesture)
             pan.require(toFail: gesture)
         }
-        if let gesture = navigationController?.interactivePopGestureRecognizer {
+        if !isInteractivePopDisabled, let gesture = navigationController?.interactivePopGestureRecognizer {
             Ext.debug("page gesture : \(gesture)", logEnabled: logEnabled)
             scrollView.panGestureRecognizer.require(toFail: gesture)
         }
     }
     
     private func reloadPan() {
-        guard !isTransitioning else { return }
+        guard !isTransitioning, !self.isInteractivePopDisabled else { return }
         let isInteractivePopDisabled = isScrollEnabled && (currentIndex != 0)
         self.ext.interactionPopDisabled(isInteractivePopDisabled)
         var parent: UIViewController? = self.parent
@@ -122,12 +124,12 @@ extension PageController: UIGestureRecognizerDelegate {
         return gestures.contains(otherGestureRecognizer)
     }
     public func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
-        guard isScrollEnabled, let gesture = gestureRecognizer as? UIPanGestureRecognizer else { return false }
+        guard isScrollEnabled, !isInteractivePopDisabled, let gesture = gestureRecognizer as? UIPanGestureRecognizer else { return false }
         let translation = gesture.translation(in: gestureRecognizer.view)
-        Ext.debug("translation: \(translation) | \(currentIndex) | \(isTransitioning)", tag: .fire, logEnabled: logEnabled)
+        Ext.debug("translation: \(translation) | currentIndex \(currentIndex) | isTransitioning: \(isTransitioning) | isInteractivePopDisabled: \(isInteractivePopDisabled)", tag: .fire, logEnabled: logEnabled)
         guard translation.x != 0 else { return false }
         guard translation.x < 0 else {
-            return currentIndex == 0 && !isTransitioning
+            return !isInteractivePopDisabled && currentIndex == 0 && !isTransitioning
         }
         return currentIndex == (controllers.count - 1) && !isTransitioning
     }
