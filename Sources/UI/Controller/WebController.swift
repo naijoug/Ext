@@ -212,8 +212,6 @@ open class WebView: ExtView {
         for name in jsHandlers.keys {
             removeJSHandler(name)
         }
-        progressObserver?.invalidate()
-        progressObserver = nil
     }
     
     open override func setupUI() {

@@ -143,7 +143,7 @@ private class GuideView: UIView {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
     deinit {
-        Ext.debug("tip: \(titleLabel.text ?? "")", tag: .recycle, logEnabled: logEnabled)
+        Ext.debug("tip: \(titleLabel.text ?? "")", tag: .recycle)
     }
     func setupUI() {
         topView.ext.active()
