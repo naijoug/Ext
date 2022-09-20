@@ -19,13 +19,6 @@ extension Character: ExtCompatible {}
  str.substring(toIndex: str.length - 2) // returns "abcd"
  */
 public extension String {
-    /// 对应索引的子串
-    ///
-    /// - Parameter i: 索引位置
-    subscript (i: Int) -> String {
-        return self[i ..< i + 1]
-    }
-    
     /// Range 范围子串
     ///
     /// - Parameter r: Range 范围
@@ -37,12 +30,19 @@ public extension String {
         return String(self[start ..< end])
     }
     
+    /// 对应索引的子串
+    ///
+    /// - Parameter i: 索引位置
+    subscript (i: Int) -> String {
+        self[i ..< i + 1]
+    }
+    
     /// 从索引开始的子串
     ///
     /// - Parameter fromIndex: 起始索引
     /// - Returns: 子串
     func substring(fromIndex: Int) -> String {
-        return self[min(fromIndex, count) ..< count]
+        self[min(fromIndex, count) ..< count]
     }
     
     /// 到结束索引的子串
@@ -50,11 +50,7 @@ public extension String {
     /// - Parameter toIndex: 结束索引
     /// - Returns: 子串
     func substring(toIndex: Int) -> String {
-        return self[0 ..< max(0, toIndex)]
-    }
-    
-    func substring(with nsRange: NSRange) -> String {
-        self[nsRange.location..<(nsRange.location + nsRange.length)]
+        self[0 ..< max(0, toIndex)]
     }
 }
 

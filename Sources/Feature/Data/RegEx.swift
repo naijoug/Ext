@@ -41,7 +41,9 @@ public extension Ext.RegEx {
 
 public extension Ext.RegEx {
     struct MatchResult {
+        /// 匹配范围
         public let range: NSRange
+        /// 匹配文本
         public let match: String
     }
     
@@ -52,12 +54,16 @@ public extension Ext.RegEx {
     /// - Returns: 解析匹配结果(倒序)
     static func parse(_ text: String, pattern: String) -> [MatchResult]? {
         guard let regEx = try? NSRegularExpression(pattern: pattern, options: []) else { return nil }
+        /**
+         fix: 文本包含 emoji 时 match 文本匹配有误
+         https://stackoverflow.com/questions/27880650/swift-extract-regex-matches
+         */
         let results = regEx.matches(in: text, options: [], range: NSRange(text.startIndex..., in: text))
                             .reversed()
-                            .compactMap({
-                                MatchResult(range: $0.range, match: text.substring(with: $0.range))
-                            })
-        return results
+        return results.compactMap { result in
+            guard let range = Range(result.range, in: text) else { return nil }
+            return MatchResult(range: result.range, match: String(text[range]))
+        }
     }
     
     
