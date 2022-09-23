@@ -117,9 +117,11 @@ open class ExtPlayerView: UIView {
     
 // MARK: - UII
     
+    private var clearPlayer: Bool = false
     private lazy var extPlayer: ExtPlayer = {
         let extPlayer = ExtPlayer()
         extPlayer.delegate = self
+        self.clearPlayer = true
         return extPlayer
     }()
     
@@ -185,7 +187,7 @@ extension ExtPlayerView: ExtPlayerDelegate {
 public extension ExtPlayerView {
     
     func clear() {
-        extPlayer.clear()
+        if clearPlayer { extPlayer.clear() }
     }
     
     /// 开始播放
