@@ -24,11 +24,11 @@ public extension ExtWrapper where Base == Formatter {
     ///   - array: 字符串数组
     ///   - connector: 连接符
     /// - Returns: 合并后的字符串
-    static func merge(_ array: [String]?, by connector: Character) -> String? {
+    static func merge(_ array: [String]?, by connector: String) -> String? {
         guard let array = array, array.count > 0 else { return nil }
         var string = ""
         for i in 0..<array.count {
-            if i != 0 { string += String(connector) }
+            if i != 0 { string += connector }
             string += array[i]
         }
         return string.isEmpty ? nil : string

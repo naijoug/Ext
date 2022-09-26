@@ -19,7 +19,7 @@ open class RoundButton: IndicatorButton {
     }
     
     /// 圆角类型
-    public var type: RoundCornerType = .normal(4) {
+    public var roundCornerType: RoundCornerType = .normal(4) {
         didSet {
             setNeedsLayout()
         }
@@ -29,7 +29,7 @@ open class RoundButton: IndicatorButton {
         super.layoutSubviews()
         
         var roundRadius: CGFloat = 0
-        switch type {
+        switch roundCornerType {
         case .none:                 roundRadius = 0
         case .normal(let radius):   roundRadius = radius
         case .circle:               roundRadius = frame.height/2
