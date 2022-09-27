@@ -87,6 +87,21 @@ open class ExtPlayerView: UIView {
         }
     }
     
+    public var videoGravity: ApplePlayerView.VideoGravity = .aspectFill {
+        didSet {
+            guard oldValue != videoGravity else { return }
+            Ext.debug("\(oldValue) -> \(videoGravity)")
+            playerView.videoGravity = videoGravity
+        }
+    }
+    
+    /// 是否静音🔇
+    public var isMuted: Bool = false {
+        didSet {
+            extPlayer.isMuted = isMuted
+        }
+    }
+    
 // MARK: - Status
     
     /// 是否打印日志
@@ -146,9 +161,15 @@ open class ExtPlayerView: UIView {
     public override init(frame: CGRect) {
         super.init(frame: frame)
         
-        backgroundColor = .black
         playerView.ext.active()
     }
+}
+
+public extension ExtPlayerView {
+    /// 播放资源总时长
+    var duration: TimeInterval? { extPlayer.duration }
+    /// 当前播放时间
+    var currentTime: TimeInterval? { extPlayer.currentTime }
 }
 
 extension ExtPlayerView: ExtPlayerDelegate {
