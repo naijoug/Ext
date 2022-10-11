@@ -134,6 +134,8 @@ extension ExtWrapper where Base == HTTPURLResponse {
         case 404: message = "Not Found"
         case 405: message = "Method Not Allowed"
         case 415: message = "Unsupported Media Type"
+        
+        case 500: message = "Server error"
         default: ()
         }
         return "【statusCode == \(base.statusCode)\(message.isEmpty ? "" : " | \(message)")】"

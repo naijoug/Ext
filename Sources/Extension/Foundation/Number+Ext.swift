@@ -12,12 +12,16 @@ extension Float: ExtCompatible {}
 extension Double: ExtCompatible {}
 
 public extension ExtWrapper where Base == Int {
-    /// 毫秒 -> 秒
-    var msecToSec: TimeInterval { TimeInterval(base) / 1000.0 }
+    /// 毫秒 -> 秒 (1000 : 1)
+    var millisecToSec: TimeInterval { TimeInterval(base) / 1000.0 }
+    /// 兆秒 -> 秒 (1000_000 : 1)
+    var megasecToSec: TimeInterval { TimeInterval(base) / 1000_000.0 }
 }
 public extension ExtWrapper  where Base == TimeInterval {
-    /// 秒 -> 毫秒
-    var secToMsec: Int { Int(Darwin.round(base * 1000)) }
+    /// 秒 -> 毫秒 (1 : 1000)
+    var secToMillisec: Int { Int(Darwin.round(base * 1000)) }
+    /// 秒 -> 兆秒 (1 : 1000_000)
+    var secToMegasec: Int { Int(Darwin.round(base * 1000_000)) }
 }
 
 public extension ExtWrapper where Base == Float {
