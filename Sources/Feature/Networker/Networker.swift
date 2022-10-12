@@ -55,10 +55,10 @@ public final class Networker: NSObject {
 public extension Networker {
     /// 网络错误
     enum Error: Swift.Error {
-        /// 未知错误
-        case unknown
         /// 无效的 URL
         case invalidURL
+        /// 无响应数据
+        case noResponseData
         /// 非 HTTP 响应体
         case nonHTTPResponse(response: URLResponse)
         /// HTTP 响应失败 (statusCode != 200...299)
@@ -67,6 +67,23 @@ public extension Networker {
         case jsonDeserializationError(error: Swift.Error)
     }
 }
+extension Networker.Error: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .invalidURL:
+            return "invalid url"
+        case .noResponseData:
+            return "no response data"
+        case .nonHTTPResponse(_):
+            return "not http response"
+        case .httpResponseFailed(let response, _):
+            return "response failed. \(response.statusCode)"
+        case .jsonDeserializationError(let error):
+            return "json deserialization error: \(error.localizedDescription)"
+        }
+    }
+}
+
 
 extension Networker {
     
@@ -124,7 +141,7 @@ extension ExtWrapper where Base == HTTPURLResponse {
     var isSucceeded: Bool { 200 ..< 300 ~= base.statusCode }
     
     /// HTTP 状态描述
-    var statusMessage: String {
+    fileprivate var statusMessage: String {
         var message = ""
         switch base.statusCode {
         case 200: message = "OK"
@@ -136,8 +153,8 @@ extension ExtWrapper where Base == HTTPURLResponse {
         case 415: message = "Unsupported Media Type"
         
         case 500: message = "Server error"
-        default: ()
+        default: message = HTTPURLResponse.localizedString(forStatusCode: base.statusCode)
         }
-        return "【statusCode == \(base.statusCode)\(message.isEmpty ? "" : " | \(message)")】"
+        return message
     }
 }

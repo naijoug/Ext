@@ -56,7 +56,7 @@ public extension Networker {
             
             guard let response = response, let data = data else {
                 Ext.debug("Data Response failed. | \(responseLog) \n", error: error, tag: .failure, logEnabled: logEnabled, locationEnabled: false)
-                queue.async { handler(.failure(Ext.Error.error(error ?? Networker.Error.unknown))) }
+                queue.async { handler(.failure(Ext.Error.error(error ?? Networker.Error.noResponseData))) }
                 return
             }
             guard let httpResponse = response as? HTTPURLResponse else {
@@ -66,7 +66,7 @@ public extension Networker {
                 return
             }
             let dataString = data.ext.toJSONString() ?? data.ext.string ?? ""
-            responseLog += " | \(httpResponse.ext.isSucceeded ? "✅" : "❎【\(httpResponse.statusCode)】") Data => \(dataString)"
+            responseLog += " | \(httpResponse.ext.isSucceeded ? "✅" : "❎【\(httpResponse.statusCode) - \(HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode))】") Data => \(dataString)"
             Ext.debug("Data Response | \(responseLog) \n", tag: .ok, locationEnabled: false)
             queue.async { handler(.success((httpResponse, data))) }
         }
