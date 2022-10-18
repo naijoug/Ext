@@ -391,19 +391,6 @@ public extension ExtWrapper where Base: UIView {
         return subview
     }
     
-    /// 添加 Label
-    /// - Parameters:
-    ///   - font: 字体
-    ///   - color: 字体颜色
-    ///   - multiline: 是否多行
-    func addLabel(font: UIFont,
-                  color: UIColor,
-                  multiline: Bool = false) -> UILabel {
-        let label = add(UILabel())
-        label.ext.config(font: font, color: color, multiline: multiline)
-        return label
-    }
-    
     /// 添加顶部分割线
     /// - Parameter color: 线颜色
     /// - Parameter width: 线高度

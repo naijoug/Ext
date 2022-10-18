@@ -179,7 +179,13 @@ private extension FileItem {
 
 private class FileCell: UITableViewCell {
     
-    private var titleLabel: UILabel!
+    private lazy var titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont.boldSystemFont(ofSize: 17)
+        label.textColor = .darkGray
+        label.numberOfLines = 0
+        return label
+    }()
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -190,7 +196,6 @@ private class FileCell: UITableViewCell {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
     private func setupUI() {
-        titleLabel  = contentView.ext.addLabel(font: UIFont.boldSystemFont(ofSize: 17), color: .darkGray, multiline: true)
         
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
