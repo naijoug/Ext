@@ -18,7 +18,12 @@ public extension ExtWrapper where Base == UIApplication {
 public extension ExtWrapper where Base == UIApplication {
     
     /// 状态栏高
-    var statusBarHeight: CGFloat { base.statusBarFrame.size.height }
+    var statusBarHeight: CGFloat {
+        guard #available(iOS 13.0, *) else {
+            return base.statusBarFrame.size.height
+        }
+        return mainWindow?.windowScene?.statusBarManager?.statusBarFrame.size.height ?? 0
+    }
     /// 安全区域 Insets
     var safeAreaInsets: UIEdgeInsets { mainWindow?.safeAreaInsets ?? UIEdgeInsets(top: statusBarHeight, left: 0, bottom: 0, right: 0) }
     
@@ -55,14 +60,12 @@ public extension ExtWrapper where Base == UIApplication {
         */
         if #available(iOS 13.0, *),
             let window = base.connectedScenes
-            .filter({$0.activationState == .foregroundActive})
-            .map({$0 as? UIWindowScene})
-            .compactMap({$0})
-            .first?.windows
-            .filter({$0.isKeyWindow}).first {
+            .filter({ $0.activationState == .foregroundActive })
+            .map({ $0 as? UIWindowScene }).compactMap({ $0 }).first?.windows
+            .filter({ $0.isKeyWindow }).first {
             return window
         }
-        return UIApplication.shared.windows.filter { $0.isKeyWindow }.first ?? UIApplication.shared.keyWindow
+        return base.windows.filter { $0.isKeyWindow }.first ?? base.keyWindow
     }
     
     /// 返回顶层控制器
