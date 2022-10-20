@@ -63,8 +63,6 @@ public extension Networker {
         case nonHTTPResponse(response: URLResponse)
         /// HTTP 响应失败 (statusCode != 200...299)
         case httpResponseFailed(response: HTTPURLResponse, data: Data?)
-        /// JSON 解析错误
-        case jsonDeserializationError(error: Swift.Error)
     }
 }
 extension Networker.Error: LocalizedError {
@@ -77,9 +75,7 @@ extension Networker.Error: LocalizedError {
         case .nonHTTPResponse(_):
             return "not http response"
         case .httpResponseFailed(let response, _):
-            return "response failed. \(response.statusCode)"
-        case .jsonDeserializationError(let error):
-            return "json deserialization error: \(error.localizedDescription)"
+            return "http response failed. \(response.statusCode)"
         }
     }
 }
@@ -141,7 +137,7 @@ extension ExtWrapper where Base == HTTPURLResponse {
     var isSucceeded: Bool { 200 ..< 300 ~= base.statusCode }
     
     /// HTTP 状态描述
-    fileprivate var statusMessage: String {
+    var statusMessage: String {
         var message = ""
         switch base.statusCode {
         case 200: message = "OK"

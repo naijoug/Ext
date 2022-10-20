@@ -62,6 +62,10 @@ extension Ext {
         - https://stackoverflow.com/questions/39176196/how-to-provide-a-localized-description-with-an-error-type-in-swift
      */
     public enum Error: Swift.Error {
+        /// JSON 发序列化错误
+        case jsonDeserializationError(error: Swift.Error)
+        /// JSON 解码错误
+        case jsonDecodedError(error: Swift.Error)
         /// Swift error
         case error(_ error: Swift.Error)
         /// 内部处理错误
@@ -71,10 +75,12 @@ extension Ext {
 extension Ext.Error: LocalizedError {
     public var errorDescription: String? {
         switch self {
-        case .error(let error):
-            return error.localizedDescription
-        case .inner(let message):
-            return message
+        case .jsonDeserializationError(let error):
+            return "json deserialization error: \(error.localizedDescription)"
+        case .jsonDecodedError(let error):
+            return "json decoded error: \(error.localizedDescription)"
+        case .error(let error):     return error.localizedDescription
+        case .inner(let message):   return message
         }
     }
 }

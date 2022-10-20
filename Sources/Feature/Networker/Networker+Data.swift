@@ -68,6 +68,12 @@ public extension Networker {
             let dataString = data.ext.toJSONString() ?? data.ext.string ?? ""
             responseLog += " | \(httpResponse.ext.isSucceeded ? "✅" : "❎【\(httpResponse.statusCode) - \(HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode))】") Data => \(dataString)"
             Ext.debug("Data Response | \(responseLog) \n", tag: .ok, locationEnabled: false)
+            
+            guard httpResponse.ext.isSucceeded else {
+                Ext.debug("Data Response failed. | http response failed. \(httpResponse.statusCode) - \(httpResponse.ext.statusMessage)", tag: .failure, logEnabled: logEnabled, locationEnabled: false)
+                queue.async { handler(.failure(Networker.Error.httpResponseFailed(response: httpResponse, data: data))) }
+                return
+            }
             queue.async { handler(.success((httpResponse, data))) }
         }
         task.resume()
@@ -276,47 +282,6 @@ private extension Data {
     mutating func appendString(_ string: String) {
         guard let data = string.data(using: .utf8, allowLossyConversion: true) else { return }
         append(data)
-    }
-}
-
-// MARK: - Ext
-
-public extension Swift.Result where Success == (response: HTTPURLResponse, data: Data) {
-    /**
-     http response result ---> data result
-     将非正确响应状态码 (statusCode != 200 ~ 299) 转化为错误
-     */
-    func asData() -> Swift.Result<Data, Swift.Error> {
-        switch self {
-        case .failure(let error): return .failure(error)
-        case .success(let tuple):
-            guard tuple.response.ext.isSucceeded else {
-                return .failure(Networker.Error.httpResponseFailed(response: tuple.response, data: tuple.data))
-            }
-            return .success(tuple.data)
-        }
-    }
-}
-public extension Swift.Result where Success == Data {
-    /// data result ---> json result
-    func asJSON(_ options: JSONSerialization.ReadingOptions = [.fragmentsAllowed, .allowFragments]) -> Swift.Result<Any, Swift.Error> {
-        switch self {
-        case .failure(let error): return .failure(error)
-        case .success(let data):
-            do {
-                let json = try JSONSerialization.jsonObject(with: data, options: options)
-                return .success(json)
-            } catch {
-                return .failure(Networker.Error.jsonDeserializationError(error: error))
-            }
-        }
-    }
-    /// data result ---> string result
-    func asString() -> Swift.Result<String?, Swift.Error> {
-        switch self {
-        case .failure(let error): return .failure(error)
-        case .success(let data): return .success(String(data: data, encoding: .utf8))
-        }
     }
 }
 

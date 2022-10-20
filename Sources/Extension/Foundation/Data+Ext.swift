@@ -22,7 +22,7 @@ public extension ExtWrapper where Base == Data {
     /// 转化为16进制字符串
     var hexString: String { base.map { String(format: "%02.2hhx", $0) }.joined() }
     
-    /// Data 转化为 JSON
+    /// data --> json string
     ///
     /// - Parameter isPrettyPrinted: 漂亮打印格式(换行展开)
     /// - Parameter errorLogged: JSON 解析失败是否打印错误日志 (默认: 打印)
@@ -36,5 +36,24 @@ public extension ExtWrapper where Base == Data {
             return nil
         }
     }
-
+    
+    /// data --> json result
+    func asJSON(_ options: JSONSerialization.ReadingOptions = [.fragmentsAllowed, .allowFragments]) -> Swift.Result<Any, Swift.Error> {
+        do {
+            let json = try JSONSerialization.jsonObject(with: base, options: options)
+            return .success(json)
+        } catch {
+            return .failure(Ext.Error.jsonDeserializationError(error: error))
+        }
+    }
+    /// data --> decodable result
+    func asCode<T: Decodable>(_ dataType: T.Type) -> Swift.Result<T, Swift.Error> {
+        do {
+            let decoder = JSONDecoder()
+            let decodedData = try decoder.decode(dataType, from: base)
+            return .success(decodedData)
+        } catch {
+            return .failure(Ext.Error.jsonDecodedError(error: error))
+        }
+    }
 }
