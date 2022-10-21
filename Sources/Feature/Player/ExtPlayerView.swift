@@ -155,14 +155,12 @@ open class ExtPlayerView: UIView {
     deinit {
         clear()
     }
-    required public init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
     public override init(frame: CGRect) {
         super.init(frame: frame)
         
         playerView.ext.active()
     }
+    required public init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }
 
 public extension ExtPlayerView {
@@ -213,6 +211,7 @@ public extension ExtPlayerView {
     
     /// 开始播放
     func play() {
+        guard extPlayer.playEnabled else { return }
         Ext.debug("")
         isPlaying = true
         extPlayer.play()

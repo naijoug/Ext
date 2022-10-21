@@ -28,8 +28,8 @@ public extension ExtWrapper where Base == Data {
     /// - Parameter errorLogged: JSON 解析失败是否打印错误日志 (默认: 打印)
     func toJSONString(_ isPrettyPrinted: Bool = false, errorLogged: Bool = true) -> String? {
         do {
-            let object = try JSONSerialization.jsonObject(with: base, options: [])
-            let data = try JSONSerialization.data(withJSONObject: object, options: isPrettyPrinted ? [.prettyPrinted] : [])
+            let jsonObject = try JSONSerialization.jsonObject(with: base, options: [])
+            let data = try JSONSerialization.data(withJSONObject: jsonObject, options: isPrettyPrinted ? [.prettyPrinted] : [])
             return String(data: data, encoding: .utf8)
         } catch {
             Ext.debug("JSON deserialization error", error: error, logEnabled: errorLogged, locationEnabled: false)
@@ -37,23 +37,23 @@ public extension ExtWrapper where Base == Data {
         }
     }
     
-    /// data --> json result
-    func asJSON(_ options: JSONSerialization.ReadingOptions = [.fragmentsAllowed, .allowFragments]) -> Swift.Result<Any, Swift.Error> {
+    /// data --> jsonObject result
+    func asJSONObject(_ options: JSONSerialization.ReadingOptions = [.fragmentsAllowed, .allowFragments]) -> Swift.Result<Any, Swift.Error> {
         do {
-            let json = try JSONSerialization.jsonObject(with: base, options: options)
-            return .success(json)
+            let jsonObject = try JSONSerialization.jsonObject(with: base, options: options)
+            return .success(jsonObject)
         } catch {
             return .failure(Ext.Error.jsonDeserializationError(error: error))
         }
     }
-    /// data --> decodable result
-    func asCode<T: Decodable>(_ dataType: T.Type) -> Swift.Result<T, Swift.Error> {
+    /// data --> model result
+    func asModel<T: Decodable>(_ dataType: T.Type) -> Swift.Result<T, Swift.Error> {
         do {
             let decoder = JSONDecoder()
-            let decodedData = try decoder.decode(dataType, from: base)
-            return .success(decodedData)
+            let model = try decoder.decode(dataType, from: base)
+            return .success(model)
         } catch {
-            return .failure(Ext.Error.jsonDecodedError(error: error))
+            return .failure(Ext.Error.jsonDecodeError(error: error))
         }
     }
 }

@@ -207,6 +207,9 @@ extension ExtPlayer {
 //MARK: - Public
 
 public extension ExtPlayer {
+    /// 是否可以播放 (playerItem != nil)
+    var playEnabled: Bool { avPlayer.currentItem != nil }
+    
     /// 播放状态
     var isPlaying: Bool { status == .playing }
     /// 缓冲状态

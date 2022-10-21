@@ -62,11 +62,16 @@ extension Ext {
         - https://stackoverflow.com/questions/39176196/how-to-provide-a-localized-description-with-an-error-type-in-swift
      */
     public enum Error: Swift.Error {
-        /// JSON 发序列化错误
+        /// JSON 序列化错误
+        case jsonSerializationError(_ error: Swift.Error)
+        /// JSON 反序列化错误
         case jsonDeserializationError(error: Swift.Error)
+        /// JSON 编码错误
+        case jsonEncodeError(error: Swift.Error)
         /// JSON 解码错误
-        case jsonDecodedError(error: Swift.Error)
-        /// Swift error
+        case jsonDecodeError(error: Swift.Error)
+        
+        /// Swift 错误
         case error(_ error: Swift.Error)
         /// 内部处理错误
         case inner(_ message: String?)
@@ -75,12 +80,12 @@ extension Ext {
 extension Ext.Error: LocalizedError {
     public var errorDescription: String? {
         switch self {
-        case .jsonDeserializationError(let error):
-            return "json deserialization error: \(error.localizedDescription)"
-        case .jsonDecodedError(let error):
-            return "json decoded error: \(error.localizedDescription)"
-        case .error(let error):     return error.localizedDescription
-        case .inner(let message):   return message
+        case .jsonSerializationError(let error):    return "json serialization error: \(error.localizedDescription)"
+        case .jsonDeserializationError(let error):  return "json deserialization error: \(error.localizedDescription)"
+        case .jsonEncodeError(let error):           return "json encode error: \(error.localizedDescription)"
+        case .jsonDecodeError(let error):           return "json decode error: \(error.localizedDescription)"
+        case .error(let error):                     return error.localizedDescription
+        case .inner(let message):                   return message
         }
     }
 }
