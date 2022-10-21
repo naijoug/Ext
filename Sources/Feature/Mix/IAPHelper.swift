@@ -63,7 +63,7 @@ extension IAPHelper {
     public var canMakePayments: Bool { return SKPaymentQueue.canMakePayments() }
     /// 购买产品
     public func buyProduct(_ product: SKProduct, handler: @escaping PaymentCompletionHandler) {
-        Ext.debug("Buying \(product.productIdentifier)...")
+        Ext.debug("Buy \(product.productIdentifier) ...")
         paymentHandler = handler
         let payment = SKPayment(product: product)
         SKPaymentQueue.default().add(payment)
@@ -102,10 +102,7 @@ extension IAPHelper: SKProductsRequestDelegate {
         let products = response.products
         handleProducts(products, error: nil)
         
-        print(SKProduct.logTitle)
-        for product in products {
-            print(product.log)
-        }
+        Ext.debug("products: \(products)")
     }
     
     public func request(_ request: SKRequest, didFailWithError error: Error) {
@@ -120,9 +117,8 @@ extension IAPHelper: SKProductsRequestDelegate {
 extension IAPHelper: SKPaymentTransactionObserver {
     
     public func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
-        print(SKPaymentTransaction.logTitle)
         for transaction in transactions {
-            print(transaction.log)
+            Ext.debug("transaction: \(transaction)")
             
             switch (transaction.transactionState) {
             case .purchased:
@@ -167,56 +163,67 @@ extension IAPHelper: SKPaymentTransactionObserver {
 
 // MARK: - Log
 
-private extension SKProduct {
-    /// 产品日志标题
-    static var logTitle: String {
-        var log = "Product: \t"
-        log += "ProductIdentifier \t"
-        log += "Title \t"
-        log += "Description \t"
-        log += "Price \t"
-        log += "PriceLocaleIdentifier \t"
-        log += "CurrencySymbol \t"
-        return log
+extension SKProduct {
+    open override var description: String {
+    """
+    {
+        "productIdentifier": \(productIdentifier),
+        "price": \(price),
+        "priceLocale": \(priceLocale),
+        "localizedTitle": \(localizedTitle),
+        "localizedDescription": \(localizedDescription),
+        "isDownloadable": \(isDownloadable),
+        "contentVersion": \(contentVersion),
+        "subscriptionPeriod": \(subscriptionPeriod?.description ?? ""),
+        "introductoryPrice": \(introductoryPrice?.description ?? ""),
+        "subscriptionGroupIdentifier": \(subscriptionGroupIdentifier ?? "")
     }
-    /// 产品日志
-    var log: String {
-        var log = "Product: \t"
-        log += "\(productIdentifier) \t"
-        log += "\(localizedTitle) \t"
-        log += "\(localizedDescription) \t"
-        log += "\(price) \t"
-        log += "\(priceLocale.identifier) \t"
-        log += "\(priceLocale.currencySymbol ?? "") \t"
-        return log
+    """
     }
 }
-private extension SKPaymentTransaction {
-    /// 交易日志标题
-    static var logTitle: String {
-        var log = "Tx: \t"
-        log += "ProductIdentifier \t"
-        log += "Identifier \t"
-        log += "State \t"
-        return log
+extension SKProductSubscriptionPeriod {
+    open override var description: String {
+    """
+    {
+        "numberOfUnits": \(numberOfUnits),
+        "unit": \(unit)
     }
-    /// 交易日志
-    var log: String {
-        var log = "Tx: \t"
-        log += "\(payment.productIdentifier) \t"
-        log += "\(transactionIdentifier ?? "") \t"
-        log += "\(stateTitle) \t"
-        return log
+    """
     }
-    /// 交易状态标题
-    var stateTitle: String {
-        switch transactionState {
+}
+extension SKProduct.PeriodUnit: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .day:      return "day"
+        case .week:     return "week"
+        case .month:    return "month"
+        case .year:     return "year"
+        default:        return "unknown"
+        }
+    }
+}
+
+extension SKPaymentTransaction {
+    open override var description: String {
+    """
+    {
+        "productIdentifier": \(payment.productIdentifier),
+        "transactionIdentifier": \(transactionIdentifier ?? ""),
+        "transactionDate": \(transactionDate?.ext.format(type: .yyyyMMdd_HHmmss_SSS) ?? ""),
+        "transactionState": \(transactionState)
+    }
+    """
+    }
+}
+extension SKPaymentTransactionState: CustomStringConvertible {
+    public var description: String {
+        switch self {
         case .purchasing:   return "purchasing..."
         case .purchased:    return "purchased."
         case .failed:       return "failed."
         case .restored:     return "restored."
         case .deferred:     return "deferred."
-        default:            return "\(String(describing: transactionState)) \(transactionState.rawValue)"
+        default:            return "\(rawValue)"
         }
     }
 }
