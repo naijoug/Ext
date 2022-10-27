@@ -48,7 +48,7 @@ public class AutoFontSizeTextView: VerticallyCenteredTextView {
             while sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude)).height < currentSize.height {
                 expectedFont = expectedFont.withSize(expectedFont.pointSize + 1)
                 guard expectedFont.pointSize <= maxFontSize else { break }
-                Ext.debug("放大字体 \(font?.pointSize ?? 0) -> \(expectedFont.pointSize)")
+                //Ext.debug("放大字体 \(font?.pointSize ?? 0) -> \(expectedFont.pointSize)")
                 font = expectedFont
             }
             return
@@ -57,7 +57,7 @@ public class AutoFontSizeTextView: VerticallyCenteredTextView {
         while sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude)).height > currentSize.height {
             expectedFont = expectedFont.withSize(expectedFont.pointSize - 1)
             guard expectedFont.pointSize >= minFontSize else { break }
-            Ext.debug("缩小字体: \(font?.pointSize ?? 0) -> \(expectedFont.pointSize)")
+            //Ext.debug("缩小字体: \(font?.pointSize ?? 0) -> \(expectedFont.pointSize)")
             font = expectedFont
         }
     }

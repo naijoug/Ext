@@ -77,6 +77,11 @@ public extension ExtWrapper where Base == UIDevice {
             case "iPhone14,2":                                      return "iPhone 13 Pro"
             case "iPhone14,3":                                      return "iPhone 13 Pro Max"
             case "iPhone14,6":                                      return "iPhone SE 3"
+            case "iPhone14,7":                                      return "iPhone 14"
+            case "iPhone14,8":                                      return "iPhone 14 Plus"
+            case "iPhone15,2":                                      return "iPhone 14 Pro"
+            case "iPhone15,3":                                      return "iPhone 14 Pro Max"
+            
             
             // iPad
             case "iPad1,1":                                         return "iPad"
@@ -93,13 +98,14 @@ public extension ExtWrapper where Base == UIDevice {
             case "iPad5,3", "iPad5,4":                              return "iPad Air 2"
             case "iPad11,3", "iPad11,4":                            return "iPad Air 3"
             case "iPad13,1", "iPad13,2":                            return "iPad Air 4"
+            case "iPas13,16", "iPad13,17":                          return "iPad Air 5"
             // iPad mini
             case "iPad2,5", "iPad2,6", "iPad2,7":                   return "iPad mini"
             case "iPad4,4", "iPad4,5", "iPad4,6":                   return "iPad mini 2"
             case "iPad4,7", "iPad4,8", "iPad4,9":                   return "iPad mini 3"
             case "iPad5,1", "iPad5,2":                              return "iPad mini 4"
             case "iPad11,1", "iPad11,2":                            return "iPad mini 5"
-            case "iPad14,1", "iPad14,2":                            return "iPad mini 5"
+            case "iPad14,1", "iPad14,2":                            return "iPad mini 6"
             // iPad Pro
             case "iPad6,3", "iPad6,4":                              return "iPad Pro (9.7-inch)"
             case "iPad7,3", "iPad7,4":                              return "iPad Pro (10.5-inch)"

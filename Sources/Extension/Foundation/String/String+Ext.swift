@@ -122,9 +122,11 @@ public extension ExtWrapper where Base == String {
             }
             return true
         }
-        let isValid = checkValid()
-        Ext.debug("\(base) | \(arguments)", tag: .error, logEnabled: !isValid, locationEnabled: false)
-        return isValid ? String(format: base, arguments: arguments) : base
+        guard checkValid() else {
+            Ext.debug("string format failed: \(base) | \(arguments)", tag: .warning, logEnabled: Ext.logEnabled, locationEnabled: false)
+            return base
+        }
+        return String(format: base, arguments: arguments)
     }
 }
 
