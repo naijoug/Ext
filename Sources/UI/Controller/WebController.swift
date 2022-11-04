@@ -219,6 +219,7 @@ open class WebView: ExtView {
         
         progressObserver = webView.observe(\.estimatedProgress, options: [.initial, .new], changeHandler: { [weak self] _, change in
             guard let `self` = self else { return }
+            Ext.debug("estimatedProgress : \(change.oldValue ?? 0) -> \(change.newValue ?? 0)")
             self.progress = change.newValue ?? 0
         })
     }

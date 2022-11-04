@@ -154,6 +154,7 @@ open class ExtPlayerView: UIView {
     
     deinit {
         clear()
+        Ext.debug("", tag: .recycle)
     }
     public override init(frame: CGRect) {
         super.init(frame: frame)

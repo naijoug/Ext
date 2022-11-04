@@ -16,17 +16,11 @@ public extension Result {
         }
     }
     
-    /// 处理 result
-    /// - Parameters:
-    ///   - handler: 抛出 result
-    ///   - success: 成功处理
-    func handle(_ handler: Ext.ResultDataHandler<Success>? = nil, success: Ext.VoidHandler?) {
+    /// 转化为 void result
+    func toVoid() -> Result<Void, Failure> {
         switch self {
-        case .failure(let error):
-            handler?(.failure(error))
-        case .success(let data):
-            success?()
-            handler?(.success(data))
+        case .failure(let error): return .failure(error)
+        case .success: return .success(())
         }
     }
 }

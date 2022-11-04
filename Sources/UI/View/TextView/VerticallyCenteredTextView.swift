@@ -8,7 +8,7 @@
 import UIKit
 
 /// 垂直居中 textView
-open class VerticallyCenteredTextView: UITextView {
+open class VerticallyCenteredTextView: PlaceholderTextView {
     // Reference: https://stackoverflow.com/questions/12591192/center-text-vertically-in-a-uitextview
     public override var contentSize: CGSize {
         didSet {
