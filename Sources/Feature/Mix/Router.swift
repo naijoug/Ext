@@ -89,7 +89,7 @@ public extension Router {
     }
     
     func controller(for key: RouterKey, param: RouterParam? = nil) -> UIViewController? {
-        return controllerMap[key.url]?(param)
+        controllerMap[key.url]?(param)
     }
     func mode(for key: RouterKey) -> Mode? {
         modeMap[key.url]
@@ -119,15 +119,13 @@ public extension Router {
 
 public extension Router {
     
-    static weak var window: UIWindow?
-    
     /// 顶层显示控制器
     var topController: UIViewController? { UIApplication.shared.ext.topViewController() }
     
     /// 启动页面
     func launch(key: RouterKey, param: RouterParam? = nil) {
         guard let controller = controller(for: key, param: param) else { return }
-        Router.window?.rootViewController = controller
+        UIApplication.shared.ext.mainWindow?.rootViewController = controller
     }
     
     /// 页面跳转模式

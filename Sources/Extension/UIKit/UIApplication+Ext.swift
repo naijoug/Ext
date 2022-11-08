@@ -78,11 +78,9 @@ public extension ExtWrapper where Base == UIApplication {
         */
         if let tabBar = controller as? UITabBarController {
             return topViewController(tabBar.selectedViewController)
-        }
-        if let nav = controller as? UINavigationController {
+        } else if let nav = controller as? UINavigationController {
             return topViewController(nav.visibleViewController)
-        }
-        if let presented = controller?.presentedViewController {
+        } else if let presented = controller?.presentedViewController {
             return topViewController(presented)
         }
         Ext.debug("\(controller?.ext.typeFullName ?? "")", tag: .custom("⛰"), locationEnabled: false)
