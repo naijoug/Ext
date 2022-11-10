@@ -74,7 +74,7 @@ extension Ext {
         /// Swift 错误
         case error(_ error: Swift.Error)
         /// 内部处理错误
-        case inner(_ message: String?)
+        case inner(_ message: String?, code: Int = -110)
     }
 }
 extension Ext.Error: LocalizedError {
@@ -85,7 +85,7 @@ extension Ext.Error: LocalizedError {
         case .jsonEncodeError(let error):           return "json encode error: \(error.localizedDescription)"
         case .jsonDecodeError(let error):           return "json decode error: \(error.localizedDescription)"
         case .error(let error):                     return error.localizedDescription
-        case .inner(let message):                   return message
+        case .inner(let message, _):                return message
         }
     }
 }

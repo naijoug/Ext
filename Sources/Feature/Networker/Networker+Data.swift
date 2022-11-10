@@ -33,7 +33,7 @@ public extension DataRequestType {
     }
 }
 
-// MARK: -
+// MARK: - Data
 
 public extension Networker {
     /// 数据请求
@@ -46,7 +46,7 @@ public extension Networker {
     func data(queue: DispatchQueue = .main, request: URLRequest, appendLog: String? = nil,
               handler: @escaping Ext.ResultDataHandler<(response: HTTPURLResponse, data: Data)>) -> URLSessionDataTask {
         let requestTime = Date()
-        let requestLog = request.ext.log + (appendLog ?? "")
+        let requestLog = request.log + (appendLog ?? "")
         let logEnabled = self.logEnabled
         Ext.debug("Data Request | \(requestLog)", tag: .network, logEnabled: logEnabled, locationEnabled: false)
         let task = dataSession.dataTask(with: request) { (data, response, error) in
@@ -285,15 +285,14 @@ private extension Data {
     }
 }
 
-extension URLRequest: ExtCompatible {}
-private extension ExtWrapper where Base == URLRequest {
+private extension URLRequest {
     /// URL Request log
     var log: String {
-        var log = "\(base.httpMethod ?? "GET") | \(base.url?.absoluteString.removingPercentEncoding ?? "")"
-        if Networker.shared.headerLogged, let headers = base.allHTTPHeaderFields, !headers.isEmpty {
+        var log = "\(httpMethod ?? "GET") | \(url?.absoluteString.removingPercentEncoding ?? "")"
+        if Networker.shared.headerLogged, let headers = allHTTPHeaderFields, !headers.isEmpty {
             log += " | headers: \(headers)"
         }
-        if let httpBody = base.httpBody?.ext.toJSONString(errorLogged: false) ?? base.httpBody?.ext.string {
+        if let httpBody = httpBody?.ext.toJSONString(errorLogged: false) ?? httpBody?.ext.string {
             log += " | \(httpBody)"
         }
         return log
