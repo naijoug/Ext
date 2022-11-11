@@ -9,9 +9,19 @@ import UIKit
 import CoreImage
 
 public extension ExtWrapper where Base == UIImage {
-    
     /// 没有系统渲染的原始图片
-    var original: UIImage { return base.withRenderingMode(.alwaysOriginal) }
+    var original: UIImage { base.withRenderingMode(.alwaysOriginal) }
+    
+    /// UIImage -> Base64 String
+    var base64String: String? { base.jpegData(compressionQuality: 1)?.base64EncodedString() }
+    /// Base64 String -> UIImage
+    static func image(base64String: String) -> UIImage? {
+        guard let data = Data(base64Encoded: base64String) else { return nil }
+        return UIImage(data: data)
+    }
+}
+
+public extension ExtWrapper where Base == UIImage {
     
     /** Reference:
         - https://stackoverflow.com/questions/25146557/how-do-i-get-the-color-of-a-pixel-in-a-uiimage-with-swift

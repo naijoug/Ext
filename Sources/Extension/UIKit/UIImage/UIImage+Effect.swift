@@ -23,7 +23,7 @@ public extension ExtWrapper where Base == String {
             return nil
         }
         
-        return image.resizableImage(withCapInsets: UIEdgeInsets.zero, resizingMode: .stretch)
+        return image.resizableImage(withCapInsets: .zero, resizingMode: .stretch)
             //.blurImage()
             .ext.filter(name: "CIGaussianBlur", parameters: [kCIInputRadiusKey: NSNumber(value: 0.3)])
             //.filter(name: "CIBoxBlur", parameters: [kCIInputRadiusKey: NSNumber(value: 3)])
