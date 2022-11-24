@@ -238,6 +238,13 @@ open class WebView: ExtView {
 
 public extension WebView {
     
+    /**
+     设置 userAgent
+     */
+    func setUserAgent(_ userAgent: String) {
+        webView.customUserAgent = userAgent
+    }
+    
     /// 添加 JS 交互函数
     /// - Parameters:
     ///   - name: JS 交互函数名

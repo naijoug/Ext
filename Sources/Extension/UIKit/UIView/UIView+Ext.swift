@@ -74,10 +74,10 @@ public extension ExtWrapper where Base: UIView  {
     ///   - highView: 高优先级视图
     ///   - lowView: 低优先级视图
     static func priority(high highView: UIView, low lowView: UIView, for axis: NSLayoutConstraint.Axis = .horizontal) {
-        lowView.setContentHuggingPriority(.defaultLow, for: .horizontal)
-        lowView.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
-        highView.setContentHuggingPriority(.defaultHigh, for: .horizontal)
-        highView.setContentCompressionResistancePriority(.defaultHigh, for: .horizontal)
+        lowView.setContentHuggingPriority(.defaultLow, for: axis)
+        lowView.setContentCompressionResistancePriority(.defaultLow, for: axis)
+        highView.setContentHuggingPriority(.defaultHigh, for: axis)
+        highView.setContentCompressionResistancePriority(.defaultHigh, for: axis)
     }
     
     
