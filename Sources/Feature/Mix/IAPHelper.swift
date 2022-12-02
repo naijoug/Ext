@@ -132,11 +132,13 @@ public extension IAPHelper {
                     return
                 }
                 guard let receiptUrl = Bundle.main.appStoreReceiptURL,
-                      let receipt = try? Data(contentsOf: receiptUrl).base64EncodedString() else {
+                      FileManager.default.fileExists(atPath: receiptUrl.path),
+                      let receipt = try? Data(contentsOf: receiptUrl, options: .alwaysMapped).base64EncodedString(options: []) else {
                     Ext.debug("transaction \(product.productIdentifier) no receipt", logEnabled: self.logEnabled, locationEnabled: false)
                     handler(.failure(IAPError.paymentNoReceipt))
                     return
                 }
+                Ext.debug("appstore receipt url: \(receiptUrl.path)")
                 handler(.success((tx, receipt)))
             }
         }
@@ -216,9 +218,9 @@ extension IAPHelper: SKPaymentTransactionObserver {
     
     public func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
         for transaction in transactions {
-            Ext.debug("transaction: \(transaction)", logEnabled: logEnabled, locationEnabled: false)
+            Ext.debug("updated transaction: \(transaction)", logEnabled: logEnabled, locationEnabled: false)
             
-            switch (transaction.transactionState) {
+            switch transaction.transactionState {
             case .purchased:
                 complete(transaction: transaction)
             case .failed:
@@ -231,6 +233,12 @@ extension IAPHelper: SKPaymentTransactionObserver {
             }
         }
     }
+    public func paymentQueue(_ queue: SKPaymentQueue, removedTransactions transactions: [SKPaymentTransaction]) {
+        for transaction in transactions {
+            Ext.debug("removed transaction: \(transaction)")
+        }
+    }
+    
 
     private func complete(transaction: SKPaymentTransaction) {
         Ext.debug("complete... \(transaction.payment.productIdentifier)", logEnabled: logEnabled, locationEnabled: false)

@@ -25,7 +25,7 @@ private extension UniqueController {
     /// 删除导航堆栈相邻控制器重复
     func remove() {
         Ext.debug("\(navigationController?.viewControllers ?? [])")
-        guard let controllers = navigationController?.viewControllers, controllers.count >= 2 else { return }
+        guard var controllers = navigationController?.viewControllers, controllers.count >= 2 else { return }
         let count = controllers.count
         let prev = controllers[count - 2]
         let current = controllers[count - 1]
@@ -36,8 +36,11 @@ private extension UniqueController {
               let currentUnique = current as? UniqueController else { return }
         Ext.debug("\(prevUnique.unique) vs \(currentUnique.unique)")
         guard prevUnique.unique == currentUnique.unique else { return }
-        navigationController?.viewControllers.remove(at: count - 2)
-        Ext.debug("result: \(navigationController?.viewControllers ?? [])")
+        let controller = controllers.remove(at: count - 2)
+        controller.removeFromParent()
+        navigationController?.setViewControllers(controllers, animated: false)
+        //navigationController?.viewControllers.remove(at: count - 2)
+        Ext.debug("result: \(controller) | \(controllers) | \(navigationController?.viewControllers ?? [])")
     }
 }
 
