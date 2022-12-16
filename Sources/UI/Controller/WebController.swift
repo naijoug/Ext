@@ -169,6 +169,7 @@ open class WebView: ExtView {
         let configuration = WKWebViewConfiguration()
         configuration.preferences = preferences
         configuration.userContentController = userContentController
+        configuration.allowsInlineMediaPlayback = true
         
         let webView = ext.add(WKWebView(frame: CGRect.zero, configuration: configuration))
         webView.uiDelegate = self
@@ -269,11 +270,11 @@ public extension WebView {
         switch resource {
         case .url(let urlString, let header):
             guard let url = URL(string: urlString) else { return false }
-            Ext.debug("open url: \(url.absoluteString)", logEnabled: logEnabled)
             var request = URLRequest(url: url)
             for (key, value) in header ?? [:] {
                 request.setValue(value, forHTTPHeaderField: key)
             }
+            Ext.debug("open url: \(url.absoluteString) | header: \(request.allHTTPHeaderFields ?? [:])", logEnabled: logEnabled)
             webView.load(request)
         case .html(let htmlString):
             Ext.debug("open html: \(htmlString)", logEnabled: logEnabled)

@@ -41,6 +41,9 @@ open class TableController: BaseScrollController {
         tableView.dataSource = self
         tableView.ext.registerClass(UnknownCell.self)
         tableView.tableFooterView = UIView()
+        if #available(iOS 15.0, *) {
+            tableView.sectionHeaderTopPadding = 0
+        }
         configTable(tableView)
         return tableView
     }()
