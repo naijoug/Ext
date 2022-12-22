@@ -18,17 +18,25 @@ import UIKit
 
 /// 自适应尺寸 UICollectionView
 public class AutoSizedCollectionView: UICollectionView {
-
-    public override var contentSize: CGSize {
-        didSet {
-            invalidateIntrinsicContentSize()
-        }
-    }
-
+    
     public override var intrinsicContentSize: CGSize {
-        layoutIfNeeded()
-        return CGSize(width: UIView.noIntrinsicMetric, height: collectionViewLayout.collectionViewContentSize.height)
+        collectionViewLayout.collectionViewContentSize
     }
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        guard bounds.size != intrinsicContentSize else { return }
+        invalidateIntrinsicContentSize()
+    }
+    
+    public override func reloadData() {
+        super.reloadData()
+        
+        invalidateIntrinsicContentSize()
+        setNeedsLayout()
+        layoutIfNeeded()
+    }
+    
 }
 
 public class AutoSizedTableView: UITableView {

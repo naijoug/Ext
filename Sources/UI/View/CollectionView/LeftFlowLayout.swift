@@ -9,7 +9,7 @@ import UIKit
 
 open class LeftFlowLayout: RTLFlowLayout {
     var delegate: UICollectionViewDelegateFlowLayout? {
-        self.collectionView?.delegate as? UICollectionViewDelegateFlowLayout
+        collectionView?.delegate as? UICollectionViewDelegateFlowLayout
     }
     
     open override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
