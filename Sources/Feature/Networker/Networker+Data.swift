@@ -7,46 +7,17 @@
 
 import Foundation
 
-/// 数据请求协议
-public protocol DataRequestType {
-    var urlRequest: URLRequest? { get }
-    
-    /// 附加日志
-    func appendLog() -> String?
-}
-public extension DataRequestType {
-    func appendLog() -> String? { nil }
-}
-
-public extension DataRequestType {
-    /// 请求数据
-    /// - Parameters:
-    ///   - queue: 数据响应所在的队列 (默认: 主队列)
-    ///   - handler: 数据响应回调
-    @discardableResult
-    func data(queue: DispatchQueue = .main, handler: @escaping Ext.ResultDataHandler<(response: HTTPURLResponse, data: Data)>) -> URLSessionDataTask? {
-        guard let request = urlRequest else {
-            handler(.failure(Networker.Error.invalidURL))
-            return nil
-        }
-        return Networker.shared.data(queue: queue, request: request, appendLog: appendLog(), handler: handler)
-    }
-}
-
-// MARK: - Data
-
 public extension Networker {
     /// 数据请求
     /// - Parameters:
     ///   - queue: 数据响应所在的队列 (默认: 主队列)
     ///   - request: 请求体
-    ///   - appendLog: 请求体附加日志
+    ///   - requestLog: 请求体日志
     ///   - handler: 数据响应
     @discardableResult
-    func data(queue: DispatchQueue = .main, request: URLRequest, appendLog: String? = nil,
-              handler: @escaping Ext.ResultDataHandler<(response: HTTPURLResponse, data: Data)>) -> URLSessionDataTask {
+    func data(queue: DispatchQueue = .main, request: URLRequest, requestLog: String? = nil, handler: @escaping DataHandler) -> URLSessionDataTask {
         let requestTime = Date()
-        let requestLog = request.log + (appendLog ?? "")
+        let requestLog = requestLog ?? request.log
         let logEnabled = self.logEnabled
         Ext.debug("Data Request | \(requestLog)", tag: .network, logEnabled: logEnabled, locationEnabled: false)
         let task = dataSession.dataTask(with: request) { (data, response, error) in
@@ -81,32 +52,49 @@ public extension Networker {
     }
 }
 
-public extension Networker {
+// MARK: - Protocol
+
+public protocol Requestable {
+    var baseURLString: String { get }
+    var path: String { get }
+    var queryParameters: [String: Any] { get }
+    
+    var httpMethod: HttpMethod { get }
+    var httpHeaderFields: [String: String] { get }
+    var contentType: String { get }
+    var httpBody: Data? { get }
+    
+    var timeoutInterval: TimeInterval { get }
+}
+public extension Requestable {
+    var path: String { "" }
+    var queryParameters: [String: Any] { [:] }
+    
+    var httpMethod: HttpMethod { .get }
+    var httpHeaderFields: [String: String] { [:] }
+    
+    var httpBody: Data? { nil }
+    
+    var timeoutInterval: TimeInterval { 60.0 }
+}
+public extension Requestable {
+    
+    @discardableResult
     /// 数据请求
-    struct DataRequest {
-        /// 请求地址
-        let urlString: String
-        /// 请求 HTTP 方法
-        let method: HttpMethod
-        /// 请求头
-        let headers: [String: String]?
-        /// 请求参数
-        let params: Any?
-        /// 请求超时时间 (默认: 60s)
-        let timeoutInterval: TimeInterval
-        
-        public init(_ urlString: String, method: HttpMethod = .get, headers: [String: String]? = nil, params: Any? = nil, timoutInterval: TimeInterval = 60.0) {
-            self.urlString = urlString
-            self.method = method
-            self.headers = headers
-            self.params = params
-            self.timeoutInterval = timoutInterval
+    /// - Parameters:
+    ///   - queue: 数据响应所在的队列 (默认: 主队列)
+    ///   - handler: 数据响应
+    /// - Returns: 数据请求回话任务
+    func data(queue: DispatchQueue = .main, handler: @escaping DataHandler) -> URLSessionDataTask? {
+        guard let request = urlRequest else {
+            handler(.failure(Networker.Error.invalidURL))
+            return nil
         }
+        return Networker.shared.data(queue: queue, request: request, requestLog: log, handler: handler)
     }
 }
-extension Networker.DataRequest: DataRequestType {
-    
-    public var urlRequest: URLRequest? {
+private extension Requestable {
+    var urlRequest: URLRequest? {
         guard let url = self.url() else {
             Ext.debug("Data HTTP URL init failed. \(urlString)", tag: .failure, locationEnabled: false)
             return nil
@@ -114,155 +102,122 @@ extension Networker.DataRequest: DataRequestType {
         
         var request = URLRequest(url: url, timeoutInterval: timeoutInterval)
         // 设置 HTTP 请求方法
-        request.httpMethod = method.rawValue
+        request.httpMethod = httpMethod.rawValue
         // 设置 HTTP 请求头
-        for (key, value) in headers ?? [:] {
+        for (key, value) in httpHeaderFields {
             request.addValue(value, forHTTPHeaderField: key)
         }
+        // 设置 HTTP Content-Type
+        request.setValue(contentType, forHTTPHeaderField: "Content-Type")
         // 设置 HTTP 请求体
         /**
          - https://stackoverflow.com/questions/978061/http-get-with-request-body
          - https://stackoverflow.com/questions/56955595/1103-error-domain-nsurlerrordomain-code-1103-resource-exceeds-maximum-size-i
          */
-        if let params = params {
-            switch method {
-            case .get: ()
-            default:
-                if let httpBody = try? JSONSerialization.data(withJSONObject: params, options: [.sortedKeys]) {
-                    request.httpBody = httpBody
-                    request.setValue("application/json; charset=UTF-8", forHTTPHeaderField: "Content-Type")
-                }
-            }
-        }
+        request.httpBody = httpBody
         return request
     }
+    var log: String? { nil }
     
+    private var urlString: String {
+        guard !path.isEmpty else { return baseURLString }
+        return baseURLString + (path.hasPrefix("/") ? path : "/\(path)")
+    }
     private func url(urlEncoded: Bool = true) -> URL? {
         guard let url = URL(string: urlString) else { return nil }
-        // GET 请求添加请求参数
-        guard method == .get, let params = params as? [String: Any], !params.isEmpty else { return url }
-        
+        guard !queryParameters.isEmpty else { return url }
         guard urlEncoded, var urlComponets = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
             var string = urlString
-            let keys = params.keys.map({ $0 })
+            let keys = queryParameters.keys.map({ $0 })
             for i in 0..<keys.count {
                 let key = keys[i]
                 string.append(i == 0 ? "?" : "&")
-                string.append("\(key)=\(params[key] ?? "")")
+                string.append("\(key)=\(queryParameters[key] ?? "")")
             }
             return URL(string: string) ?? url
         }
         // GET请求，添加查询参数
-        urlComponets.queryItems = params.map({ URLQueryItem(name: $0.key, value: "\($0.value)") })
+        urlComponets.queryItems = queryParameters.map { URLQueryItem(name: $0.key, value: "\($0.value)") }
         return urlComponets.url ?? url
     }
 }
 
-// MARK: - FormData
-
-/// form-data 文件数据
-public struct FormData {
-    public init() {}
-    /// 附件名字
-    public var name: String?
-    /// 文件名
-    public var filename: String?
-    /**
-     文件 MIME 类型
-     Reference: https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_types
-     
-      - text/plain
-      - text/html
-      - image/jpeg
-      - image/png
-      - audio/m4a
-      - video/mp4
-      - application/json
-      - application/javascript
-    */
-    public var mimeType: String?
-    /// 文件数据
-    public var data: Data?
+public protocol JSONRequestable: Requestable {
+    var jsonParameters: Any? { get }
 }
-extension FormData: CustomStringConvertible {
+extension JSONRequestable {
+    public var jsonParameters: Any? { nil }
+    
+    public var contentType: String { "application/json; charset=UTF-8" }
+    public var httpBody: Data? {
+        guard let jsonParameters = jsonParameters,
+              let data = try? JSONSerialization.data(withJSONObject: jsonParameters, options: [.sortedKeys]) else { return nil }
+        return data
+    }
+}
+
+public struct MultipartForm {
+    /// form-data 文件数据
+    public struct FormData {
+        public init() {}
+        /// 附件名字
+        public var name: String?
+        /// 文件名
+        public var filename: String?
+        /**
+         文件 MIME 类型
+         Reference: https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_types
+         
+          - text/plain
+          - text/html
+          - image/jpeg
+          - image/png
+          - audio/m4a
+          - video/mp4
+          - application/json
+          - application/javascript
+        */
+        public var mimeType: String?
+        /// 文件数据
+        public var data: Data?
+    }
+    
+    public var boundary: String = UUID().uuidString
+    public let formDatas: [FormData]
+    public init(formDatas: [FormData]) {
+        self.formDatas = formDatas
+    }
+}
+extension MultipartForm.FormData: CustomStringConvertible {
     public var description: String {
         return "{ name: \(name ?? ""), filename: \(filename ?? ""), mimeType: \(mimeType ?? "")}"
     }
 }
 
-public extension Networker {
-    /// form-data 格式数据请求
-    struct FormDataRequest {
-        /// 请求地址
-        let urlString: String
-        /// form-data 数据
-        let formDatas: [FormData]
-        /// 请求头
-        let headers: [String: String]?
-        /// 请求参数
-        let params: [String: Any]?
-        /// 请求超时时间 (默认: 120s)
-        let timeoutInterval: TimeInterval
-        
-        public init(_ urlString: String, formDatas: [FormData], headers: [String: String]? = nil, params: [String: Any]? = nil, timoutInterval: TimeInterval = 120.0) {
-            self.urlString = urlString
-            self.formDatas = formDatas
-            self.headers = headers
-            self.params = params
-            self.timeoutInterval = timoutInterval
-        }
-    }
+public protocol FormDataRequestable: Requestable {
+    var params: [String: Any] { get }
+    var multipartForm: MultipartForm { get }
 }
-
-extension Networker.FormDataRequest: DataRequestType {
-        
-    public var urlRequest: URLRequest? {
-        guard let url = URL(string: urlString) else {
-            Ext.debug("FormData HTTP URL init failed. \(urlString)", tag: .failure, locationEnabled: false)
-            return nil
-        }
-        
-        var request = URLRequest(url: url, timeoutInterval: timeoutInterval)
-        // 设置 HTTP 请求方法 (form-data 使用: POST)
-        request.httpMethod = HttpMethod.post.rawValue
-        // 设置 HTTP 请求头
-        for (key, value) in headers ?? [:] {
-            request.addValue(value, forHTTPHeaderField: key)
-        }
-        // 设置 HTTP 请求体
-        let boundary = "Boundary-\(UUID().uuidString)"
-        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-        request.httpBody = httpBody(boundary: boundary)
-        return request
-    }
+extension FormDataRequestable {
+    public var params: [String: Any] { [:] }
     
-    public func appendLog() -> String? {
-        var log = ""
-        if let params = params, !params.isEmpty {
-            log += " | params: \(params)"
-        }
-        log += " | form-data: \(formDatas)"
-        return log
-    }
-    
-    /// 创建 multipart/form-data Body 体
-    /// - Parameters:
-    ///   - boundary: 分界字符
-    private func httpBody(boundary: String) -> Data {
+    public var httpMethod: HttpMethod { .post }
+    public var contentType: String { "multipart/form-data; boundary=\(multipartForm.boundary)" }
+    public var timeoutInterval: TimeInterval { 120.0 }
+    public var httpBody: Data? {
         var body = Data()
         let lineBreak = "\r\n"
         // boundary 线
-        let boundaryPrefix = "--\(boundary)\(lineBreak)"
+        let boundaryPrefix = "--\(multipartForm.boundary)\(lineBreak)"
         // 拼接参数
-        for (key, value) in params ?? [:] {
+        for (key, value) in params {
             body.appendString(boundaryPrefix)
             body.appendString("Content-Disposition: form-data; name=\"\(key)\"\(lineBreak)\(lineBreak)")
             body.appendString("\(value)\(lineBreak)")
         }
         // 拼接 multipart 文件
-        for formData in formDatas {
-            guard let name = formData.name, let filename = formData.filename,
-                  let data = formData.data else { continue }
+        for formData in multipartForm.formDatas {
+            guard let name = formData.name, let filename = formData.filename, let data = formData.data else { continue }
             body.appendString(boundaryPrefix)
             body.appendString("Content-Disposition: form-data; name=\"\(name)\"; filename=\"\(filename)\"\(lineBreak)")
             if let mimeType = formData.mimeType, mimeType != "" {
@@ -272,11 +227,19 @@ extension Networker.FormDataRequest: DataRequestType {
             body.appendString("\(lineBreak)")
         }
         // boundary 结束
-        body.appendString("--\(boundary)--")
+        body.appendString("--\(multipartForm.boundary)--")
         return body
     }
+    
+    var log: String? {
+        var log = urlRequest?.log ?? ""
+        if !params.isEmpty {
+            log += " | params: \(params)"
+        }
+        log += " | multipart/form-data: \(multipartForm.formDatas)"
+        return log
+    }
 }
-
 private extension Data {
     /// 添加字符串到 Data
     mutating func appendString(_ string: String) {

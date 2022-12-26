@@ -16,8 +16,8 @@ public enum HttpMethod: String {
     case delete     = "DELETE"
 }
 
-/// 数据回调
-public typealias DataHandler = Ext.DataHandler<(Data?, URLResponse?, Swift.Error?)>
+/// 数据请求回调
+public typealias DataHandler = Ext.ResultDataHandler<(response: HTTPURLResponse, data: Data)>
 /// 进度回调
 public typealias ProgressHandler = (_ progress: Double, _ speed: Double) -> Void
 
