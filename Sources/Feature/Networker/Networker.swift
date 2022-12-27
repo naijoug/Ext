@@ -7,13 +7,21 @@
 
 import Foundation
 
-/// HTTP 请求方法
+/**
+ HTTP 请求方法
+ Reference:
+    - https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Methods
+ */
 public enum HttpMethod: String {
     case get        = "GET"
-    case put        = "PUT"
+    case head       = "HEAD"
     case post       = "POST"
-    case patch      = "PATCH"
+    case put        = "PUT"
     case delete     = "DELETE"
+    case connect    = "CONNECT"
+    case options    = "OPTIONS"
+    case trace      = "TRACE"
+    case patch      = "PATCH"
 }
 
 /// 数据请求回调

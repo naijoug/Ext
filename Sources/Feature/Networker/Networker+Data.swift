@@ -12,12 +12,12 @@ public extension Networker {
     /// - Parameters:
     ///   - queue: 数据响应所在的队列 (默认: 主队列)
     ///   - request: 请求体
-    ///   - requestLog: 请求体日志
+    ///   - requestLog: 求体日志
     ///   - handler: 数据响应
     @discardableResult
     func data(queue: DispatchQueue = .main, request: URLRequest, requestLog: String? = nil, handler: @escaping DataHandler) -> URLSessionDataTask {
         let requestTime = Date()
-        let requestLog = requestLog ?? request.log
+        let requestLog = request.log + (requestLog ?? "")
         let logEnabled = self.logEnabled
         Ext.debug("Data Request | \(requestLog)", tag: .network, logEnabled: logEnabled, locationEnabled: false)
         let task = dataSession.dataTask(with: request) { (data, response, error) in
@@ -51,6 +51,19 @@ public extension Networker {
         return task
     }
 }
+private extension URLRequest {
+    /// URL Request log
+    var log: String {
+        var log = "\(httpMethod ?? "GET") | \(url?.absoluteString.removingPercentEncoding ?? "")"
+        if Networker.shared.headerLogged, let headers = allHTTPHeaderFields, !headers.isEmpty {
+            log += " | headers: \(headers)"
+        }
+        if let httpBody = httpBody?.ext.toJSONString(errorLogged: false) ?? httpBody?.ext.string {
+            log += " | \(httpBody)"
+        }
+        return log
+    }
+}
 
 // MARK: - Protocol
 
@@ -58,24 +71,11 @@ public protocol Requestable {
     var baseURLString: String { get }
     var path: String { get }
     var queryParameters: [String: Any] { get }
-    
     var httpMethod: HttpMethod { get }
     var httpHeaderFields: [String: String] { get }
     var contentType: String { get }
     var httpBody: Data? { get }
-    
     var timeoutInterval: TimeInterval { get }
-}
-public extension Requestable {
-    var path: String { "" }
-    var queryParameters: [String: Any] { [:] }
-    
-    var httpMethod: HttpMethod { .get }
-    var httpHeaderFields: [String: String] { [:] }
-    
-    var httpBody: Data? { nil }
-    
-    var timeoutInterval: TimeInterval { 60.0 }
 }
 public extension Requestable {
     
@@ -90,7 +90,7 @@ public extension Requestable {
             handler(.failure(Networker.Error.invalidURL))
             return nil
         }
-        return Networker.shared.data(queue: queue, request: request, requestLog: log, handler: handler)
+        return Networker.shared.data(queue: queue, request: request, requestLog: (self as? FormDataRequestable)?.log, handler: handler)
     }
 }
 private extension Requestable {
@@ -117,7 +117,6 @@ private extension Requestable {
         request.httpBody = httpBody
         return request
     }
-    var log: String? { nil }
     
     private var urlString: String {
         guard !path.isEmpty else { return baseURLString }
@@ -148,22 +147,44 @@ public protocol JSONRequestable: Requestable {
 extension JSONRequestable {
     public var jsonParameters: Any? { nil }
     
+    public var path: String { "" }
+    public var queryParameters: [String: Any] { [:] }
+    public var httpMethod: HttpMethod { .get }
+    public var httpHeaderFields: [String: String] { [:] }
     public var contentType: String { "application/json; charset=UTF-8" }
     public var httpBody: Data? {
         guard let jsonParameters = jsonParameters,
               let data = try? JSONSerialization.data(withJSONObject: jsonParameters, options: [.sortedKeys]) else { return nil }
+        Ext.debug("")
         return data
     }
+    public var timeoutInterval: TimeInterval { 60.0 }
+}
+
+public protocol FormDataRequestable: Requestable {
+    var multipartForm: MultipartForm { get }
+}
+extension FormDataRequestable {
+    public var path: String { "" }
+    public var queryParameters: [String: Any] { [:] }
+    public var httpMethod: HttpMethod { .post }
+    public var httpHeaderFields: [String: String] { [:] }
+    public var contentType: String { "multipart/form-data; boundary=\(multipartForm.boundary)" }
+    public var httpBody: Data? { multipartForm.httpBody }
+    public var timeoutInterval: TimeInterval { 120.0 }
+    
+    var log: String? { multipartForm.log }
 }
 
 public struct MultipartForm {
     /// form-data 文件数据
     public struct FormData {
-        public init() {}
         /// 附件名字
-        public var name: String?
+        public let name: String
         /// 文件名
-        public var filename: String?
+        public let filename: String
+        /// 文件数据
+        public var data: Data
         /**
          文件 MIME 类型
          Reference: https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Basics_of_HTTP/MIME_types
@@ -177,66 +198,61 @@ public struct MultipartForm {
           - application/json
           - application/javascript
         */
-        public var mimeType: String?
-        /// 文件数据
-        public var data: Data?
+        public var mimeType: String
+        
+        public init(name: String, filename: String, data: Data, mimeType: String) {
+            self.name = name
+            self.filename = filename
+            self.data = data
+            self.mimeType = mimeType
+        }
     }
     
-    public var boundary: String = UUID().uuidString
+    public let parameters: [String: Any]
     public let formDatas: [FormData]
-    public init(formDatas: [FormData]) {
+    public let boundary: String
+    public init(parameters: [String: Any], formDatas: [FormData], boundary: String = "Boundary-\(UUID().uuidString)") {
+        self.parameters = parameters
         self.formDatas = formDatas
+        self.boundary = boundary
     }
 }
 extension MultipartForm.FormData: CustomStringConvertible {
     public var description: String {
-        return "{ name: \(name ?? ""), filename: \(filename ?? ""), mimeType: \(mimeType ?? "")}"
+        return "{ name: \(name), filename: \(filename), mimeType: \(mimeType)}"
     }
 }
-
-public protocol FormDataRequestable: Requestable {
-    var params: [String: Any] { get }
-    var multipartForm: MultipartForm { get }
-}
-extension FormDataRequestable {
-    public var params: [String: Any] { [:] }
-    
-    public var httpMethod: HttpMethod { .post }
-    public var contentType: String { "multipart/form-data; boundary=\(multipartForm.boundary)" }
-    public var timeoutInterval: TimeInterval { 120.0 }
-    public var httpBody: Data? {
+private extension MultipartForm {
+    var httpBody: Data {
         var body = Data()
         let lineBreak = "\r\n"
         // boundary 线
-        let boundaryPrefix = "--\(multipartForm.boundary)\(lineBreak)"
+        let boundaryPrefix = "--\(boundary)\(lineBreak)"
         // 拼接参数
-        for (key, value) in params {
+        for (key, value) in parameters {
             body.appendString(boundaryPrefix)
             body.appendString("Content-Disposition: form-data; name=\"\(key)\"\(lineBreak)\(lineBreak)")
             body.appendString("\(value)\(lineBreak)")
         }
         // 拼接 multipart 文件
-        for formData in multipartForm.formDatas {
-            guard let name = formData.name, let filename = formData.filename, let data = formData.data else { continue }
+        for formData in formDatas {
             body.appendString(boundaryPrefix)
-            body.appendString("Content-Disposition: form-data; name=\"\(name)\"; filename=\"\(filename)\"\(lineBreak)")
-            if let mimeType = formData.mimeType, mimeType != "" {
-                body.appendString("Content-Type: \(mimeType)\(lineBreak)\(lineBreak)")
-            }
-            body.append(data)
+            body.appendString("Content-Disposition: form-data; name=\"\(formData.name)\"; filename=\"\(formData.filename)\"\(lineBreak)")
+            body.appendString("Content-Type: \(formData.mimeType)\(lineBreak)\(lineBreak)")
+            body.append(formData.data)
             body.appendString("\(lineBreak)")
         }
         // boundary 结束
-        body.appendString("--\(multipartForm.boundary)--")
+        body.appendString("--\(boundary)--")
+        Ext.debug("")
         return body
     }
     
-    var log: String? {
-        var log = urlRequest?.log ?? ""
-        if !params.isEmpty {
-            log += " | params: \(params)"
-        }
-        log += " | multipart/form-data: \(multipartForm.formDatas)"
+    var log: String {
+        var log = " | multipart/form-data =>"
+        log += parameters.isEmpty ? "" : " parameters: \(parameters)"
+        log += formDatas.isEmpty ? "" : " formDatas: \(formDatas)"
+        Ext.debug("")
         return log
     }
 }
@@ -245,19 +261,5 @@ private extension Data {
     mutating func appendString(_ string: String) {
         guard let data = string.data(using: .utf8, allowLossyConversion: true) else { return }
         append(data)
-    }
-}
-
-private extension URLRequest {
-    /// URL Request log
-    var log: String {
-        var log = "\(httpMethod ?? "GET") | \(url?.absoluteString.removingPercentEncoding ?? "")"
-        if Networker.shared.headerLogged, let headers = allHTTPHeaderFields, !headers.isEmpty {
-            log += " | headers: \(headers)"
-        }
-        if let httpBody = httpBody?.ext.toJSONString(errorLogged: false) ?? httpBody?.ext.string {
-            log += " | \(httpBody)"
-        }
-        return log
     }
 }
