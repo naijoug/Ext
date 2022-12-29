@@ -12,19 +12,21 @@ import Foundation
     - https://stackoverflow.com/questions/32322386/how-to-download-multiple-files-sequentially-using-nsurlsession-downloadtask-in-s
  */
 
-/// 下载结果数据
-public struct DownloadData {
-    /// 下载成功的资源地址
-    public let url: URL
-    
-    /// 开始下载时间戳
-    public let started: TimeInterval
-    /// 下载消耗的时间
-    public let elapsed: TimeInterval
+public extension Ext {
+    struct DownloadResponse {
+        /// HTTP 响应
+        public let response: HTTPURLResponse
+        /// 下载成功的资源地址
+        public let url: URL
+        /// 开始下载时间戳
+        public let started: TimeInterval
+        /// 下载消耗的时间
+        public let elapsed: TimeInterval
+    }
 }
 
-/// 下载回调
-public typealias DownloadHandler = Ext.ResultDataHandler<DownloadData>
+/// 下载响应回调
+public typealias DownloadHandler = Ext.ResultDataHandler<Ext.DownloadResponse>
 
 /// 下载任务
 struct DownloadTask {
@@ -101,7 +103,6 @@ extension Networker: URLSessionDownloadDelegate {
             downloadTask.errorHandler(date, session: session, task: task, didCompleteWithError: error)
         }
     }
-    
 }
 
 private extension DownloadTask {
@@ -127,7 +128,7 @@ private extension DownloadTask {
         if let url = cacheUrl, FileManager.default.fileExists(atPath: url.path) {
             Ext.debug("Download succeeded from cached. \(elapsed) | \(downloadUrlString)",
                       tag: .success, logEnabled: Networker.shared.downloadLogged, locationEnabled: false)
-            resultHandler(.success(DownloadData(url: url, started: startTime.timeIntervalSince1970, elapsed: elapsed)))
+            resultHandler(.success(Ext.DownloadResponse(response: httpResponse, url: url, started: startTime.timeIntervalSince1970, elapsed: elapsed)))
         }
         let url = cacheUrl ?? URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(location.lastPathComponent)
         guard FileManager.default.ext.save(location, to: url) else {
@@ -138,7 +139,7 @@ private extension DownloadTask {
         }
         Ext.debug("Download succeeded. \(elapsed) | \(downloadUrlString)",
                   tag: .success, logEnabled: Networker.shared.downloadLogged, locationEnabled: false)
-        resultHandler(.success(DownloadData(url: url, started: startTime.timeIntervalSince1970, elapsed: elapsed)))
+        resultHandler(.success(Ext.DownloadResponse(response: httpResponse, url: url, started: startTime.timeIntervalSince1970, elapsed: elapsed)))
     }
     func errorHandler(_ date: Date, session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         let elapsed = date.timeIntervalSince(startTime)

@@ -28,17 +28,62 @@ public extension Requestable {
 }
 public extension Requestable {
     @discardableResult
+    /// 数据请求响应
+    /// - Parameters:
+    ///   - queue: 数据响应所在的队列 (默认: 主队列)
+    ///   - handler: 数据响应
+    /// - Returns: 数据请求回话任务
+    func response(queue: DispatchQueue = .main, handler: @escaping ResponseHandler) -> URLSessionDataTask? {
+        guard let request = urlRequest else {
+            handler(.failure(Networker.Error.invalidURL))
+            return nil
+        }
+        return Networker.shared.data(queue: queue, request: request, requestLog: (self as? Logable)?.log ?? "", responseHandler: handler)
+    }
+    
+    @discardableResult
     /// 数据请求
     /// - Parameters:
     ///   - queue: 数据响应所在的队列 (默认: 主队列)
     ///   - handler: 数据响应
     /// - Returns: 数据请求回话任务
-    func data(queue: DispatchQueue = .main, handler: @escaping DataHandler) -> URLSessionDataTask? {
-        guard let request = urlRequest else {
+    func data(queue: DispatchQueue = .main, handler: @escaping Ext.ResultDataHandler<Data>) -> URLSessionDataTask? {
+        response(queue: queue) { result in
+            switch result {
+            case .failure(let error): handler(.failure(error))
+            case .success(let response): handler(.success(response.data))
+            }
+        }
+    }
+}
+public extension ExtWrapper where Base: Requestable {
+    @discardableResult
+    /// 数据请求响应
+    /// - Parameters:
+    ///   - queue: 数据响应所在的队列 (默认: 主队列)
+    ///   - handler: 数据响应
+    /// - Returns: 数据请求回话任务
+    func response(queue: DispatchQueue = .main, handler: @escaping ResponseHandler) -> URLSessionDataTask? {
+        guard let request = base.urlRequest else {
             handler(.failure(Networker.Error.invalidURL))
             return nil
         }
-        return Networker.shared.data(queue: queue, request: request, requestLog: (self as? FormDataRequestable)?.formData.description ?? "", handler: handler)
+        return Networker.shared.data(queue: queue, request: request, requestLog: (self as? Logable)?.log ?? "", responseHandler: handler)
+    }
+    
+    @discardableResult
+    /// 数据请求
+    /// - Parameters:
+    ///   - queue: 数据响应所在的队列 (默认: 主队列)
+    ///   - handler: 数据响应
+    /// - Returns: 数据请求回话任务
+    func data(queue: DispatchQueue = .main, handler: @escaping Ext.ResultDataHandler<Data>) -> URLSessionDataTask? {
+        response(queue: queue) { result in
+            switch result {
+            case .failure(let error): handler(.failure(error))
+            case .success(let response): handler(.success(response.data))
+            }
+        }
     }
 }
 private extension Requestable {
@@ -75,6 +120,10 @@ private extension Requestable {
     private func url(urlEncoded: Bool = true) -> URL? {
         guard let url = URL(string: urlString) else { return nil }
         guard !queryParameters.isEmpty else { return url }
+        /**
+         - https://stackoverflow.com/questions/611906/http-post-with-url-query-parameters-good-idea-or-not
+         - https://stackoverflow.com/questions/38720933/whats-the-difference-between-passing-false-and-true-to-resolvingagainstbaseurl
+         */
         guard urlEncoded, var urlComponets = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
             var string = urlString
             let keys = queryParameters.keys.map({ $0 })
@@ -94,23 +143,57 @@ private extension Requestable {
 // MARK: - JSON
 
 public protocol JSONRequestable: Requestable {
-    var jsonParameters: Any? { get }
+    var jsonParameter: Any? { get }
 }
 public extension JSONRequestable {
-    var jsonParameters: Any? { nil }
+    var jsonParameter: Any? { nil }
     
+    var queryParameters: [String: Any] {
+        guard httpMethod == .get else { return [:] }
+        return (jsonParameter as? [String: Any]) ?? [:]
+    }
     var contentType: String { "application/json; charset=UTF-8" }
     var httpBody: Data? {
-        guard let jsonParameters = jsonParameters,
-              let data = try? JSONSerialization.data(withJSONObject: jsonParameters, options: [.sortedKeys]) else { return nil }
-        Ext.debug("")
+        guard httpMethod != .get else { return nil }
+        return parameterData
+    }
+    
+    /// 参数数据
+    var parameterData: Data? {
+        guard let jsonParameter = jsonParameter,
+              let data = try? JSONSerialization.data(withJSONObject: jsonParameter, options: [.sortedKeys]) else { return nil }
         return data
+    }
+}
+
+// MARK: - Codable
+
+public protocol EncodeRequestable: Requestable {
+    var parameter: Encodable? { get }
+}
+public extension EncodeRequestable {
+    var parameter: Encodable? { nil }
+    
+    var queryParameters: [String: Any] {
+        guard httpMethod == .get else { return [:] }
+        return (parameterData?.ext.toJSONObject() as? [String: Any]) ?? [:]
+    }
+    var contentType: String { "application/json; charset=UTF-8" }
+    var httpBody: Data? {
+        guard httpMethod != .get else { return nil }
+        return parameterData
+    }
+    
+    /// 参数数据
+    var parameterData: Data? {
+        guard let parameter = parameter else { return nil }
+        return (try? JSONEncoder().encode(parameter))
     }
 }
 
 // MARK: - FormData
 
-public protocol FormDataRequestable: Requestable {
+public protocol FormDataRequestable: Requestable, Logable {
     var boundary: String { get set }
     var formData: MultipartFormData { get }
 }
@@ -119,6 +202,8 @@ public extension FormDataRequestable {
     var contentType: String { "multipart/form-data; boundary=\(boundary)" }
     var httpBody: Data? { formData.httpBody(boundary: boundary) }
     var timeoutInterval: TimeInterval { 120.0 }
+    
+    var log: String { formData.description }
 }
 
 /// multipart/form-data 数据

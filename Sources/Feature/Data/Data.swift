@@ -33,3 +33,8 @@ public protocol Refreshable {
 public protocol Cacheable {
     func cache()
 }
+
+/// 数据日志协议
+public protocol Logable {
+    var log: String { get }
+}

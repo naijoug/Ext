@@ -24,8 +24,6 @@ public enum HttpMethod: String {
     case patch      = "PATCH"
 }
 
-/// 数据请求回调
-public typealias DataHandler = Ext.ResultDataHandler<(response: HTTPURLResponse, data: Data)>
 /// 进度回调
 public typealias ProgressHandler = (_ progress: Double, _ speed: Double) -> Void
 
@@ -88,7 +86,6 @@ extension Networker.Error: LocalizedError {
     }
 }
 
-
 extension Networker {
     
     /// 添加一个下载任务
@@ -116,14 +113,6 @@ extension Networker {
     }
     
 }
-
-public extension ExtWrapper where Base: Swift.Error {
-    
-    var nsError: NSError { base as NSError }
-    
-}
-
-//public
 
 /**
  Reference:

@@ -22,38 +22,63 @@ public extension ExtWrapper where Base == Data {
     /// 转化为16进制字符串
     var hexString: String { base.map { String(format: "%02.2hhx", $0) }.joined() }
     
-    /// data --> json string
+    /// data --> jsonString
     ///
     /// - Parameter isPrettyPrinted: 漂亮打印格式(换行展开)
     /// - Parameter errorLogged: JSON 解析失败是否打印错误日志 (默认: 打印)
     func toJSONString(_ isPrettyPrinted: Bool = false, errorLogged: Bool = true) -> String? {
         do {
-            let jsonObject = try JSONSerialization.jsonObject(with: base, options: [])
+            let jsonObject = try JSONSerialization.jsonObject(with: base)
             let data = try JSONSerialization.data(withJSONObject: jsonObject, options: isPrettyPrinted ? [.prettyPrinted] : [])
             return String(data: data, encoding: .utf8)
         } catch {
-            Ext.debug("JSON deserialization error", error: error, logEnabled: errorLogged, locationEnabled: false)
+            Ext.debug("data to JSONString failed.", error: error, logEnabled: errorLogged, locationEnabled: false)
             return nil
         }
     }
     
-    /// data --> jsonObject result
-    func asJSONObject(_ options: JSONSerialization.ReadingOptions = [.fragmentsAllowed, .allowFragments]) -> Swift.Result<Any, Swift.Error> {
+    /// data --> jsonObject
+    func toJSONObject(_ options: JSONSerialization.ReadingOptions = [.fragmentsAllowed, .allowFragments]) -> Any? {
         do {
-            let jsonObject = try JSONSerialization.jsonObject(with: base, options: options)
-            return .success(jsonObject)
+            return try JSONSerialization.jsonObject(with: base)
         } catch {
-            return .failure(Ext.Error.jsonDeserializationError(error: error))
+            Ext.debug("data to JSONObject failed.", error: error, locationEnabled: false)
+            return nil
         }
     }
-    /// data --> model result
-    func asModel<T: Decodable>(_ dataType: T.Type) -> Swift.Result<T, Swift.Error> {
+    
+    /// data --> decodable model
+    func toModel<T: Decodable>(_ modelType: T.Type) -> T? {
         do {
-            let decoder = JSONDecoder()
-            let model = try decoder.decode(dataType, from: base)
-            return .success(model)
+            return try JSONDecoder().decode(modelType, from: base)
         } catch {
-            return .failure(Ext.Error.jsonDecodeError(error: error))
+            Ext.debug("data to Decodable model failed.", error: error, locationEnabled: false)
+            return nil
+        }
+    }
+}
+
+public extension Swift.Result where Success == Data, Failure == Swift.Error {
+    /// data result --> jsonObject result
+    func asJSONObject(_ options: JSONSerialization.ReadingOptions = [.fragmentsAllowed, .allowFragments]) -> Swift.Result<Any, Swift.Error> {
+        flatMap { data in
+            do {
+                return .success(try JSONSerialization.jsonObject(with: data, options: options))
+            } catch {
+                Ext.debug("data as JSONObject failed.", error: error, locationEnabled: false)
+                return .failure(Ext.Error.jsonDeserializationError(error: error))
+            }
+        }
+    }
+    /// data result --> decodable model result
+    func asModel<T: Decodable>(_ modelType: T.Type) -> Swift.Result<T, Swift.Error> {
+        flatMap { data in
+            do {
+                return .success(try JSONDecoder().decode(modelType, from: data))
+            } catch {
+                Ext.debug("data as Decodable model failed.", error: error, locationEnabled: false)
+                return .failure(Ext.Error.jsonDecodeError(error: error))
+            }
         }
     }
 }
