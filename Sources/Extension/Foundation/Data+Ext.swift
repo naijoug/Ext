@@ -57,28 +57,3 @@ public extension ExtWrapper where Base == Data {
         }
     }
 }
-
-public extension Swift.Result where Success == Data, Failure == Swift.Error {
-    /// data result --> jsonObject result
-    func asJSONObject(_ options: JSONSerialization.ReadingOptions = [.fragmentsAllowed, .allowFragments]) -> Swift.Result<Any, Swift.Error> {
-        flatMap { data in
-            do {
-                return .success(try JSONSerialization.jsonObject(with: data, options: options))
-            } catch {
-                Ext.debug("data as JSONObject failed.", error: error, locationEnabled: false)
-                return .failure(Ext.Error.jsonDeserializationError(error: error))
-            }
-        }
-    }
-    /// data result --> decodable model result
-    func asModel<T: Decodable>(_ modelType: T.Type) -> Swift.Result<T, Swift.Error> {
-        flatMap { data in
-            do {
-                return .success(try JSONDecoder().decode(modelType, from: data))
-            } catch {
-                Ext.debug("data as Decodable model failed.", error: error, locationEnabled: false)
-                return .failure(Ext.Error.jsonDecodeError(error: error))
-            }
-        }
-    }
-}

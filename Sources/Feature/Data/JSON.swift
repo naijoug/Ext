@@ -12,43 +12,57 @@ public extension Ext {
 }
 
 public extension Ext.JSON {
-    
-    /// Dict -> String
-    static func toString(_ dict: [String: Any]?, prettyPrinted: Bool = false) -> String? {
-        guard let dict = dict, !dict.isEmpty else { return nil }
+    /// JSONObject -> String
+    static func toString(jsonObject: Any?, prettyPrinted: Bool = false) -> String? {
+        guard let jsonObject = jsonObject else { return nil }
         do {
             let options: JSONSerialization.WritingOptions = prettyPrinted ? [.prettyPrinted, .fragmentsAllowed] : [.fragmentsAllowed]
-            let data = try JSONSerialization.data(withJSONObject: dict, options: options)
+            let data = try JSONSerialization.data(withJSONObject: jsonObject, options: options)
             return String(data: data, encoding: .utf8)
         } catch {
-            Ext.debug("dict to string failed.", error: error)
+            Ext.debug("jsonObject to string failed.", error: error)
+            return nil
         }
-        return nil
     }
-    /// String -> Dict
-    static func toDict(_ string: String?) -> [String: Any]? {
+    /// Encodable -> String
+    static func toString(_ value: Encodable?, prettyPrinted: Bool = false) -> String? {
+        guard let value = value else { return nil }
+        do {
+            let data = try JSONEncoder().encode(value)
+            guard prettyPrinted else {
+                return String(data: data, encoding: .utf8)
+            }
+            return Ext.JSON.toString(jsonObject: data.ext.toJSONObject(), prettyPrinted: prettyPrinted)
+        } catch {
+            Ext.debug("encodable to string failed.", error: error)
+            return nil
+        }
+    }
+    
+    /// String -> JSONObject
+    static func toJSONObject(_ string: String?) -> Any? {
         guard let string = string, !string.isEmpty else { return nil }
         do {
             let data = Data(string.utf8)
-            let json = try JSONSerialization.jsonObject(with: data, options: [.allowFragments, .mutableLeaves])
-            return json as? [String: Any]
+            let jsonObject = try JSONSerialization.jsonObject(with: data, options: [.allowFragments, .mutableLeaves])
+            return jsonObject
         } catch {
-            Ext.debug("string to dict failed.", error: error)
+            Ext.debug("string to jsonObject failed.", error: error)
+            return nil
         }
-        return nil
     }
-    
-    /// Any -> Dict
-    static func toDict(_ anyData: Any?) -> [String: Any]? {
-        guard let anyData = anyData else { return nil }
-        if anyData is String, let string = anyData as? String {
-            return toDict(string)
-        } else if anyData is [String: Any], let json = anyData as? [String: Any] {
-            return json
+    /// String -> JSONObject
+    static func toJSONObject(_ value: Encodable?) -> Any? {
+        guard let value = value else { return nil }
+        do {
+            let data = try JSONEncoder().encode(value)
+            let jsonObject = try JSONSerialization.jsonObject(with: data, options: [.allowFragments, .mutableLeaves])
+            return jsonObject
+        } catch {
+            Ext.debug("encodable to jsonObject failed.", error: error)
+            return nil
         }
-        return nil
     }
-    
 }
 
 public extension Ext.JSON {

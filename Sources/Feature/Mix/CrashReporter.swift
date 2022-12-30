@@ -65,7 +65,7 @@ private extension CrashReporter {
         crash["timestamp"] = date.timeIntervalSince1970
         crash["time"] = formatter.string(from: date)
         DispatchQueue.global().async {
-            let crashString = Ext.JSON.toString(crash, prettyPrinted: true) ?? "\(crash)"
+            let crashString = Ext.JSON.toString(jsonObject: crash, prettyPrinted: true) ?? "\(crash)"
             FileManager.default.ext.save(crashString, to: crashUrl)
         }
     }
@@ -80,7 +80,7 @@ private extension CrashReporter {
                 handler(nil)
                 return
             }
-            let crash = Ext.JSON.toDict(crashString)
+            let crash = Ext.JSON.toJSONObject(crashString) as? [String: Any]
             DispatchQueue.main.async {
                 handler(crash)
             }
