@@ -40,9 +40,9 @@ public extension ExtWrapper where Base == Data {
     /// data --> jsonObject
     func toJSONObject(_ options: JSONSerialization.ReadingOptions = [.fragmentsAllowed, .allowFragments]) -> Any? {
         do {
-            return try JSONSerialization.jsonObject(with: base)
+            return try JSONSerialization.jsonObject(with: base, options: options)
         } catch {
-            Ext.debug("data to JSONObject failed.", error: error, locationEnabled: false)
+            Ext.debug("data to jsonObject failed.", error: error, locationEnabled: false)
             return nil
         }
     }
@@ -52,7 +52,7 @@ public extension ExtWrapper where Base == Data {
         do {
             return try JSONDecoder().decode(modelType, from: base)
         } catch {
-            Ext.debug("data to Decodable model failed.", error: error, locationEnabled: false)
+            Ext.debug("data to decodable model failed.", error: error, locationEnabled: false)
             return nil
         }
     }

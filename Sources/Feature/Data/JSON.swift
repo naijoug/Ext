@@ -43,50 +43,71 @@ public extension Ext.JSON {
     static func toJSONObject(_ string: String?) -> Any? {
         guard let string = string, !string.isEmpty else { return nil }
         do {
-            let data = Data(string.utf8)
-            let jsonObject = try JSONSerialization.jsonObject(with: data, options: [.allowFragments, .mutableLeaves])
-            return jsonObject
+            return try JSONSerialization.jsonObject(with: Data(string.utf8), options: [.allowFragments, .mutableLeaves])
         } catch {
             Ext.debug("string to jsonObject failed.", error: error)
             return nil
         }
     }
-    /// String -> JSONObject
+    /// Encodable -> JSONObject
     static func toJSONObject(_ value: Encodable?) -> Any? {
         guard let value = value else { return nil }
         do {
             let data = try JSONEncoder().encode(value)
-            let jsonObject = try JSONSerialization.jsonObject(with: data, options: [.allowFragments, .mutableLeaves])
-            return jsonObject
+            return try JSONSerialization.jsonObject(with: data, options: [.allowFragments, .mutableLeaves])
         } catch {
             Ext.debug("encodable to jsonObject failed.", error: error)
             return nil
         }
     }
-}
-
-public extension Ext.JSON {
-    /// 从 JSON 文件中加载 JSON Dict
-    static func loadDict(_ filePath: String) -> [String: Any]? {
-        load(filePath) as? [String: Any]
-    }
-    /// 从 JSON 文件中加载 JSON Array
-    static func loadArray(_ filePath: String) -> [Any]? {
-        load(filePath) as? [Any]
-    }
-    
-    /// 加载 JSON 文件
-    private static func load(_ filePath: String) -> Any? {
+    /// JSON file --> JSONObject
+    static func toJSONObject(filePath: String) -> Any? {
         guard FileManager.default.fileExists(atPath: filePath) else {
-            Ext.debug("load JSON file not exist.", tag: .error)
+            Ext.debug("JSON file not exist.", tag: .error)
             return nil
         }
         do {
             let data = try Data(contentsOf: URL(fileURLWithPath: filePath))
             return try JSONSerialization.jsonObject(with: data, options: [.allowFragments, .mutableLeaves])
         } catch {
-            Ext.debug("load JSON file failed.", error: error)
+            Ext.debug("JSON file to jsonObject failed.", error: error)
+            return nil
         }
-        return nil
+    }
+    
+    /// String --> Decodable Model
+    static func toModel<T: Decodable>(_ modeType: T.Type, string: String?) -> T? {
+        guard let string = string else { return nil }
+        do {
+            return try JSONDecoder().decode(modeType, from: Data(string.utf8))
+        } catch {
+            Ext.debug("string to decodable failed.", error: error)
+            return nil
+        }
+    }
+    /// JSONObject --> Decodable Model
+    static func toModel<T: Decodable>(_ modeType: T.Type, jsonObject: Any?) -> T? {
+        guard let jsonObject = jsonObject else { return nil }
+        do {
+            let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [.fragmentsAllowed])
+            return try JSONDecoder().decode(modeType, from: data)
+        } catch {
+            Ext.debug("jsonObject to decodable failed.", error: error)
+            return nil
+        }
+    }
+    /// JSON file --> Decodeable Model
+    static func toModel<T: Decodable>(_ modeType: T.Type, filePath: String) -> T? {
+        guard FileManager.default.fileExists(atPath: filePath) else {
+            Ext.debug("JSON file not exist.", tag: .error)
+            return nil
+        }
+        do {
+            let data = try Data(contentsOf: URL(fileURLWithPath: filePath))
+            return try JSONDecoder().decode(modeType, from: data)
+        } catch {
+            Ext.debug("JSON file to jsonObject failed.", error: error)
+            return nil
+        }
     }
 }
