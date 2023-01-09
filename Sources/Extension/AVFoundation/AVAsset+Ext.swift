@@ -48,6 +48,7 @@ public extension Ext {
     // Reference: https://stackoverflow.com/questions/35738133/ios-code-to-convert-m4a-to-wav
     
     static func convertToWav(_ url: URL, outputURL: URL) {
+        Ext.debug("convert to Wav start...", tag: .begin)
         guard FileManager.default.fileExists(atPath: url.path) else {
             Ext.debug("convert file not exist.")
             return
@@ -59,9 +60,12 @@ public extension Ext {
         
         var srcFormat: AudioStreamBasicDescription = AudioStreamBasicDescription()
         var dstFormat: AudioStreamBasicDescription = AudioStreamBasicDescription()
-
+        
+        func log(_ message: String) {
+            Ext.debug("\(message) \(error == noErr ? "succeeded." : "failed. \(error.description)")", logEnabled: error != noErr)
+        }
+        
         ExtAudioFileOpenURL(url as CFURL, &sourceFile)
-
         guard let sourceFile = sourceFile else {
             Ext.debug("audio file open failed", tag: .error)
             return
@@ -90,19 +94,23 @@ public extension Ext {
             nil,
             AudioFileFlags.eraseFile.rawValue,
             &destinationFile)
-        Ext.debug("Error 1 in convertAudio: \(error.description)")
+        guard let destinationFile = destinationFile else {
+            Ext.debug("destination file create failed. \(error.description)")
+            return
+        }
+        log("① create audio file")
 
         error = ExtAudioFileSetProperty(sourceFile,
                                         kExtAudioFileProperty_ClientDataFormat,
                                         thePropertySize,
                                         &dstFormat)
-        Ext.debug("Error 2 in convertAudio: \(error.description)")
+        log("② set source file property")
 
-        error = ExtAudioFileSetProperty(destinationFile!,
+        error = ExtAudioFileSetProperty(destinationFile,
                                         kExtAudioFileProperty_ClientDataFormat,
                                         thePropertySize,
                                         &dstFormat)
-        Ext.debug("Error 3 in convertAudio: \(error.description)")
+        log("③ set destination file property")
 
         let bufferByteSize: UInt32 = 32768
         var srcBuffer = [UInt8](repeating: 0, count: 32768)
@@ -122,7 +130,7 @@ public extension Ext {
             }
 
             error = ExtAudioFileRead(sourceFile, &numFrames, &fillBufList)
-            Ext.debug("Error 4 in convertAudio: \(error.description)")
+            log("④ read source file - \(numFrames)")
 
             if numFrames == 0 {
                 error = noErr
@@ -130,14 +138,15 @@ public extension Ext {
             }
 
             sourceFrameOffset += numFrames
-            error = ExtAudioFileWrite(destinationFile!, numFrames, &fillBufList)
-            Ext.debug("Error 5 in convertAudio: \(error.description)")
+            error = ExtAudioFileWrite(destinationFile, numFrames, &fillBufList)
+            log("⑤ write destination file - \(numFrames) | \(sourceFrameOffset)")
         }
 
-        error = ExtAudioFileDispose(destinationFile!)
-        Ext.debug("Error 6 in convertAudio: \(error.description)")
+        error = ExtAudioFileDispose(destinationFile)
+        log("⑥ dispose destination")
         error = ExtAudioFileDispose(sourceFile)
-        Ext.debug("Error 7 in convertAudio: \(error.description)")
+        log("⑦ dispose source")
+        Ext.debug("convert to Wav end.", tag: .end)
     }
     
 }
