@@ -118,6 +118,7 @@ public extension Ext {
         /**
          Reference:
             - https://swift.gg/2016/08/03/swift-prettify-your-print-statements-pt-1/
+            - https://swift.gg/2016/09/12/default-arguments-in-protocols/
          */
         #if DEBUG
         guard logEnabled else { return }

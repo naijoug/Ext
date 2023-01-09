@@ -48,9 +48,9 @@ public extension Ext {
     // Reference: https://stackoverflow.com/questions/35738133/ios-code-to-convert-m4a-to-wav
     
     static func convertToWav(_ url: URL, outputURL: URL) {
-        Ext.debug("convert to Wav start...", tag: .begin)
+        Ext.debug("convert to Wav start...", tag: .begin, logEnabled: Ext.logEnabled, locationEnabled: false)
         guard FileManager.default.fileExists(atPath: url.path) else {
-            Ext.debug("convert file not exist.")
+            Ext.debug("convert file not exist.", logEnabled: Ext.logEnabled, locationEnabled: false)
             return
         }
         
@@ -62,7 +62,7 @@ public extension Ext {
         var dstFormat: AudioStreamBasicDescription = AudioStreamBasicDescription()
         
         func log(_ message: String) {
-            Ext.debug("\(message) \(error == noErr ? "succeeded." : "failed. \(error.description)")", logEnabled: error != noErr)
+            Ext.debug("\(message) \(error == noErr ? "succeeded." : "failed. \(error.description)")", logEnabled: error != noErr, locationEnabled: false)
         }
         
         ExtAudioFileOpenURL(url as CFURL, &sourceFile)
@@ -95,7 +95,7 @@ public extension Ext {
             AudioFileFlags.eraseFile.rawValue,
             &destinationFile)
         guard let destinationFile = destinationFile else {
-            Ext.debug("destination file create failed. \(error.description)")
+            Ext.debug("destination file create failed. \(error.description)", logEnabled: Ext.logEnabled, locationEnabled: false)
             return
         }
         log("① create audio file")
@@ -146,7 +146,7 @@ public extension Ext {
         log("⑥ dispose destination")
         error = ExtAudioFileDispose(sourceFile)
         log("⑦ dispose source")
-        Ext.debug("convert to Wav end.", tag: .end)
+        Ext.debug("convert to Wav end.", tag: .end, logEnabled: Ext.logEnabled, locationEnabled: false)
     }
     
 }

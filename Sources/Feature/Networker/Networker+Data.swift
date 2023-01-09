@@ -25,7 +25,7 @@ public extension Networker {
     /// - Parameters:
     ///   - queue: 数据响应所在的队列 (默认: 主队列)
     ///   - request: 请求体
-    ///   - requestLog: 求体日志
+    ///   - requestLog: 请体日志
     ///   - responseHandler: 请求响应
     @discardableResult
     func data(queue: DispatchQueue = .main, request: URLRequest, requestLog: String? = nil, responseHandler: @escaping ResponseHandler) -> URLSessionDataTask {

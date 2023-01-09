@@ -39,4 +39,10 @@ Pod::Spec.new do |spec|
     ss.dependency 'Ext/Extension'
   end
   
+  spec.subspec 'Rx' do |ss|
+    ss.source_files = 'Sources/Rx/**/*'
+    
+    ss.dependency 'Ext/Feature'
+    ss.dependency 'RxSwift', '~> 6.2.0'
+  end
 end
