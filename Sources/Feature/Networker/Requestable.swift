@@ -10,7 +10,7 @@ import Foundation
 public protocol Requestable {
     var baseURLString: String { get }
     var path: String { get }
-    var queryParameters: [String: Any] { get }
+    var queryParameters: [(name: String, value: Any)] { get }
     var httpMethod: HttpMethod { get }
     var httpHeaderFields: [String: String] { get }
     var contentType: String { get }
@@ -19,7 +19,7 @@ public protocol Requestable {
 }
 public extension Requestable {
     var path: String { "" }
-    var queryParameters: [String: Any] { [:] }
+    var queryParameters: [(name: String, value: Any)] { [] }
     var httpMethod: HttpMethod { .get }
     var httpHeaderFields: [String: String] { [:] }
     var contentType: String { "" }
@@ -64,11 +64,7 @@ public extension ExtWrapper where Base: Requestable {
     ///   - handler: 数据响应
     /// - Returns: 数据请求回话任务
     func response(queue: DispatchQueue = .main, handler: @escaping ResponseHandler) -> URLSessionDataTask? {
-        guard let request = base.urlRequest else {
-            handler(.failure(Networker.Error.invalidURL))
-            return nil
-        }
-        return Networker.shared.data(queue: queue, request: request, requestLog: (self as? Logable)?.log ?? "", responseHandler: handler)
+        base.response(queue: queue, handler: handler)
     }
     
     @discardableResult
@@ -78,12 +74,7 @@ public extension ExtWrapper where Base: Requestable {
     ///   - handler: 数据响应
     /// - Returns: 数据请求回话任务
     func data(queue: DispatchQueue = .main, handler: @escaping Ext.ResultDataHandler<Data>) -> URLSessionDataTask? {
-        response(queue: queue) { result in
-            switch result {
-            case .failure(let error): handler(.failure(error))
-            case .success(let response): handler(.success(response.data))
-            }
-        }
+        base.data(queue: queue, handler: handler)
     }
 }
 private extension Requestable {
@@ -126,16 +117,21 @@ private extension Requestable {
          */
         guard urlEncoded, var urlComponets = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
             var string = urlString
-            let keys = queryParameters.keys.map({ $0 })
-            for i in 0..<keys.count {
-                let key = keys[i]
+            for i in 0..<queryParameters.count {
+                let queryParameter = queryParameters[i]
                 string.append(i == 0 ? "?" : "&")
-                string.append("\(key)=\(queryParameters[key] ?? "")")
+                string.append("\(queryParameter.name)=\(queryParameter.value)")
             }
+//            let keys = queryParameters.keys.map({ $0 })
+//            for i in 0..<keys.count {
+//                let key = keys[i]
+//                string.append(i == 0 ? "?" : "&")
+//                string.append("\(key)=\(queryParameters[key] ?? "")")
+//            }
             return URL(string: string) ?? url
         }
         // GET请求，添加查询参数
-        urlComponets.queryItems = queryParameters.map { URLQueryItem(name: $0.key, value: "\($0.value)") }
+        urlComponets.queryItems = queryParameters.map { URLQueryItem(name: $0.name, value: "\($0.value)") }
         return urlComponets.url ?? url
     }
 }
@@ -148,9 +144,9 @@ public protocol JSONRequestable: Requestable {
 public extension JSONRequestable {
     var jsonParameter: Any? { nil }
     
-    var queryParameters: [String: Any] {
-        guard httpMethod == .get else { return [:] }
-        return (jsonParameter as? [String: Any]) ?? [:]
+    var queryParameters: [(name: String, value: Any)] {
+        guard httpMethod == .get else { return [] }
+        return (jsonParameter as? [String: Any])?.map { ($0.key, $0.value) } ?? []
     }
     var contentType: String { "application/json; charset=UTF-8" }
     var httpBody: Data? {
@@ -159,7 +155,7 @@ public extension JSONRequestable {
     }
     
     /// 参数数据
-    var parameterData: Data? {
+    private var parameterData: Data? {
         guard let jsonParameter = jsonParameter,
               let data = try? JSONSerialization.data(withJSONObject: jsonParameter, options: [.sortedKeys]) else { return nil }
         return data
@@ -174,9 +170,9 @@ public protocol EncodeRequestable: Requestable {
 public extension EncodeRequestable {
     var parameter: Encodable? { nil }
     
-    var queryParameters: [String: Any] {
-        guard httpMethod == .get else { return [:] }
-        return (parameterData?.ext.toJSONObject() as? [String: Any]) ?? [:]
+    var queryParameters: [(name: String, value: Any)] {
+        guard httpMethod == .get else { return [] }
+        return (parameterData?.ext.toJSONObject() as? [String: Any])?.map { ($0.key, $0.value) } ?? []
     }
     var contentType: String { "application/json; charset=UTF-8" }
     var httpBody: Data? {
@@ -185,7 +181,7 @@ public extension EncodeRequestable {
     }
     
     /// 参数数据
-    var parameterData: Data? {
+    private var parameterData: Data? {
         guard let parameter = parameter else { return nil }
         return (try? JSONEncoder().encode(parameter))
     }
