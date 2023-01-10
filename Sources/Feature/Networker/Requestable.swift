@@ -43,7 +43,7 @@ public extension Requestable {
             handler(.failure(Networker.Error.invalidURL))
             return nil
         }
-        return Networker.shared.data(queue: queue, request: request, requestLog: (self as? Logable)?.log ?? "", responseHandler: handler)
+        return Networker.shared.data(queue: queue, request: request, requestLog: (self as? DataLogable)?.log ?? "", responseHandler: handler)
     }
     
     @discardableResult
@@ -188,7 +188,7 @@ public extension EncodeRequestable {
 
 // MARK: - FormData
 
-public protocol FormDataRequestable: Requestable, Logable {
+public protocol FormDataRequestable: Requestable, DataLogable {
     var boundary: String { get set }
     var formData: MultipartFormData { get }
 }
