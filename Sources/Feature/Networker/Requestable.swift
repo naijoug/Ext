@@ -7,6 +7,11 @@
 
 import Foundation
 
+/**
+ Reference:
+    - https://github.com/rinov/SwiftFlyer
+ */
+
 public protocol Requestable {
     var baseURLString: String { get }
     var path: String { get }
@@ -122,12 +127,6 @@ private extension Requestable {
                 string.append(i == 0 ? "?" : "&")
                 string.append("\(queryParameter.name)=\(queryParameter.value)")
             }
-//            let keys = queryParameters.keys.map({ $0 })
-//            for i in 0..<keys.count {
-//                let key = keys[i]
-//                string.append(i == 0 ? "?" : "&")
-//                string.append("\(key)=\(queryParameters[key] ?? "")")
-//            }
             return URL(string: string) ?? url
         }
         // GET请求，添加查询参数
@@ -303,18 +302,18 @@ public extension Swift.Result where Success == Data, Failure == Swift.Error {
             do {
                 return .success(try JSONSerialization.jsonObject(with: data, options: options))
             } catch {
-                Ext.debug("data as JSONObject failed.", error: error, locationEnabled: false)
+                Ext.debug("data as jsonObject failed.", error: error, locationEnabled: false)
                 return .failure(Ext.Error.jsonDeserializationError(error: error))
             }
         }
     }
-    /// data result --> decodable model result
+    /// data result --> decodable result
     func asModel<T: Decodable>(_ modelType: T.Type) -> Swift.Result<T, Swift.Error> {
         flatMap { data in
             do {
                 return .success(try JSONDecoder().decode(modelType, from: data))
             } catch {
-                Ext.debug("data as Decodable model failed.", error: error, locationEnabled: false)
+                Ext.debug("data as decodable failed.", error: error, locationEnabled: false)
                 return .failure(Ext.Error.jsonDecodeError(error: error))
             }
         }

@@ -11,103 +11,117 @@ public extension Ext {
     enum JSON {}
 }
 
+// MARK: - toData
 public extension Ext.JSON {
-    /// JSONObject -> String
-    static func toString(jsonObject: Any?, prettyPrinted: Bool = false) -> String? {
+    /// String --> Data
+    static func toData(_ string: String?) -> Data? {
+        guard let string = string, !string.isEmpty else { return nil }
+        return string.data(using: .utf8)
+    }
+    /// JSONObject --> Data
+    static func toData(jsonObject: Any?, prettyPrinted: Bool = false) -> Data? {
         guard let jsonObject = jsonObject else { return nil }
         do {
             let options: JSONSerialization.WritingOptions = prettyPrinted ? [.prettyPrinted, .fragmentsAllowed] : [.fragmentsAllowed]
-            let data = try JSONSerialization.data(withJSONObject: jsonObject, options: options)
-            return String(data: data, encoding: .utf8)
+            return try JSONSerialization.data(withJSONObject: jsonObject, options: options)
         } catch {
-            Ext.debug("jsonObject to string failed.", error: error)
+            Ext.debug("jsonObject to data failed.", error: error)
             return nil
         }
     }
-    /// Encodable -> String
-    static func toString(_ value: Encodable?, prettyPrinted: Bool = false) -> String? {
+    /// Encodable --> Data
+    static func toData(_ value: Encodable?) -> Data? {
         guard let value = value else { return nil }
         do {
-            let data = try JSONEncoder().encode(value)
-            guard prettyPrinted else {
-                return String(data: data, encoding: .utf8)
-            }
-            return Ext.JSON.toString(jsonObject: data.ext.toJSONObject(), prettyPrinted: prettyPrinted)
+            return try JSONEncoder().encode(value)
         } catch {
-            Ext.debug("encodable to string failed.", error: error)
+            Ext.debug("encodable to data failed.", error: error)
+            return nil
+        }
+    }
+    /// JSON file --> Data
+    static func toData(filePath: String) -> Data? {
+        guard FileManager.default.fileExists(atPath: filePath) else {
+            Ext.debug("JSON file not exist.", tag: .error)
+            return nil
+        }
+        do {
+            return try Data(contentsOf: URL(fileURLWithPath: filePath))
+        } catch {
+            Ext.debug("JSON file to Data failed.", error: error)
+            return nil
+        }
+    }
+}
+
+// MARK: - toString
+public extension Ext.JSON {
+    /// Data --> String
+    static func toString(_ data: Data?) -> String? {
+        guard let data = data else { return nil }
+        return String(data: data, encoding: .utf8)
+    }
+    
+    /// JSONObject -> String
+    static func toString(jsonObject: Any?, prettyPrinted: Bool = false) -> String? {
+        toString(toData(jsonObject: jsonObject, prettyPrinted: prettyPrinted))
+    }
+    /// Encodable -> String
+    static func toString(_ value: Encodable?) -> String? {
+        toString(toData(value))
+    }
+}
+
+// MARK: - toJSONObject
+public extension Ext.JSON {
+    /// Data --> JSONObject
+    static func toJSONObject(_ data: Data?) -> Any? {
+        guard let data = data else { return nil }
+        do {
+            return try JSONSerialization.jsonObject(with: data, options: [.allowFragments, .mutableLeaves])
+        } catch {
+            Ext.debug("data to jsonObject failed.", error: error)
             return nil
         }
     }
     
     /// String -> JSONObject
     static func toJSONObject(_ string: String?) -> Any? {
-        guard let string = string, !string.isEmpty else { return nil }
-        do {
-            return try JSONSerialization.jsonObject(with: Data(string.utf8), options: [.allowFragments, .mutableLeaves])
-        } catch {
-            Ext.debug("string to jsonObject failed.", error: error)
-            return nil
-        }
+        toJSONObject(toData(string))
     }
     /// Encodable -> JSONObject
     static func toJSONObject(_ value: Encodable?) -> Any? {
-        guard let value = value else { return nil }
-        do {
-            let data = try JSONEncoder().encode(value)
-            return try JSONSerialization.jsonObject(with: data, options: [.allowFragments, .mutableLeaves])
-        } catch {
-            Ext.debug("encodable to jsonObject failed.", error: error)
-            return nil
-        }
+        toJSONObject(toData(value))
     }
     /// JSON file --> JSONObject
     static func toJSONObject(filePath: String) -> Any? {
-        guard FileManager.default.fileExists(atPath: filePath) else {
-            Ext.debug("JSON file not exist.", tag: .error)
-            return nil
-        }
+        toJSONObject(toData(filePath: filePath))
+    }
+}
+
+// MARK: - toModel(Encodable)
+public extension Ext.JSON {
+    /// Data --> Decodable
+    static func toModel<T: Decodable>(_ modelType: T.Type, data: Data?) -> T? {
+        guard let data = data else { return nil }
         do {
-            let data = try Data(contentsOf: URL(fileURLWithPath: filePath))
-            return try JSONSerialization.jsonObject(with: data, options: [.allowFragments, .mutableLeaves])
+            return try JSONDecoder().decode(modelType, from: data)
         } catch {
-            Ext.debug("JSON file to jsonObject failed.", error: error)
+            Ext.debug("data to decodable failed.", error: error)
             return nil
         }
     }
     
-    /// String --> Decodable Model
-    static func toModel<T: Decodable>(_ modeType: T.Type, string: String?) -> T? {
-        guard let string = string else { return nil }
-        do {
-            return try JSONDecoder().decode(modeType, from: Data(string.utf8))
-        } catch {
-            Ext.debug("string to decodable failed.", error: error)
-            return nil
-        }
+    /// String --> Decodable
+    static func toModel<T: Decodable>(_ modelType: T.Type, string: String?) -> T? {
+        toModel(modelType, data: toData(string))
     }
-    /// JSONObject --> Decodable Model
-    static func toModel<T: Decodable>(_ modeType: T.Type, jsonObject: Any?) -> T? {
-        guard let jsonObject = jsonObject else { return nil }
-        do {
-            let data = try JSONSerialization.data(withJSONObject: jsonObject, options: [.fragmentsAllowed])
-            return try JSONDecoder().decode(modeType, from: data)
-        } catch {
-            Ext.debug("jsonObject to decodable failed.", error: error)
-            return nil
-        }
+    /// JSONObject --> Decodable
+    static func toModel<T: Decodable>(_ modelType: T.Type, jsonObject: Any?) -> T? {
+        toModel(modelType, data: toData(jsonObject: jsonObject))
     }
-    /// JSON file --> Decodeable Model
-    static func toModel<T: Decodable>(_ modeType: T.Type, filePath: String) -> T? {
-        guard FileManager.default.fileExists(atPath: filePath) else {
-            Ext.debug("JSON file not exist.", tag: .error)
-            return nil
-        }
-        do {
-            let data = try Data(contentsOf: URL(fileURLWithPath: filePath))
-            return try JSONDecoder().decode(modeType, from: data)
-        } catch {
-            Ext.debug("JSON file to jsonObject failed.", error: error)
-            return nil
-        }
+    /// JSON file --> Decodeable
+    static func toModel<T: Decodable>(_ modelType: T.Type, filePath: String) -> T? {
+        toModel(modelType, data: toData(filePath: filePath))
     }
 }
