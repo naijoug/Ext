@@ -31,29 +31,32 @@ public extension Requestable {
     var httpBody: Data? { nil }
     var timeoutInterval: TimeInterval { 60.0 }
 }
-public extension Requestable {
-    @discardableResult
+
+public extension ExtWrapper where Base == Networker {
     /// 数据请求响应
     /// - Parameters:
     ///   - queue: 数据响应所在的队列 (默认: 主队列)
+    ///   - request: 数据请求体
     ///   - handler: 数据响应
     /// - Returns: 数据请求回话任务
-    func response(queue: DispatchQueue = .main, handler: @escaping ResponseHandler) -> URLSessionDataTask? {
-        guard let request = urlRequest else {
+    @discardableResult
+    static func response(queue: DispatchQueue = .main, request: Requestable, handler: @escaping ResponseHandler) -> URLSessionDataTask? {
+        guard let urlRequest = request.urlRequest else {
             handler(.failure(Networker.Error.invalidURL))
             return nil
         }
-        return Networker.shared.data(queue: queue, request: request, requestLog: (self as? DataLogable)?.log ?? "", responseHandler: handler)
+        return Networker.shared.data(queue: queue, request: urlRequest, requestLog: (self as? DataLogable)?.log ?? "", responseHandler: handler)
     }
     
-    @discardableResult
     /// 数据请求
     /// - Parameters:
     ///   - queue: 数据响应所在的队列 (默认: 主队列)
+    ///   - request: 数据请求体
     ///   - handler: 数据响应
     /// - Returns: 数据请求回话任务
-    func data(queue: DispatchQueue = .main, handler: @escaping Ext.ResultDataHandler<Data>) -> URLSessionDataTask? {
-        response(queue: queue) { result in
+    @discardableResult
+    static func data(queue: DispatchQueue = .main, request: Requestable, handler: @escaping Ext.ResultDataHandler<Data>) -> URLSessionDataTask? {
+        response(queue: queue, request: request) { result in
             switch result {
             case .failure(let error): handler(.failure(error))
             case .success(let response): handler(.success(response.data))
@@ -61,6 +64,7 @@ public extension Requestable {
         }
     }
 }
+
 public extension ExtWrapper where Base: Requestable {
     @discardableResult
     /// 数据请求响应
@@ -69,7 +73,7 @@ public extension ExtWrapper where Base: Requestable {
     ///   - handler: 数据响应
     /// - Returns: 数据请求回话任务
     func response(queue: DispatchQueue = .main, handler: @escaping ResponseHandler) -> URLSessionDataTask? {
-        base.response(queue: queue, handler: handler)
+        Networker.ext.response(queue: queue, request: base, handler: handler)
     }
     
     @discardableResult
@@ -79,7 +83,7 @@ public extension ExtWrapper where Base: Requestable {
     ///   - handler: 数据响应
     /// - Returns: 数据请求回话任务
     func data(queue: DispatchQueue = .main, handler: @escaping Ext.ResultDataHandler<Data>) -> URLSessionDataTask? {
-        base.data(queue: queue, handler: handler)
+        Networker.ext.data(queue: queue, request: base, handler: handler)
     }
 }
 private extension Requestable {
