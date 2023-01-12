@@ -8,9 +8,9 @@
 import UIKit
 import MobileCoreServices
 
+/// 系统媒体资源选择器
 public struct MediaPicker {}
 
-/// 系统媒体资源选择器
 public extension MediaPicker {
     /// 媒体资源类型
     enum MediaType {

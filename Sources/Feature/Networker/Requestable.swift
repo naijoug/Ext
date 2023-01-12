@@ -12,6 +12,7 @@ import Foundation
     - https://github.com/rinov/SwiftFlyer
  */
 
+/// 数据请求协议
 public protocol Requestable {
     var baseURLString: String { get }
     var path: String { get }
@@ -141,6 +142,7 @@ private extension Requestable {
 
 // MARK: - JSON
 
+/// JSON 参数请求协议
 public protocol JSONRequestable: Requestable {
     var jsonParameter: Any? { get }
 }
@@ -167,6 +169,7 @@ public extension JSONRequestable {
 
 // MARK: - Codable
 
+/// Encodable 参数请求协议
 public protocol EncodeRequestable: Requestable {
     var parameter: Encodable? { get }
 }
@@ -192,6 +195,7 @@ public extension EncodeRequestable {
 
 // MARK: - FormData
 
+/// FormData 参数请求协议
 public protocol FormDataRequestable: Requestable, DataLogable {
     var boundary: String { get set }
     var formData: MultipartFormData { get }
