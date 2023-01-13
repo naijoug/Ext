@@ -47,9 +47,13 @@ public extension Ext {
     
     // Reference: https://stackoverflow.com/questions/35738133/ios-code-to-convert-m4a-to-wav
     
-    static func convertToWav(_ url: URL, outputURL: URL) {
+    /// 媒体资源转化为 Wav 音频文件
+    /// - Parameters:
+    ///   - sourceURL: 源文件
+    ///   - outputURL: 输出的 Wav 音频文件
+    static func convertToWav(sourceURL: URL, outputURL: URL) {
         Ext.debug("convert to Wav start...", tag: .begin, logEnabled: Ext.logEnabled, locationEnabled: false)
-        guard FileManager.default.fileExists(atPath: url.path) else {
+        guard FileManager.default.fileExists(atPath: sourceURL.path) else {
             Ext.debug("convert file not exist.", logEnabled: Ext.logEnabled, locationEnabled: false)
             return
         }
@@ -65,7 +69,7 @@ public extension Ext {
             Ext.debug("\(message) \(error == noErr ? "succeeded." : "failed. \(error.description)")", logEnabled: error != noErr, locationEnabled: false)
         }
         
-        ExtAudioFileOpenURL(url as CFURL, &sourceFile)
+        ExtAudioFileOpenURL(sourceURL as CFURL, &sourceFile)
         guard let sourceFile = sourceFile else {
             Ext.debug("audio file open failed", tag: .error)
             return
