@@ -153,4 +153,185 @@ public extension Ext {
         Ext.debug("convert to Wav end.", tag: .end, logEnabled: Ext.logEnabled, locationEnabled: false)
     }
     
+    /// 转化为 MP4
+    static func convertToMP4(sourceURL: URL,
+                             outputURL: URL = URL.ext.tempFile(fileExtension: "mp4"),
+                             handler: @escaping Ext.ResultDataHandler<URL>) {
+        let presetName = UIDevice.ext.hevcEnabled ? AVAssetExportPresetHEVCHighestQuality : AVAssetExportPresetHighestQuality
+        guard let export = AVAssetExportSession(asset: AVAsset(url: sourceURL), presetName: presetName) else {
+            handler(.failure(Ext.Error.inner("export session init failed.")))
+            return
+        }
+        export.outputURL = outputURL
+        export.outputFileType = .mp4
+        FileManager.default.ext.remove(outputURL)
+        export.exportAsynchronously {
+            DispatchQueue.main.async {
+                switch export.status {
+                case .completed:
+                    handler(.success(outputURL))
+                case .cancelled:
+                    handler(.failure(Ext.Error.inner("convert to MP4 canccelled.")))
+                default:
+                    handler(.failure(export.error ?? Ext.Error.inner("convert to MP4 failed")))
+                }
+            }
+        }
+    }
+}
+
+public extension ExtWrapper where Base: AVAsset {
+    
+    /// 裁剪资源
+    /// - Parameters:
+    ///   - range: 裁剪范围
+    ///   - outputURL: 输出 url
+    func crop(_ range: CMTimeRange, outputURL: URL, handler: @escaping Ext.ResultDataHandler<URL>) {
+        let presetName = UIDevice.ext.hevcEnabled ? AVAssetExportPresetHEVCHighestQuality : AVAssetExportPreset1920x1080
+        guard let export = AVAssetExportSession(asset: base, presetName: presetName) else {
+            handler(.failure(Ext.Error.inner("export session init failed.")))
+            return
+        }
+        export.outputURL = outputURL
+        export.outputFileType = .mp4
+        export.timeRange = range
+        FileManager.default.ext.remove(outputURL)
+        export.exportAsynchronously {
+            DispatchQueue.main.async {
+                switch export.status {
+                case .completed:
+                    //Ext.debug("crop video completed.")
+                    handler(.success(outputURL))
+                case .cancelled:
+                    handler(.failure(Ext.Error.inner("crop video cancelled")))
+                default:
+                    handler(.failure(export.error ?? Ext.Error.inner("crop video failed")))
+                }
+            }
+        }
+    }
+}
+
+// MARK: - Image
+
+public extension Ext {
+    typealias ImageFrame = (image: UIImage, time: CMTime)
+    typealias ExportImageHandler = Ext.ResultDataHandler<[ImageFrame]>
+}
+
+public extension ExtWrapper where Base: AVAsset {
+    
+    /// 导出指定帧数图片
+    /// - Parameters:
+    ///   - size: 图片尺寸
+    ///   - frames: 导出图片帧数
+    ///   - handler: 导出结果
+    func exportImages(_ size: CGSize, frames: Int, handler: @escaping Ext.ExportImageHandler) {
+        let times = (0..<frames).map {
+            CMTime(seconds: base.duration.seconds * TimeInterval($0)/TimeInterval(frames), preferredTimescale: base.duration.timescale)
+        }
+        exportImages(size, times: times, handler: handler)
+    }
+    
+    /// 按指定时间帧间隔导出图片
+    /// - Parameters:
+    ///   - size: 图片尺寸
+    ///   - frameInterval: 导出图片帧间隔 (单位: 秒)
+    ///   - handler: 导出结果
+    func exportImages(_ size: CGSize, frameInterval: TimeInterval, handler: @escaping Ext.ExportImageHandler) {
+        guard 0 < frameInterval, frameInterval <= base.duration.seconds else {
+            handler(.failure(Ext.Error.inner("frame interval error.")))
+            return
+        }
+        // 计算间隔时间
+        let seconds = base.duration.seconds // 总时长
+        let fullFrames = Int(seconds/frameInterval) // 完整帧数
+        let remainderT = seconds - Double(fullFrames)*frameInterval // 剩余时长
+        let lastW = size.width * CGFloat(remainderT/frameInterval)  // 最后一帧图片宽度
+        //Ext.debug("总时长: \(seconds) | 完整帧数: \(fullFrames) | 剩余时长: \(remainderT) | 最后一帧图片宽度\(lastW)")
+        let times = stride(from: 0, to: seconds, by: frameInterval).map {
+            CMTime(seconds: $0, preferredTimescale: base.duration.timescale)
+        }
+        exportImages(size, times: times) { result in
+            switch result {
+            case .failure(let error): handler(.failure(error))
+            case .success(var frames):
+                // 对最后一帧图片进行裁剪
+                if lastW > 0, frames.count > 0 {
+                    let last = frames.removeLast()
+                    if let image = last.image.ext.clip(in: CGRect(x: 0, y: 0, width: lastW, height: size.height)) {
+                        frames.append((image, last.time))
+                    }
+                }
+                handler(.success(frames))
+            }
+        }
+    }
+    /// 导出多张图片(异步)
+    ///
+    /// - Parameters:
+    ///   - size: 图片最大尺寸
+    ///   - times: 导出图片时间点
+    ///   - handler: 导出结果
+    func exportImages(_ size: CGSize, times: [CMTime], handler: @escaping Ext.ExportImageHandler) {
+        func handleResult(_ result: Result<[Ext.ImageFrame], Swift.Error>) {
+            DispatchQueue.main.async {
+                handler(result)
+            }
+        }
+        
+        guard !times.isEmpty else {
+            handler(.success([]))
+            return
+        }
+        let generator = AVAssetImageGenerator(asset: base)
+        generator.requestedTimeToleranceAfter    = .zero
+        generator.requestedTimeToleranceBefore   = .zero
+        generator.appliesPreferredTrackTransform = true
+        generator.maximumSize = size
+        
+        //Ext.debug("times: \(times)")
+        var frames = [Ext.ImageFrame]()
+        var count = 0
+        generator.generateCGImagesAsynchronously(forTimes: times.map { NSValue(time: $0) }) { (requestedTime, cgImage, actualTime, result, error) in
+            switch result {
+            case .succeeded:
+                if let cgImage = cgImage {
+                    frames.append((UIImage(cgImage: cgImage), actualTime))
+                }
+            case .cancelled:
+                Ext.debug("export \(requestedTime) image cancelled.", error: error)
+                handleResult(.failure(Ext.Error.inner("export \(requestedTime) image cancelled.")))
+            default:
+                Ext.debug("export \(requestedTime) image failed.", error: error)
+                handleResult(.failure(error ?? Ext.Error.inner("export \(requestedTime) image failed.")))
+            }
+            
+            count += 1
+            guard count == times.count else { return } // 全部导出完成
+            handleResult(.success(frames))
+        }
+    }
+    
+    /// 导出一帧图片(同步)
+    ///
+    /// - Parameters:
+    ///   - size: 图片最大尺寸
+    ///   - time: 导出图片时间点
+    func exportImage(_ size: CGSize, time: CMTime) -> Ext.ImageFrame? {
+        let generator = AVAssetImageGenerator(asset: base)
+        generator.requestedTimeToleranceAfter    = .zero
+        generator.requestedTimeToleranceBefore   = .zero
+        generator.appliesPreferredTrackTransform = true
+        generator.maximumSize = size
+        
+        do {
+            var actualTime = CMTime(value: 0, timescale: 0) // actual time for the image
+            let cgImage = try generator.copyCGImage(at: time, actualTime: &actualTime)
+            return (UIImage(cgImage: cgImage), actualTime)
+        } catch {
+            Ext.debug("image generate failed.", error: error)
+            return nil
+        }
+    }
 }

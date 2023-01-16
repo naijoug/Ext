@@ -41,7 +41,5 @@ public extension ExtWrapper where Base == CMTime {
     }
     
     /// 包装 NSValue
-    var nsValue: NSValue {
-        return NSValue(time: base)
-    }
+    var nsValue: NSValue { NSValue(time: base) }
 }

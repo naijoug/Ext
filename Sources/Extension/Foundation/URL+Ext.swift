@@ -81,8 +81,40 @@ public extension ExtWrapper where Base == URL {
     var fileSize: Int? {
         let keys: Set<URLResourceKey> = [.totalFileSizeKey, .fileSizeKey]
         let resourceValues = try? base.resourceValues(forKeys: keys)
-//        let assetSizeBytes = tracks(withMediaType: AVMediaType.video).first?.totalSampleDataLength
+        //let assetSizeBytes = tracks(withMediaType: AVMediaType.video).first?.totalSampleDataLength
         return resourceValues?.fileSize ?? resourceValues?.totalFileSize
     }
     
+}
+
+public extension Ext {
+    /// 随机名类型
+    enum RandomName {
+        /// 当前时间戳
+        case date
+        /// UUID()
+        case uuid
+        /// ProcessInfo().globallyUniqueString
+        case unique
+        
+        public var name: String {
+            switch self {
+            case .date:     return "\(Date().timeIntervalSince1970)"
+            case .uuid:     return UUID().uuidString
+            case .unique:   return ProcessInfo().globallyUniqueString
+            }
+        }
+    }
+}
+
+public extension ExtWrapper where Base == URL {
+    /// temp 目录文件
+    /// - Parameters:
+    ///   - fileName: 文件名 (默认: 当前时间戳)
+    ///   - fileExtension: 文件后缀名
+    static func tempFile(fileName: String = Ext.RandomName.date.name, fileExtension: String) -> URL {
+        URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
+            .appendingPathComponent(fileName)
+            .appendingPathExtension(fileExtension)
+    }
 }

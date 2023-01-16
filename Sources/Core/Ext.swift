@@ -48,7 +48,7 @@ public extension Ext {
     typealias FuncHandler<X, Y> = (_ x: X) -> Y
     
     /// 结果闭包
-    typealias ResultHandler<T, E: Swift.Error> = ((Result<T, E>) -> Void)
+    typealias ResultHandler<T, E: Swift.Error> = ((Swift.Result<T, E>) -> Void)
     /// 空结果闭包
     typealias ResultVoidHandler = ResultHandler<Void, Swift.Error>
     /// 数据结果闭包
