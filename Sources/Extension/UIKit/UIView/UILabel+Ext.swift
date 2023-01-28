@@ -7,7 +7,7 @@
 
 import UIKit
 
-public extension ExtWrapper where Base == UILabel {
+public extension ExtWrapper where Base: UILabel {
     
     /// 配置 label 属性
     /// - Parameters:
