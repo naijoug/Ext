@@ -7,8 +7,43 @@
 
 import UIKit
 
+/**
+ Reference:
+    - https://stackoverflow.com/questions/12591192/center-text-vertically-in-a-uitextview
+    - https://stackoverflow.com/questions/7235310/uitextview-alignment-to-bottom
+ */
+
 open class PlaceholderTextView: UITextView {
     
+    public enum Alignment {
+        case top
+        case center
+        case bottom
+    }
+    
+    /// 文本垂直对齐方式
+    public var textVerticalAlignment: Alignment = .top
+    
+    public override var contentSize: CGSize {
+        didSet {
+            let height = bounds.size.height
+            let contentHeight = contentSize.height
+            
+            var topCorrection: CGFloat = 0.0
+            switch textVerticalAlignment {
+            case .top: ()
+            case .center:
+                topCorrection = max(0, (height - contentHeight * zoomScale)/2.0)
+            case .bottom:
+                topCorrection = height - contentHeight
+            }
+            
+            contentInset = UIEdgeInsets(top: topCorrection, left: 0, bottom: 0, right: 0)
+        }
+    }
+    
+    /// 占位符是否可用
+    public var placeholderEnabled: Bool = true { didSet { setNeedsDisplay() } }
     /// 占位文字
     open var placeholder: String? { didSet { setNeedsDisplay() } }
     /// 占位字体
@@ -23,20 +58,15 @@ open class PlaceholderTextView: UITextView {
     open override var textContainerInset: UIEdgeInsets { didSet { setNeedsDisplay() } }
     open override var attributedText: NSAttributedString! { didSet { setNeedsDisplay() } }
     
-    public required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
+    public required init?(coder aDecoder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     public override init(frame: CGRect, textContainer: NSTextContainer?) {
         super.init(frame: frame, textContainer: textContainer)
-        NotificationCenter.default.addObserver(self, selector: #selector(textChange), name: UITextView.textDidChangeNotification, object: nil)
-
+        
+        NotificationCenter.default.addObserver(forName: UITextView.textDidChangeNotification, object: nil, queue: nil) { [weak self] _ in
+            guard let `self` = self else { return }
+            self.setNeedsDisplay()
+        }
     }
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-    }
-    
-    @objc
-    private func textChange() { setNeedsDisplay() }
     
     override open func layoutSubviews() {
         super.layoutSubviews()
@@ -44,26 +74,47 @@ open class PlaceholderTextView: UITextView {
     }
     
     open override func draw(_ rect: CGRect) {
-        guard !hasText else { return }
+        guard placeholderEnabled, !hasText else { return }
         guard let placeholder = placeholder, !placeholder.isEmpty else { return }
+        let canvasW = rect.size.width - textContainerInset.left + placeholderOffset.x - textContainerInset.right
+        //let canvasH = rect.size.height - textContainerInset.top + placeholderOffset.y - textContainerInset.bottom
+        let placeholderFont = self.placeholderFont ?? (font ?? UIFont.systemFont(ofSize: UIFont.systemFontSize))
+        let placeholderSize = (placeholder as NSString).boundingRect(
+            with: CGSize(width: .greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude),
+            options: .usesLineFragmentOrigin,
+            attributes: [.font: placeholderFont],
+            context: nil
+        ).size
+        
+        var offsetX: CGFloat = textContainerInset.left + placeholderOffset.x
+        if canvasW > placeholderSize.width {
+            switch textAlignment {
+            case .center: offsetX += (canvasW - placeholderSize.width) / 2.0
+            case .right: offsetX += canvasW - placeholderSize.width
+            default: ()
+            }
+        }
+        let offsetY: CGFloat = textContainerInset.top + placeholderOffset.y
+//        if canvasH > placeholderSize.height {
+//            switch textVerticalAlignment {
+//            case .center: offsetY += (canvasH - placeholderSize.height) / 2.0
+//            case .bottom: offsetY += canvasH - placeholderSize.height
+//            default: ()
+//            }
+//        }
+        
         let style = NSMutableParagraphStyle()
         style.lineSpacing = 3
-        let offsetX: CGFloat = placeholderOffset.x
-        let offsetY: CGFloat = placeholderOffset.y
+        
         (placeholder as NSString).draw(
-            in: CGRect(x: textContainerInset.left + offsetX,
-                       y: textContainerInset.top + offsetY,
-                       width: rect.size.width - textContainerInset.left - offsetX - textContainerInset.right,
-                       height: rect.size.height - textContainerInset.top - offsetY - textContainerInset.bottom),
+            in: CGRect(x: offsetX, y: offsetY, width: placeholderSize.width, height: placeholderSize.height),
             withAttributes: [
-                .font: placeholderFont ?? (font ?? UIFont.systemFont(ofSize: UIFont.systemFontSize)),
+                .font: placeholderFont,
                 .foregroundColor: placeholderColor,
                 .paragraphStyle: style
             ]
         )
     }
-    
-
 }
 
 public extension UITextView {

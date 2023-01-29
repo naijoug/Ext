@@ -8,7 +8,7 @@
 import UIKit
 
 /// 自动缩放字体大小 textView
-public class AutoFontSizeTextView: VerticallyCenteredTextView {
+public class AutoFontSizeTextView: PlaceholderTextView {
     
     private var minFontSize: CGFloat = 6
     private var maxFontSize: CGFloat = 60
@@ -50,6 +50,7 @@ public class AutoFontSizeTextView: VerticallyCenteredTextView {
                 guard expectedFont.pointSize <= maxFontSize else { break }
                 //Ext.debug("放大字体 \(font?.pointSize ?? 0) -> \(expectedFont.pointSize)")
                 font = expectedFont
+                placeholderFont = expectedFont
             }
             return
         }
@@ -59,6 +60,7 @@ public class AutoFontSizeTextView: VerticallyCenteredTextView {
             guard expectedFont.pointSize >= minFontSize else { break }
             //Ext.debug("缩小字体: \(font?.pointSize ?? 0) -> \(expectedFont.pointSize)")
             font = expectedFont
+            placeholderFont = expectedFont
         }
     }
 }
