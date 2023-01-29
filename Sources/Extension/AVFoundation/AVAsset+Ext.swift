@@ -239,17 +239,18 @@ public extension ExtWrapper where Base: AVAsset {
     ///   - frameInterval: 导出图片帧间隔 (单位: 秒)
     ///   - handler: 导出结果
     func exportImages(_ size: CGSize, frameInterval: TimeInterval, handler: @escaping Ext.ExportImageHandler) {
-        guard 0 < frameInterval, frameInterval <= base.duration.seconds else {
-            handler(.failure(Ext.Error.inner("frame interval error.")))
+        let durationT = base.duration.seconds // 总时长
+        let frameInterval = min(frameInterval, durationT)
+        guard frameInterval > 0 else {
+            handler(.failure(Ext.Error.inner("frame interval \(frameInterval) error.")))
             return
         }
         // 计算间隔时间
-        let seconds = base.duration.seconds // 总时长
-        let fullFrames = Int(seconds/frameInterval) // 完整帧数
-        let remainderT = seconds - Double(fullFrames)*frameInterval // 剩余时长
+        let fullFrames = Int(durationT/frameInterval) // 完整帧数
+        let remainderT = durationT - TimeInterval(fullFrames)*frameInterval // 剩余时长
         let lastW = size.width * CGFloat(remainderT/frameInterval)  // 最后一帧图片宽度
         //Ext.debug("总时长: \(seconds) | 完整帧数: \(fullFrames) | 剩余时长: \(remainderT) | 最后一帧图片宽度\(lastW)")
-        let times = stride(from: 0, to: seconds, by: frameInterval).map {
+        let times = stride(from: 0, to: durationT, by: frameInterval).map {
             CMTime(seconds: $0, preferredTimescale: base.duration.timescale)
         }
         exportImages(size, times: times) { result in
