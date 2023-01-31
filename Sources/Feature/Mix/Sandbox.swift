@@ -197,6 +197,7 @@ private class FileCell: UITableViewCell {
     
     private func setupUI() {
         
+        contentView.addSubview(titleLabel)
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
             titleLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 20),

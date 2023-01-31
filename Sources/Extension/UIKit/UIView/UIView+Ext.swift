@@ -80,7 +80,6 @@ public extension ExtWrapper where Base: UIView  {
         highView.setContentCompressionResistancePriority(.defaultHigh, for: axis)
     }
     
-    
     /// 相对于 view 四周进行自动布局
     /// - Parameters:
     ///   - view: 参照视图
@@ -288,9 +287,12 @@ public extension ExtWrapper where Base: UIView {
     }
 }
 
-// MARK: - Shake
+// MARK: - Animation
 
 public extension ExtWrapper where Base: UIView {
+    
+    /// 默认动画时长 0.3
+    static var animationDuration: TimeInterval { 0.3 }
     
     // Reference: https://www.hangge.com/blog/cache/detail_1603.html
     
