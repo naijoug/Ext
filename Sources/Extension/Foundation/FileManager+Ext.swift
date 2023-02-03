@@ -20,7 +20,6 @@ public extension ExtWrapper where Base == FileManager {
         }
     }
     
-    
     /// 异步删除文件
     /// - Parameters:
     ///   - url: 文件 url
@@ -50,7 +49,6 @@ public extension ExtWrapper where Base == FileManager {
             Ext.debug("folder create failure | \(folderUrl.path)", error: error, tag: .file, locationEnabled: false)
         }
     }
-    
     
     /// 读取文件中的字符内容
     func read(_ url: URL) -> String? {
@@ -168,4 +166,8 @@ public extension ExtWrapper where Base == FileManager {
             return false
         }
     }
+}
+
+public extension ExtWrapper where Base == FileManager {
+    
 }
