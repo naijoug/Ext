@@ -155,7 +155,7 @@ public extension Ext {
     
     /// 转化为 MP4
     static func convertToMP4(sourceURL: URL,
-                             outputURL: URL = URL.ext.tempFile(fileExtension: "mp4"),
+                             outputURL: URL = FileManager.ext.file(for: .temp, fileName: .timestamp, fileExtension: "mp4"),
                              handler: @escaping Ext.ResultDataHandler<URL>) {
         let presetName = UIDevice.ext.hevcEnabled ? AVAssetExportPresetHEVCHighestQuality : AVAssetExportPresetHighestQuality
         guard let export = AVAssetExportSession(asset: AVAsset(url: sourceURL), presetName: presetName) else {

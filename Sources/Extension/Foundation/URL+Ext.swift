@@ -10,6 +10,23 @@ import Foundation
 extension URL: ExtCompatible{}
 
 public extension ExtWrapper where Base == URL {
+    /// 根据路径创建 url
+    /// - Parameter filePath: 文件路径
+    static func url(for filePath: String) -> URL {
+        if #available(iOS 16.0, *) {
+            return URL(filePath: filePath)
+        } else {
+            return URL(fileURLWithPath: filePath)
+        }
+    }
+}
+
+public extension ExtWrapper where Base == URL {
+    
+    /// 移除沙盒前缀的文件路径
+    var filePathWithoutSandboxPrefix: String {
+        base.path.ext.removePrefix("/private\(NSHomeDirectory())")
+    }
     
     // Reference: https://stackoverflow.com/questions/2188469/how-can-i-calculate-the-size-of-a-folder
     
@@ -80,37 +97,5 @@ public extension ExtWrapper where Base == URL {
             Ext.debug("regularFileAllocatedSize error.", error: error, locationEnabled: false)
             return 0
         }
-    }
-}
-
-public extension Ext {
-    /// 随机名类型
-    enum RandomName {
-        /// 当前时间戳
-        case date
-        /// UUID()
-        case uuid
-        /// ProcessInfo().globallyUniqueString
-        case unique
-        
-        public var name: String {
-            switch self {
-            case .date:     return "\(Date().timeIntervalSince1970)"
-            case .uuid:     return UUID().uuidString
-            case .unique:   return ProcessInfo().globallyUniqueString
-            }
-        }
-    }
-}
-
-public extension ExtWrapper where Base == URL {
-    /// temp 目录文件
-    /// - Parameters:
-    ///   - fileName: 文件名 (默认: 当前时间戳)
-    ///   - fileExtension: 文件后缀名
-    static func tempFile(fileName: String = Ext.RandomName.date.name, fileExtension: String) -> URL {
-        URL(fileURLWithPath: NSTemporaryDirectory(), isDirectory: true)
-            .appendingPathComponent(fileName)
-            .appendingPathExtension(fileExtension)
     }
 }

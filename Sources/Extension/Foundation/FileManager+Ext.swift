@@ -8,6 +8,63 @@
 import Foundation
 
 public extension ExtWrapper where Base == FileManager {
+    /// 文件沙盒路径
+    enum SandboxPath {
+        /// 主目录
+        case home
+        /// 临时目录
+        case temp
+        /// 文档目录
+        case document
+        /// 库目录
+        case library
+        /// 缓存目录
+        case cache
+        
+        var path: String {
+            switch self {
+            case .home: return NSHomeDirectory()
+            case .temp: return NSTemporaryDirectory()
+            case .document: return NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true).first ?? "\(NSHomeDirectory())/Documents"
+            case .library: return NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true).first ?? "\(NSHomeDirectory())/Library"
+            case .cache: return NSSearchPathForDirectoriesInDomains(.cachesDirectory, .userDomainMask, true).first ?? "\(NSHomeDirectory())/Library/Caches"
+            }
+        }
+    }
+    /// 文件名类型
+    enum FileName {
+        /// 当前时间戳
+        case timestamp
+        /// UUID()
+        case uuid
+        /// ProcessInfo().globallyUniqueString
+        case unique
+        /// 自定义名
+        case name(String)
+        
+        public var name: String {
+            switch self {
+            case .timestamp:    return "\(Date().timeIntervalSince1970)"
+            case .uuid:         return UUID().uuidString
+            case .unique:       return ProcessInfo().globallyUniqueString
+            case .name(let name): return name
+            }
+        }
+    }
+    
+    /// 创建文件
+    /// - Parameters:
+    ///   - path: 沙盒目录
+    ///   - name: 文件名
+    ///   - fileExtension: 文件后缀名
+    static func file(for filePath: SandboxPath, fileName: FileName, fileExtension: String) -> URL {
+        URL(fileURLWithPath: filePath.path, isDirectory: true)
+            .appendingPathComponent(fileName.name)
+            .appendingPathExtension(fileExtension)
+    }
+}
+
+public extension ExtWrapper where Base == FileManager {
     
     /// 删除文件
     func remove(_ url: URL?) {
