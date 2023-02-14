@@ -291,7 +291,7 @@ public extension ExtPlayer {
         Ext.debug("begin seeking newTime: \(newTime) | \(newTime.seconds) | \(time)", tag: .launch, logEnabled: logEnabled)
         isSeeking = true
         avPlayer.seek(to: newTime, toleranceBefore: .zero, toleranceAfter: .zero) { [weak self] completion in
-            guard let `self` = self else { return }
+            guard let self else { return }
             self.isSeeking = false
             Ext.debug("end player seeking \(completion) | \(self.currentTime)", error: self.avPlayer.error, tag: .bingo, logEnabled: self.logEnabled)
             guard completion else {

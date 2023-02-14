@@ -80,7 +80,7 @@ private extension UIViewController {
     @objc
     func lifecycle_viewDidLoad() {
         let deallocator = Deallocator { [weak self] in
-            guard let `self` = self else { return }
+            guard let self else { return }
             Ext.debug("Deallocated: \(self.ext.typeName)", tag: .recycle)
         }
         ext.setAssociatedObject(&Self.deallocatorKey, value: deallocator, policy: .retainNonatomic)

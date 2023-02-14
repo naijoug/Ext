@@ -62,7 +62,7 @@ public class DiskCache {
     /// 最大缓存尺寸 (单位: byte 默认: 1GB)
     public var maxSize: CacheSize = .GB(1)
     
-    public var logEnabled: Bool = true
+    public var logEnabled: Bool = false
     
     /// 磁盘 IO 处理队列
     private let ioQueue = DispatchQueue(label: "ext.diskCache.ioQueue")

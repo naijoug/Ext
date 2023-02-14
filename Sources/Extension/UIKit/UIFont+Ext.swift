@@ -18,25 +18,36 @@ public extension ExtWrapper where Base == UIFont {
             }
         }
     }
-    
-    enum FontKind {
-        /// 常规
-        case regular
-        /// 粗体
-        case bold
-        /// 斜体
-        case italic
+}
+
+public extension ExtWrapper where Base == UIFont {
+    /// 系统字体
+    /// - Parameters:
+    ///   - fontSize: 字体大小
+    ///   - weight: 字体权重
+    static func of(size fontSize: CGFloat, weight: UIFont.Weight) -> UIFont {
+        UIFont.systemFont(ofSize: fontSize, weight: weight)
     }
     
-    /// 字体
-    /// - Parameters:
-    ///   - kind: 字体种类
-    ///   - fontSize: 字体大小
-    static func of(_ kind: FontKind, fontSize: CGFloat) -> UIFont {
-        switch kind {
-        case .regular:  return .systemFont(ofSize: fontSize)
-        case .bold:     return .boldSystemFont(ofSize: fontSize)
-        case .italic:   return .italicSystemFont(ofSize: fontSize)
+    /**
+     Reference:
+        - https://stackoverflow.com/questions/61291811/how-to-implement-uikit-sf-pro-rounded
+        - https://shorturl.at/crLY6
+     */
+    
+    /// rounded 字体
+    static func rounded(ofSize fontSize: CGFloat, weight: UIFont.Weight) -> UIFont {
+        var font = UIFont.systemFont(ofSize: fontSize, weight: weight)
+        if #available(iOS 13.0, *) {
+            if let descriptor = font.fontDescriptor.withDesign(.rounded) {
+                font = UIFont(descriptor: descriptor, size: fontSize)
+            }
+        } else {
+            let name = ".AppleSystemUIFontRounded\(weight == .bold ? "-Bold" : "")"
+            if let nameFont = UIFont(name: name, size: fontSize) {
+                font = nameFont
+            }
         }
+        return font
     }
 }
