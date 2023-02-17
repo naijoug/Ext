@@ -195,6 +195,7 @@ public extension AudioSession {
             Ext.debug("no need to set \(kind)", logEnabled: logEnabled)
             return
         }
+        Ext.debug("\(session.category) -> \(kind.avCategory)", tag: .fire, logEnabled: logEnabled)
         do {
             //if category == .playAndRecord, #available(iOS 13.0, *) {
             //    try session.setAllowHapticsAndSystemSoundsDuringRecording(true)

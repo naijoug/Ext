@@ -11,7 +11,7 @@ import UIKit
 
 public extension ExtWrapper where Base == String {
     
-    func height(_ width: CGFloat, font: UIFont) -> CGFloat { ceil(boundingRect(with: CGSize(width: width, height: .greatestFiniteMagnitude), font: font).height) + 4 }
+    func height(_ width: CGFloat, font: UIFont) -> CGFloat { ceil(boundingRect(with: CGSize(width: width, height: .greatestFiniteMagnitude), font: font).height) }
     func width(_ height: CGFloat, font: UIFont) -> CGFloat { ceil(boundingRect(with: CGSize(width: .greatestFiniteMagnitude, height: height), font: font).width) }
     
     private func boundingRect(with size: CGSize, font: UIFont) -> CGRect {
@@ -27,7 +27,7 @@ public extension ExtWrapper where Base == NSAttributedString {
     func size(height: CGFloat) -> CGSize { boundingRect(with: CGSize(width: .greatestFiniteMagnitude, height: height)).size }
     func size(width: CGFloat) -> CGSize { boundingRect(with: CGSize(width: width, height: .greatestFiniteMagnitude)).size }
     
-    func height(_ width: CGFloat) -> CGFloat { ceil(boundingRect(with: CGSize(width: width, height: .greatestFiniteMagnitude)).height) + 4 }
+    func height(_ width: CGFloat) -> CGFloat { ceil(boundingRect(with: CGSize(width: width, height: .greatestFiniteMagnitude)).height) }
     func width(_ height: CGFloat) -> CGFloat { ceil(boundingRect(with: CGSize(width: .greatestFiniteMagnitude, height: height)).width) }
     
     private func boundingRect(with size: CGSize) -> CGRect {
