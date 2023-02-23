@@ -50,7 +50,9 @@ public protocol ExtPlayerViewDelegate: AnyObject {
     func extPlayerView(_ playerView: ExtPlayerView, didAction action: ExtPlayerView.Action)
 }
 
-open class ExtPlayerView: UIView {
+open class ExtPlayerView: UIView, ExtLogable {
+    public var logEnabled: Bool = true
+    
     /// 播放器视图状态
     public enum Status: Equatable {
         case unknown                        // 未知状态
@@ -90,7 +92,7 @@ open class ExtPlayerView: UIView {
     public var videoGravity: ApplePlayerView.VideoGravity = .aspectFill {
         didSet {
             guard oldValue != videoGravity else { return }
-            Ext.log("\(oldValue) -> \(videoGravity)")
+            ext.log("\(oldValue) -> \(videoGravity)")
             playerView.videoGravity = videoGravity
         }
     }
@@ -104,16 +106,13 @@ open class ExtPlayerView: UIView {
     
 // MARK: - Status
     
-    /// 是否打印日志
-    public var logEnabled: Bool = true
-    
     /// 是否正在播放
     public var isPlaying = false
     
     /// 是否正在缓冲
     private var isBuffering: Bool = false {
         didSet {
-            Ext.log("\(isBuffering)")
+            ext.log("\(isBuffering)")
             if isBuffering {
                 indicatorView.startAnimating()
             } else {
@@ -125,7 +124,7 @@ open class ExtPlayerView: UIView {
     public private(set) var status: ExtPlayerView.Status = .unknown {
         didSet {
             guard oldValue != status else { return }
-            Ext.log("\(oldValue) -> \(status)", logEnabled: logEnabled)
+            ext.log("\(oldValue) -> \(status)")
             delegate?.extPlayerView(self, status: status)
         }
     }
@@ -213,13 +212,13 @@ public extension ExtPlayerView {
     /// 开始播放
     func play() {
         guard extPlayer.playEnabled else { return }
-        Ext.log("")
+        ext.log("")
         isPlaying = true
         extPlayer.play()
     }
     /// 暂停播放
     func pause() {
-        Ext.log("")
+        ext.log("")
         isPlaying = false
         extPlayer.pause()
     }

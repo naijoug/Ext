@@ -306,3 +306,23 @@ extension Ext.Tag: CustomStringConvertible {
         }
     }
 }
+
+public protocol ExtLogable: ExtCompatible {
+    /// 是否启用日志开关
+    var logEnabled: Bool { get }
+}
+public extension ExtLogable {
+    /// 默认开启日志
+    var logEnabled: Bool { true }
+}
+
+public extension ExtWrapper where Base: ExtLogable {
+    func log(_ message: Any,
+             error: Swift.Error? = nil,
+             logEnabled: Bool = true,
+             locationEnabled: Bool = true,
+             file: String = #file, line: Int = #line, function: String = #function) {
+        Ext.log(message, error: error, logEnabled: logEnabled && base.logEnabled,
+                locationEnabled: locationEnabled, file: file, line: line, function: function)
+    }
+}

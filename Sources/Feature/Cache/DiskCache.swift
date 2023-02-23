@@ -7,62 +7,64 @@
 
 import Foundation
 
+/// 缓存时间
+public enum CacheTime {
+    case year(UInt)
+    case month(UInt)
+    case week(UInt)
+    case day(UInt)
+    case hour(UInt)
+    case minute(UInt)
+    
+    /// 缓存时长(单位: 秒s)
+    var seconds: TimeInterval {
+        switch self {
+        case .year(let i):      return TimeInterval(i) * 365 * 24 * 60 * 60
+        case .month(let i):     return TimeInterval(i) * 30 * 24 * 60 * 60
+        case .week(let i):      return TimeInterval(i) * 7 * 24 * 60 * 60
+        case .day(let i):       return TimeInterval(i) * 24 * 60 * 60
+        case .hour(let i):      return TimeInterval(i) * 60 * 60
+        case .minute(let i):    return TimeInterval(i) * 60
+        }
+    }
+}
+/// 缓存尺寸
+public enum CacheSize {
+    case GB(UInt)
+    case MB(UInt)
+    case KB(UInt)
+    
+    /// 缓存尺寸(单位: 字节byte)
+    var bytes: UInt {
+        switch self {
+        case .GB(let i): return i * 1024 * 1024 * 1024
+        case .MB(let i): return i * 1024 * 1024
+        case .KB(let i): return i * 10124
+        }
+    }
+    var title: String {
+        switch self {
+        case .GB(let i): return "\(i) GB"
+        case .MB(let i): return "\(i) MB"
+        case .KB(let i): return "\(i) KB"
+        }
+    }
+}
+
 /// 磁盘缓存
-public class DiskCache {
+public class DiskCache: ExtLogable {
+    public var logEnabled: Bool = false
+    
     /// 管理的缓存目录
     private let folderURLs: [URL]
     public init(folderURLs: [URL]) {
         self.folderURLs = folderURLs
     }
     
-    public enum CacheTime {
-        case year(UInt)
-        case month(UInt)
-        case week(UInt)
-        case day(UInt)
-        case hour(UInt)
-        case minute(UInt)
-        
-        /// 缓存时长(单位: 秒s)
-        var seconds: TimeInterval {
-            switch self {
-            case .year(let i):      return TimeInterval(i) * 365 * 24 * 60 * 60
-            case .month(let i):     return TimeInterval(i) * 30 * 24 * 60 * 60
-            case .week(let i):      return TimeInterval(i) * 7 * 24 * 60 * 60
-            case .day(let i):       return TimeInterval(i) * 24 * 60 * 60
-            case .hour(let i):      return TimeInterval(i) * 60 * 60
-            case .minute(let i):    return TimeInterval(i) * 60
-            }
-        }
-    }
-    public enum CacheSize {
-        case GB(UInt)
-        case MB(UInt)
-        case KB(UInt)
-        
-        /// 缓存尺寸(单位: 字节byte)
-        var bytes: UInt {
-            switch self {
-            case .GB(let i): return i * 1024 * 1024 * 1024
-            case .MB(let i): return i * 1024 * 1024
-            case .KB(let i): return i * 10124
-            }
-        }
-        var title: String {
-            switch self {
-            case .GB(let i): return "\(i) GB"
-            case .MB(let i): return "\(i) MB"
-            case .KB(let i): return "\(i) KB"
-            }
-        }
-    }
-    
     /// 最大缓存时间 (单位: 秒 默认: 一周)
     public var maxTime: CacheTime = .week(1)
     /// 最大缓存尺寸 (单位: byte 默认: 1GB)
     public var maxSize: CacheSize = .GB(1)
-    
-    public var logEnabled: Bool = false
     
     /// 磁盘 IO 处理队列
     private let ioQueue = DispatchQueue(label: "ext.diskCache.ioQueue")
@@ -85,21 +87,21 @@ public class DiskCache {
                 let resource = resources[i]
                 let filePath = resource.url.ext.filePathWithoutSandboxPrefix
                 let values = resource.resourceValues
-                Ext.log("\(i) - \(values.isDirectory ?? false) \t - \((values.contentAccessDate ?? Date()).ext.logTime) - \(values.totalFileAllocatedSize ?? 0) | \(filePath)", logEnabled: logEnabled)
+                ext.log("\(i) - \(values.isDirectory ?? false) \t - \((values.contentAccessDate ?? Date()).ext.logTime) - \(values.totalFileAllocatedSize ?? 0) | \(filePath)")
                 guard let expiredDate = resource.resourceValues.contentAccessDate?.addingTimeInterval(maxTime.seconds), expiredDate < Date() else { continue }
-                Ext.log("时间过期文件, 移除 \(i) - \(expiredDate.ext.logTime) - \(Date().ext.logTime) | \(filePath)", logEnabled: logEnabled)
+                ext.log("时间过期文件, 移除 \(i) - \(expiredDate.ext.logTime) - \(Date().ext.logTime) | \(filePath)")
                 try? FileManager.default.removeItem(at: resource.url)
                 resources.remove(at: i)
             }
             var totalSize = UInt(resources.compactMap({ $0.resourceValues.totalFileAllocatedSize ?? 0 }).reduce(0, +))
-            Ext.log("移除过期时间完成: \(resources.count) | 已缓存空间: \(totalSize) = \(Double(totalSize)/1024/1024) mb | 最大缓存空间 = \(maxSize.title)", logEnabled: logEnabled)
+            ext.log("移除过期时间完成: \(resources.count) | 已缓存空间: \(totalSize) = \(Double(totalSize)/1024/1024) mb | 最大缓存空间 = \(maxSize.title)")
             if totalSize > maxSize.bytes {
                 for i in stride(from: resources.count - 1, to: -1, by: -1) {
                     let resource = resources[i]
                     let filePath = resource.url.ext.filePathWithoutSandboxPrefix
                     let values = resource.resourceValues
                     let fileSize = UInt(values.totalFileAllocatedSize ?? 0)
-                    Ext.log("移除 \(i) -\(fileSize) - \(values.isDirectory ?? false) \t - \(values.contentAccessDate ?? Date()) - \(values.totalFileAllocatedSize ?? 0) | \(filePath)", logEnabled: logEnabled)
+                    ext.log("移除 \(i) -\(fileSize) - \(values.isDirectory ?? false) \t - \(values.contentAccessDate ?? Date()) - \(values.totalFileAllocatedSize ?? 0) | \(filePath)")
                     try? FileManager.default.removeItem(at: resource.url)
                     resources.remove(at: i)
                     totalSize -= fileSize
@@ -108,7 +110,7 @@ public class DiskCache {
                 }
             }
             
-            Ext.log("缓存移除完成. 缓存尺寸: \(totalSize) = \(Double(totalSize)/1024/1024) mb", logEnabled: logEnabled)
+            ext.log("缓存移除完成. 缓存尺寸: \(totalSize) = \(Double(totalSize)/1024/1024) mb")
             self.isCleaning = false
             DispatchQueue.main.async {
                 successHandler()
@@ -127,11 +129,11 @@ public class DiskCache {
         let keys: Set<URLResourceKey> = [.isDirectoryKey, .contentAccessDateKey, .totalFileAllocatedSizeKey]
         for folderURL in folderURLs {
             guard let enumerator = FileManager.default.enumerator(at: folderURL, includingPropertiesForKeys: Array(keys)) else {
-                Ext.log("enumerator is nil. \(folderURL)", logEnabled: logEnabled)
+                ext.log("enumerator is nil. \(folderURL)")
                 continue
             }
             for (index, value) in enumerator.enumerated() {
-                Ext.log("\(index) - \(value)", logEnabled: logEnabled)
+                ext.log("\(index) - \(value)")
                 guard let url = value as? URL, let resourceValues = try? url.resourceValues(forKeys: keys) else { continue }
                 resources.append(CacheResource(url: url, resourceValues: resourceValues))
             }

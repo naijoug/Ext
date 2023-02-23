@@ -31,7 +31,8 @@ public protocol AutoPlayDelegate: AnyObject {
     func autoPlay(_ autoPlay: TableAutoPlay, didAction action: AutoPlayAction)
 }
 
-public class TableAutoPlay {
+public class TableAutoPlay: ExtLogable {
+    public var logEnabled: Bool = false
     
     public weak var delegate: AutoPlayDelegate?
     
@@ -41,13 +42,11 @@ public class TableAutoPlay {
         self.tableView = tableView
     }
     
-    public var logEnabled: Bool = false
-    
     /// 是否停止自动播放处理
     public var isStopping: Bool = false {
         didSet {
             if !isStopping, !isDragScrolling {
-                Ext.log("开启自动播放，并且没有拖动滚动", logEnabled: logEnabled)
+                ext.log("开启自动播放，并且没有拖动滚动")
                 playBest()
             }
         }
@@ -59,7 +58,7 @@ public class TableAutoPlay {
     /// 当前最佳播放索引
     public private(set) var playableIndexPath: IndexPath? {
         didSet {
-            Ext.log("play indexPath: \(oldValue?.description ?? "") -> \(playableIndexPath?.description ?? "")", logEnabled: logEnabled)
+            ext.log("play indexPath: \(oldValue?.description ?? "") -> \(playableIndexPath?.description ?? "")")
             
         }
     }
@@ -93,12 +92,12 @@ public extension TableAutoPlay {
     /// 开始播放
     @objc
     func play() {
-        Ext.log("", logEnabled: logEnabled)
+        ext.log("")
         playBest()
     }
     /// 暂停播放
     func pause() {
-        Ext.log("", logEnabled: logEnabled)
+        ext.log("")
         //guard let _ = viewIfLoaded else { return }
         
         guard let tableView = self.tableView else { return }
@@ -112,7 +111,7 @@ private extension TableAutoPlay {
     
     /// 播放最佳
     func playBest() {
-        Ext.log("current playable indexPath: \(playableIndexPath?.description ?? "")", logEnabled: logEnabled)
+        ext.log("current playable indexPath: \(playableIndexPath?.description ?? "")")
         guard let cell = bestVisibleCell(), let indexPath = tableView?.indexPath(for: cell) else { return }
         play(at: indexPath)
     }
@@ -120,14 +119,14 @@ private extension TableAutoPlay {
     /// 播放指定索引
     private func play(at indexPath: IndexPath?) {
         guard let indexPath = indexPath else { return }
-        Ext.log("play \(indexPath)", logEnabled: logEnabled)
+        ext.log("play \(indexPath)")
         guard playableIndexPath != indexPath else {
             guard let playable = playableFor(indexPath), !playable.isPlaying else { return }
-            Ext.log("当前播放索引 \(playableIndexPath?.description ?? "") 未开始播放，play", logEnabled: logEnabled)
+            ext.log("当前播放索引 \(playableIndexPath?.description ?? "") 未开始播放，play")
             playable.play()
             return
         }
-        Ext.log("play indexPath changed.", tag: .target, logEnabled: logEnabled)
+        ext.log("play indexPath changed.")
         pause(at: playableIndexPath)
         playableIndexPath = indexPath
         delegate?.autoPlay(self, didAction: .play(indexPath))
@@ -137,7 +136,7 @@ private extension TableAutoPlay {
     /// 暂停指定索引
     func pause(at indexPath: IndexPath?) {
         guard let indexPath = indexPath else { return }
-        Ext.log("pause \(indexPath)", logEnabled: logEnabled)
+        ext.log("pause \(indexPath)")
         playableFor(indexPath)?.pause()
     }
     
@@ -157,24 +156,23 @@ public extension TableAutoPlay {
         switch status {
         case .didScroll(let scrollView):
             guard scrollView.isDragging, scrollView.isTracking else { return }
-            Ext.log("手指正在拖拽...", logEnabled: logEnabled)
+            ext.log("手指正在拖拽...")
             scrollTracking()
         case .willBeginDragging:
-            Ext.log("开始拖拽", logEnabled: logEnabled)
+            ext.log("开始拖拽")
             dragIndexPath = playableIndexPath
             
             isDragScrolling = true
         case .willEndDragging(_, let velocity, let targetContentOffset):
-            Ext.log("将要结束拖拽", logEnabled: logEnabled)
-            Ext.log("target offset: \(targetContentOffset.pointee) | velocity \(velocity)", logEnabled: logEnabled)
+            ext.log("将要结束拖拽 target offset: \(targetContentOffset.pointee) | velocity \(velocity)")
         case .didEndDragging(_, let decelerate):
             guard !decelerate else { return }
-            Ext.log("拖拽无减速，直接静止", logEnabled: logEnabled)
+            ext.log("拖拽无减速，直接静止")
             scrollToEnd()
         case .willBeginDecelerating:
-            Ext.log("停止拖拽，开始减速", logEnabled: logEnabled)
+            ext.log("停止拖拽，开始减速")
         case .didEndDecelerating:
-            Ext.log("拖拽之后减速停止", logEnabled: logEnabled)
+            ext.log("拖拽之后减速停止")
             scrollToEnd()
         }
     }
@@ -185,17 +183,17 @@ private extension TableAutoPlay {
     @objc
     func scrollTracking() {
         guard !isStopping, draggingEnabled else { return }
-        Ext.log("处理手指拖动...", logEnabled: logEnabled)
+        ext.log("处理手指拖动...")
         playBest()
     }
     /// 滚动结束
     @objc
     func scrollToEnd() {
-        Ext.log("isDragScrolling: \(isDragScrolling)", logEnabled: logEnabled)
+        ext.log("isDragScrolling: \(isDragScrolling)")
         guard isDragScrolling else { return }
         isDragScrolling = false
         guard !isStopping else { return }
-        Ext.log("处理滚动结束...", logEnabled: logEnabled)
+        ext.log("处理滚动结束...")
         playBest()
     }
     /// 滚动到顶部
@@ -233,12 +231,12 @@ private extension TableAutoPlay {
     /// 计算可视范围
     private func calcVisible(_ visible: AutoPlayable?, log: String = "") -> CGFloat? {
         guard let visible = visible, let superView = tableView?.superview else { return nil }
-        //Ext.log("superView: \(superView)")
+        //ext.log("superView: \(superView)")
         guard let point = visible.playableView.superview?.convert(visible.playableView.frame.origin, to: superView) else { return nil }
         let minY = max(visibleMinY, min(visibleMaxY, point.y))
         let maxY = min(visibleMaxY, max(visibleMinY, point.y + visible.playableView.frame.height))
         let delta = maxY - minY
-        //Ext.log("\(log) delta: \(delta) | visible: \(minY) ~ \(maxY) in range: [\(visibleMinY) ~ \(visibleMaxY)] | height: \(visible.visibleView.frame.height) | \(point)", logEnabled: true)
+        //ext.log("\(log) delta: \(delta) | visible: \(minY) ~ \(maxY) in range: [\(visibleMinY) ~ \(visibleMaxY)] | height: \(visible.visibleView.frame.height) | \(point)")
         return delta
     }
 }

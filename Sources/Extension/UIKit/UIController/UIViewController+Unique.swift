@@ -53,7 +53,7 @@ private extension UIViewController {
     @objc
     func unique_viewDidLoad() {
         unique_viewDidLoad()
-        Ext.log("unique", tag: .target, logEnabled: false)
+        Ext.log("unique", tag: .target, logEnabled: Ext.logEnabled)
         (self as? UniqueController)?.remove()
     }
 }

@@ -57,18 +57,18 @@ public extension Networker {
     func download(urlString: String, cacheUrl: URL?, stamp: String = "\(Date().timeIntervalSince1970)",
                   progressHandler: ProgressHandler? = nil, resultHandler: @escaping DownloadHandler) -> URLSessionDownloadTask? {
         guard let url = URL(string: urlString) else {
-            Ext.log("Download HTTP url create failed. \(urlString)", tag: .failure, logEnabled: downloadLogged, locationEnabled: false)
+            ext.log("Download HTTP url create failed. \(urlString)", logEnabled: downloadLogged, locationEnabled: false)
             resultHandler(.failure(Ext.Error.inner("download url error.")))
             return nil
         }
         
         let downloadTask = DownloadTask(url: url, cacheUrl: cacheUrl, stamp: stamp, progressHandler: progressHandler, resultHandler: resultHandler)
         guard append(downloadTask) else {
-            Ext.log("Downloading... | \(url.absoluteString)", logEnabled: downloadLogged, locationEnabled: false)
+            ext.log("Downloading... | \(url.absoluteString)", logEnabled: downloadLogged, locationEnabled: false)
             return nil
         }
         
-        Ext.log("Download Request | \(url.absoluteString)", tag: .network, logEnabled: downloadLogged, locationEnabled: false)
+        ext.log("Download Request | \(url.absoluteString)", logEnabled: downloadLogged, locationEnabled: false)
         let request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 60 * 3)
         let task = downloadSession.downloadTask(with: request)
         task.resume()

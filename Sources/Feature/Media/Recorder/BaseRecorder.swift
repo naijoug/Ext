@@ -24,7 +24,8 @@ public protocol Recorder {
 }
 
 /// 录制器 ⏺ 基类
-open class BaseRecorder: NSObject {
+open class BaseRecorder: NSObject, ExtLogable {
+    public var logEnabled: Bool = true
     
     /// 录制定时器 ⏰
     private weak var timer: Timer?
@@ -39,9 +40,6 @@ open class BaseRecorder: NSObject {
     deinit {
         stopTimer()
     }
-    
-    /// 日志标识
-    public var logEnabled: Bool = true
     
     /// 是否使用定时器 (如果子类录制已经有定时器，可以设为 false)
     open var timerEnabled: Bool { true }
@@ -62,7 +60,7 @@ extension BaseRecorder: Recorder {
     public func startRecording(_ path: String, maxDuration: Int64, handler: Ext.DataHandler<RecordAction>?) {
         self.maxDuration = maxDuration
         self.recordHandler = handler
-        Ext.log("start record duration: \(TimeInterval(self.maxDuration / 1000_000)) | \(self.maxDuration) | path: \(path)", tag: .custom("⏺"), logEnabled: logEnabled)
+        ext.log("start record duration: \(TimeInterval(self.maxDuration / 1000_000)) | \(self.maxDuration) | path: \(path)")
         
         let url = URL(fileURLWithPath: path)
         // 如果文件已存在，先删除
@@ -71,17 +69,17 @@ extension BaseRecorder: Recorder {
         FileManager.default.ext.createIfNotExists(url.deletingLastPathComponent())
         
         guard startRecord(path) else {
-            Ext.log("start record failed.", tag: .error, logEnabled: logEnabled)
+            ext.log("start record failed.")
             handler?(.failure(Ext.Error.inner("start record failed.")))
             return
         }
-        Ext.log("start record succeeded", logEnabled: logEnabled)
+        ext.log("start record succeeded")
         startTimer()
     }
     
     /// 停止⏹录制
     public func stopRecording(_ handler: Ext.DataHandler<String>?) {
-        Ext.log("stop record.", tag: .custom("⏹"), logEnabled: logEnabled)
+        ext.log("stop record.")
         stopRecord(handler)
         stopTimer()
     }
@@ -95,16 +93,16 @@ extension BaseRecorder {
     /// 开启定时器
     private func startTimer() {
         guard timerEnabled else { return }
-        Ext.log("开启录制定时器", tag: .timer, logEnabled: logEnabled)
+        ext.log("开启录制定时器")
         stopTimer()
         // 定时器时间间隔: 0.1s
         let interval: TimeInterval = 0.1
         let timer = Timer(timeInterval: interval, repeats: true, block: { [weak self] _ in
-            guard let `self` = self else { return }
+            guard let self else { return }
             self.duration += Int64(interval * 1000_000)
             
             guard self.duration < self.maxDuration else {
-                Ext.log("达到最大录制时长", tag: .timer, logEnabled: self.logEnabled)
+                self.ext.log("达到最大录制时长")
                 self.recordHandler?(.reachedMaxDuration)
                 return
             }
@@ -121,7 +119,7 @@ extension BaseRecorder {
         timer?.invalidate()
         timer = nil
         duration = 0
-        Ext.log("停止录制定时器", tag: .timer, logEnabled: logEnabled)
+        ext.log("停止录制定时器")
     }
     
     @objc

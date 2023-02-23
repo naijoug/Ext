@@ -56,7 +56,9 @@ public extension ExtWrapper where Base: SKProduct {
     }
 }
 
-public class IAPHelper: NSObject  {
+public class IAPHelper: NSObject, ExtLogable {
+    public var logEnabled: Bool = true
+    
     public override init() {
         super.init()
         SKPaymentQueue.default().add(self)
@@ -64,8 +66,6 @@ public class IAPHelper: NSObject  {
     deinit {
         SKPaymentQueue.default().remove(self)
     }
-    
-    public var logEnabled: Bool = true
     
     private var productsRequest: SKProductsRequest?
     private var productsHandler: ProductsHandler?
@@ -123,7 +123,7 @@ public extension IAPHelper {
     /// 购买产品
     func buyProduct(_ product: SKProduct, handler: @escaping PaymentHandler) {
         _buyProduct(product) { [weak self] result in
-            guard let `self` = self else { return }
+            guard let self else { return }
             switch result {
             case .failure(let error): handler(.failure(error))
             case .success(let tx):
@@ -134,11 +134,11 @@ public extension IAPHelper {
                 guard let receiptUrl = Bundle.main.appStoreReceiptURL,
                       FileManager.default.fileExists(atPath: receiptUrl.path),
                       let receipt = try? Data(contentsOf: receiptUrl, options: .alwaysMapped).base64EncodedString(options: []) else {
-                    Ext.log("transaction \(product.productIdentifier) no receipt", logEnabled: self.logEnabled, locationEnabled: false)
+                    self.ext.log("transaction \(product.productIdentifier) no receipt")
                     handler(.failure(IAPError.paymentNoReceipt))
                     return
                 }
-                Ext.log("appstore receipt url: \(receiptUrl.path)")
+                self.ext.log("appstore receipt url: \(receiptUrl.path)")
                 handler(.success((tx, receipt)))
             }
         }
@@ -157,7 +157,7 @@ private extension IAPHelper {
             handleProducts(nil, error: IAPError.productIdEmpty)
             return
         }
-        Ext.log("load products: \(productIdentifiers)")
+        ext.log("load products: \(productIdentifiers)")
         productsRequest?.cancel()
         productsHandler = handler
         productsRequest = SKProductsRequest(productIdentifiers: productIdentifiers)
@@ -171,7 +171,7 @@ private extension IAPHelper {
             handler(.failure(IAPError.paymentDisabled))
             return
         }
-        Ext.log("buy product \(product.productIdentifier) ...", logEnabled: logEnabled, locationEnabled: false)
+        ext.log("buy product \(product.productIdentifier) ...")
         paymentHandler = handler
         let payment = SKPayment(product: product)
         SKPaymentQueue.default().add(payment)
@@ -179,7 +179,7 @@ private extension IAPHelper {
     
     /// 恢复产品
     func _resotre() {
-        Ext.log("restore product...", logEnabled: logEnabled, locationEnabled: false)
+        ext.log("restore product...")
         SKPaymentQueue.default().restoreCompletedTransactions()
     }
 }
@@ -189,13 +189,13 @@ private extension IAPHelper {
 extension IAPHelper: SKProductsRequestDelegate {
 
     public func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
-        Ext.log("load products success: \(response.products)", logEnabled: logEnabled, locationEnabled: false)
+        ext.log("load products success: \(response.products)")
         let products = response.products
         handleProducts(products, error: nil)
     }
     
     public func request(_ request: SKRequest, didFailWithError error: Error) {
-        Ext.log("load products failed.", error: error, logEnabled: logEnabled, locationEnabled: false)
+        ext.log("load products failed.", error: error)
         handleProducts(nil, error: error)
     }
     
@@ -218,7 +218,7 @@ extension IAPHelper: SKPaymentTransactionObserver {
     
     public func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
         for transaction in transactions {
-            Ext.log("updated transaction: \(transaction)", logEnabled: logEnabled, locationEnabled: false)
+            ext.log("updated transaction: \(transaction)")
             
             switch transaction.transactionState {
             case .purchased:
@@ -235,28 +235,28 @@ extension IAPHelper: SKPaymentTransactionObserver {
     }
     public func paymentQueue(_ queue: SKPaymentQueue, removedTransactions transactions: [SKPaymentTransaction]) {
         for transaction in transactions {
-            Ext.log("removed transaction: \(transaction)")
+            ext.log("removed transaction: \(transaction)")
         }
     }
     
 
     private func complete(transaction: SKPaymentTransaction) {
-        Ext.log("complete... \(transaction.payment.productIdentifier)", logEnabled: logEnabled, locationEnabled: false)
+        ext.log("complete... \(transaction.payment.productIdentifier)")
         handlePayment(transaction, error: nil)
         SKPaymentQueue.default().finishTransaction(transaction)
     }
 
     private func restore(transaction: SKPaymentTransaction) {
-        Ext.log("restore... \(transaction.payment.productIdentifier)", logEnabled: logEnabled, locationEnabled: false)
+        ext.log("restore... \(transaction.payment.productIdentifier)")
         SKPaymentQueue.default().finishTransaction(transaction)
     }
 
     private func fail(transaction: SKPaymentTransaction) {
         if let txError = transaction.error as? NSError, txError.code == SKError.paymentCancelled.rawValue {
-            Ext.log("transaction cancelled.", error: transaction.error, logEnabled: logEnabled, locationEnabled: false)
+            ext.log("transaction cancelled.", error: transaction.error)
             handlePayment(transaction, error: IAPError.paymentCancelled)
         } else {
-            Ext.log("transaction error.", error: transaction.error, logEnabled: logEnabled, locationEnabled: false)
+            ext.log("transaction error.", error: transaction.error)
             handlePayment(transaction, error: transaction.error)
         }
         SKPaymentQueue.default().finishTransaction(transaction)

@@ -13,7 +13,8 @@ import UIKit
  */
 
 /// 可分页布局
-public class PageableFlowLayout: RTLFlowLayout {
+public class PageableFlowLayout: RTLFlowLayout, ExtLogable {
+    public var logEnabled: Bool = false
     
     public enum Alignment {
         case left
@@ -23,8 +24,6 @@ public class PageableFlowLayout: RTLFlowLayout {
     
     /// 对齐方式 (默认: 居中对齐)
     public var alignment: Alignment = .center
-    
-    public var logEnabled: Bool = false
     
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     public override init() {
@@ -38,13 +37,13 @@ public class PageableFlowLayout: RTLFlowLayout {
     }
     
     open override func targetContentOffset(forProposedContentOffset proposedContentOffset: CGPoint, withScrollingVelocity velocity: CGPoint) -> CGPoint {
-        Ext.log("\(proposedContentOffset) | velocity: \(velocity)", logEnabled: logEnabled)
+        ext.log("\(proposedContentOffset) | velocity: \(velocity)")
         guard let collectionView = self.collectionView,
               let attris = layoutAttributesForElements(in: collectionView.bounds), attris.count > 0 else {
             return super.targetContentOffset(forProposedContentOffset: proposedContentOffset, withScrollingVelocity: velocity)
         }
         
-        Ext.log("ext: \(ext.pageWidth) | itemSize: \(ext.itemSize) | lineSpacing \(ext.minimumLineSpacing) | interitemSpacing \(ext.minimumInteritemSpacing)", logEnabled: logEnabled)
+        ext.log("ext: \(ext.pageWidth) | itemSize: \(ext.itemSize) | lineSpacing \(ext.minimumLineSpacing) | interitemSpacing \(ext.minimumInteritemSpacing)")
         
         var offsetX = ext.pageWidth/2
         if abs(velocity.x) > 0.3 {
@@ -57,9 +56,9 @@ public class PageableFlowLayout: RTLFlowLayout {
             if attri.representedElementCategory != .cell { continue }
             let offset1 = abs(attri.center.x - proposedContentOffsetCenterX)
             let offset2 = abs(targetAttri.center.x - proposedContentOffsetCenterX)
-            Ext.log("attri centerX: \(attri.center.x) | \(targetAttri.center.x) | offset: \(offset1) - \(offset2)", logEnabled: logEnabled)
+            ext.log("attri centerX: \(attri.center.x) | \(targetAttri.center.x) | offset: \(offset1) - \(offset2)")
             if offset1 < offset2 {
-                Ext.log("taregt changed.", logEnabled: logEnabled)
+                ext.log("taregt changed.")
                 targetAttri = attri
             }
         }
@@ -69,7 +68,7 @@ public class PageableFlowLayout: RTLFlowLayout {
         case .center:   targetX -= collectionView.bounds.width/2
         case .right:    targetX += ext.minimumLineSpacing
         }
-        Ext.log("targetX: \(targetAttri.center.x) -> \(targetX) | \(ext.itemSize.width/4)", logEnabled: logEnabled)
+        ext.log("targetX: \(targetAttri.center.x) -> \(targetX) | \(ext.itemSize.width/4)")
         return CGPoint(x: targetX, y: proposedContentOffset.y)
     }
 }

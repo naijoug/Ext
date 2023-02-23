@@ -8,11 +8,11 @@
 import UIKit
 
 /// 用户引导
-public final class UserGuider {
+public final class UserGuider: ExtLogable {
+    public var logEnabled = false
+    
     public static let shared = UserGuider()
     private init() {}
-    
-    public var logEnabled = false
     
     /// 当前引导的视图
     private weak var currentView: GuideView?
@@ -36,12 +36,12 @@ public final class UserGuider {
                       offset: CGPoint = CGPoint(x: 5, y: 10),
                       hideHandler: Ext.VoidHandler? = nil) {
         if let currentView = currentView {
-            Ext.log("current guide view: \(currentView)", logEnabled: logEnabled)
+            ext.log("current guide view: \(currentView)")
             currentView.removeFromSuperview()
             self.currentView = nil
         }
         
-        Ext.log("guide tip: \(tip) | target: \(String(describing: targetView)) | isVisiable: \(targetView?.ext.isVisible(fully: true, edgeInsets: visibleEdgeInsets) ?? false)", logEnabled: logEnabled)
+        ext.log("guide tip: \(tip) | target: \(String(describing: targetView)) | isVisiable: \(targetView?.ext.isVisible(fully: true, edgeInsets: visibleEdgeInsets) ?? false)")
         
         guard let targetView = targetView, targetView.frame.size != .zero, targetView.ext.isVisible(fully: true, edgeInsets: visibleEdgeInsets),
               let containerView = UIApplication.shared.ext.mainWindow else { return }
@@ -52,43 +52,42 @@ public final class UserGuider {
         containerView.layoutIfNeeded()
         self.currentView = guideView
         
-        Ext.log("begin.... guide view: \(guideView)", logEnabled: logEnabled)
+        ext.log("begin.... guide view: \(guideView)")
         guideView.logEnabled = logEnabled
         guideView.hideHandler = hideHandler
         guideView.guide(targetView, hitView: hitView, fillBackground: fillBackground, offset: offset)
-        Ext.log("end.", logEnabled: logEnabled)
+        ext.log("end.")
     }
     
 }
 
 /// 引导视图
-private class GuideView: UIView {
+private class GuideView: UIView, ExtLogable {
+    var logEnabled: Bool = false
     
     /// 点击隐藏的区域
     private var hitFrame: CGRect = .zero
     
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
-        Ext.log("point: \(point) | frame: \(frame) | hitFrame: \(hitFrame)", logEnabled: logEnabled)
+        ext.log("point: \(point) | frame: \(frame) | hitFrame: \(hitFrame)")
         func hide() {
             hideHandler?()
             removeFromSuperview()
         }
         guard frame.contains(hitFrame) else {
-            Ext.log("hit 区域不存，直接隐藏", logEnabled: logEnabled)
+            ext.log("hit 区域不存，直接隐藏")
             hide()
             return nil
         }
         guard hitFrame.contains(point) else {
             return super.hitTest(point, with: event)
         }
-        Ext.log("点击 mask 区域", logEnabled: logEnabled)
+        ext.log("点击 mask 区域")
         hide()
         return nil
     }
     
 // MARK: - Params
-    
-    var logEnabled: Bool = false
     
     /// 隐藏回调
     var hideHandler: Ext.VoidHandler?
@@ -193,11 +192,11 @@ private extension GuideView {
                                 y: centerFrame.origin.y,
                                 width: max(0, frame.width - centerFrame.maxX),
                                 height: centerFrame.height)
-        Ext.log("centerFrame: \(centerFrame)", logEnabled: logEnabled)
-        Ext.log("topFrame: \(topFrame)", logEnabled: logEnabled)
-        Ext.log("bottomFrame: \(bottomFrame)", logEnabled: logEnabled)
-        Ext.log("leftFrame: \(leftFrame)", logEnabled: logEnabled)
-        Ext.log("rightFrame: \(rightFrame)", logEnabled: logEnabled)
+        ext.log("centerFrame: \(centerFrame)")
+        ext.log("topFrame: \(topFrame)")
+        ext.log("bottomFrame: \(bottomFrame)")
+        ext.log("leftFrame: \(leftFrame)")
+        ext.log("rightFrame: \(rightFrame)")
         topView.frame = topFrame
         bottomView.frame = bottomFrame
         leftView.frame = leftFrame
@@ -215,7 +214,7 @@ private extension GuideView {
         let imageH: CGFloat = imageView.frame.size.height
         
         let isTop = frame.height > (hitY + hitH/2 + imageH*2)
-        Ext.log("isTop: \(isTop) | hit: \(hitFrame) | hit center (x, y): \(hitX) \(hitY) | image \(imageView.frame) | \(frame)", logEnabled: logEnabled)
+        ext.log("isTop: \(isTop) | hit: \(hitFrame) | hit center (x, y): \(hitX) \(hitY) | image \(imageView.frame) | \(frame)")
         
         imageView.image = isTop ? upImage : downImage
         let ratio = CGFloat(isTop ? 1 : -1)
@@ -257,7 +256,7 @@ private extension GuideView {
     private func shake() {
         imageView.ext.shake(direction: .vertical, times: 3, interval: 0.3, delta: 10, recover: false) { [weak self] in
             guard let `self` = self else { return }
-            //Ext.log("继续下一次 shake", logEnabled: logEnabled)
+            //ext.log("继续下一次 shake")
             self.shake()
         }
     }

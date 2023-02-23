@@ -28,18 +28,18 @@ public enum HttpMethod: String {
 public typealias ProgressHandler = (_ progress: Double, _ speed: Double) -> Void
 
 /// Networker
-public final class Networker: NSObject {
-    public static let shared = Networker()
-    private override init() {
-        super.init()
-    }
-    
+public final class Networker: NSObject, ExtLogable {
     /// 是否打印日志
     public var logEnabled: Bool = true
     /// 是否打印 HTTP headers 日志
     public var headerLogged: Bool = false
     /// 是否打印下载日志
     public var downloadLogged: Bool = false
+    
+    public static let shared = Networker()
+    private override init() {
+        super.init()
+    }
     
     /// 数据请求 Session
     private(set) lazy var dataSession: URLSession = {
@@ -53,7 +53,7 @@ public final class Networker: NSObject {
         return session
     }()
     /// 下载队列
-    private let downloadQueue = DispatchQueue(label: "DownloadTaskQueue", qos: .utility)
+    private let downloadQueue = DispatchQueue(label: "ext.download.queue", qos: .utility)
     /// 下载任务列表
     private var downloadTasks = [String: [DownloadTask]]()
 }
@@ -93,12 +93,12 @@ extension Networker {
         let key = task.url.absoluteString
         var tasks = downloadTasks[key] ?? [DownloadTask]()
         if !tasks.isEmpty, tasks.contains(where: { $0.stamp == task.stamp }) {
-            Ext.log("已经包含该 \(task.stamp) 任务", logEnabled: downloadLogged, locationEnabled: false)
+            ext.log("已经包含该 \(task.stamp) 任务", logEnabled: downloadLogged, locationEnabled: false)
             return false
         }
         tasks.append(task)
         downloadTasks[key] = tasks
-        Ext.log("添加下载任务: \(task.stamp) | \(task.startTime) | \(key)", logEnabled: downloadLogged, locationEnabled: false)
+        ext.log("添加下载任务: \(task.stamp) | \(task.startTime) | \(key)", logEnabled: downloadLogged, locationEnabled: false)
         return true
     }
     /// 查询下载任务
