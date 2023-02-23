@@ -52,7 +52,7 @@ public class ImagePreviewView: ExtView {
     private func doubleTap(_ gesture: UITapGestureRecognizer) {
         guard gesture.state == .ended else { return }
         
-        Ext.debug("min: \(scrollView.minimumZoomScale) | max: \(scrollView.maximumZoomScale) | scale: \(scrollView.zoomScale)")
+        Ext.log("min: \(scrollView.minimumZoomScale) | max: \(scrollView.maximumZoomScale) | scale: \(scrollView.zoomScale)")
         guard scrollView.zoomScale == scrollView.minimumZoomScale else {
             scrollView.setZoomScale(scrollView.minimumZoomScale, animated: true)
             return

@@ -128,29 +128,29 @@ private extension FileController {
     /// 加载路径数据
     func loadData(_ path: String) {
         let logEnabled = false
-        Ext.debug("load path: \(path) | root path: \(FileController.rootPath)", logEnabled: logEnabled)
+        Ext.log("load path: \(path) | root path: \(FileController.rootPath)", logEnabled: logEnabled)
         
         var items = [FileItem]()
         do {
             let contents = try FileManager.default.contentsOfDirectory(atPath: path)
-            Ext.debug(contents, logEnabled: logEnabled)
+            Ext.log(contents, logEnabled: logEnabled)
             for content in contents {
                 guard !(content as NSString).lastPathComponent.hasPrefix(".") else { continue }
                 
                 let url = URL(fileURLWithPath: path).appendingPathComponent(content)
                 
-                Ext.debug("fullPath: \(url.path)", logEnabled: logEnabled)
+                Ext.log("fullPath: \(url.path)", logEnabled: logEnabled)
                 var isFolder: ObjCBool = false
                 guard FileManager.default.fileExists(atPath: url.path, isDirectory: &isFolder) else { continue }
                 
-                Ext.debug("isFolder: \(isFolder)", logEnabled: logEnabled)
+                Ext.log("isFolder: \(isFolder)", logEnabled: logEnabled)
                 items.append(FileItem(type: isFolder.boolValue ? .folder : .file, name: content, path: url.path))
             }
         } catch {
-            Ext.debug("load directory content error.", error: error, logEnabled: logEnabled)
+            Ext.log("load directory content error.", error: error, logEnabled: logEnabled)
         }
         
-        Ext.debug("items: \(items)", logEnabled: logEnabled)
+        Ext.log("items: \(items)", logEnabled: logEnabled)
         self.items = items
         self.tableView.reloadData()
     }

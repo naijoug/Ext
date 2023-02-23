@@ -90,7 +90,7 @@ open class ExtPlayerView: UIView {
     public var videoGravity: ApplePlayerView.VideoGravity = .aspectFill {
         didSet {
             guard oldValue != videoGravity else { return }
-            Ext.debug("\(oldValue) -> \(videoGravity)")
+            Ext.log("\(oldValue) -> \(videoGravity)")
             playerView.videoGravity = videoGravity
         }
     }
@@ -113,7 +113,7 @@ open class ExtPlayerView: UIView {
     /// 是否正在缓冲
     private var isBuffering: Bool = false {
         didSet {
-            Ext.debug("\(isBuffering)")
+            Ext.log("\(isBuffering)")
             if isBuffering {
                 indicatorView.startAnimating()
             } else {
@@ -125,7 +125,7 @@ open class ExtPlayerView: UIView {
     public private(set) var status: ExtPlayerView.Status = .unknown {
         didSet {
             guard oldValue != status else { return }
-            Ext.debug("\(oldValue) -> \(status)", logEnabled: logEnabled)
+            Ext.log("\(oldValue) -> \(status)", logEnabled: logEnabled)
             delegate?.extPlayerView(self, status: status)
         }
     }
@@ -154,7 +154,7 @@ open class ExtPlayerView: UIView {
     
     deinit {
         clear()
-        Ext.debug("", tag: .recycle)
+        Ext.log("", tag: .recycle)
     }
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -213,13 +213,13 @@ public extension ExtPlayerView {
     /// 开始播放
     func play() {
         guard extPlayer.playEnabled else { return }
-        Ext.debug("")
+        Ext.log("")
         isPlaying = true
         extPlayer.play()
     }
     /// 暂停播放
     func pause() {
-        Ext.debug("")
+        Ext.log("")
         isPlaying = false
         extPlayer.pause()
     }

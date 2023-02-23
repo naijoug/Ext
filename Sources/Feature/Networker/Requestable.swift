@@ -90,7 +90,7 @@ public extension ExtWrapper where Base: Requestable {
 private extension Requestable {
     var urlRequest: URLRequest? {
         guard let url = self.url() else {
-            Ext.debug("Data HTTP URL init failed. \(urlString)", tag: .failure, locationEnabled: false)
+            Ext.log("Data HTTP URL init failed. \(urlString)", tag: .failure, locationEnabled: false)
             return nil
         }
         
@@ -273,7 +273,7 @@ public extension MultipartFormData {
         }
         // boundary 结束
         body.appendString("--\(boundary)--")
-        Ext.debug("")
+        Ext.log("")
         return body
     }
 }
@@ -310,7 +310,7 @@ public extension Swift.Result where Success == Data, Failure == Swift.Error {
             do {
                 return .success(try JSONSerialization.jsonObject(with: data, options: options))
             } catch {
-                Ext.debug("data as jsonObject failed.", error: error, locationEnabled: false)
+                Ext.log("data as jsonObject failed.", error: error, locationEnabled: false)
                 return .failure(Ext.Error.jsonDeserializationError(error: error))
             }
         }
@@ -321,7 +321,7 @@ public extension Swift.Result where Success == Data, Failure == Swift.Error {
             do {
                 return .success(try JSONDecoder().decode(modelType, from: data))
             } catch {
-                Ext.debug("data as decodable failed.", error: error, locationEnabled: false)
+                Ext.log("data as decodable failed.", error: error, locationEnabled: false)
                 return .failure(Ext.Error.jsonDecodeError(error: error))
             }
         }

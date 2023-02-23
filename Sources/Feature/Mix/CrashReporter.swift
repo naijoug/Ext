@@ -35,12 +35,12 @@ public final class CrashReporter {
         
         read { crash in
             guard let crash = crash else { return }
-            Ext.debug("last crash: \(crash)", tag: .bang, locationEnabled: false)
+            Ext.log("last crash: \(crash)", tag: .bang, locationEnabled: false)
             reportHandler(crash) { result in
                 switch result {
                 case .failure: ()
                 case .success:
-                    Ext.debug("after report success, clear crash file.", tag: .clean, locationEnabled: false)
+                    Ext.log("after report success, clear crash file.", tag: .clean, locationEnabled: false)
                     CrashReporter.shared.clear()
                 }
             }
@@ -102,7 +102,7 @@ private extension CrashReporter {
                 "stackSymbols": exception.callStackSymbols,
                 "statkReturnAddress": exception.callStackReturnAddresses
             ]]
-            Ext.debug(crash, tag: .bang)
+            Ext.log(crash, tag: .bang)
             CrashReporter.shared.save(crash)
         }
     }
@@ -124,7 +124,7 @@ private extension CrashReporter {
                     "name": "\(sigDict[sig] ?? "\(sig)")",
                     "stackSymbols": Thread.callStackSymbols
                 ]]
-                Ext.debug(crash, tag: .bang)
+                Ext.log(crash, tag: .bang)
                 CrashReporter.shared.save(crash)
                 
                 exit(sig)

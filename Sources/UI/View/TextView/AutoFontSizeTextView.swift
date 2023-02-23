@@ -33,32 +33,32 @@ public class AutoFontSizeTextView: PlaceholderTextView {
         let expectedSize = sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude))
         
         guard expectedSize.height != currentSize.height else {
-            Ext.debug("字体不需要缩放")
+            Ext.log("字体不需要缩放")
             return
         }
-        Ext.debug("textView font : \(font?.pointSize ?? 0)")
+        Ext.log("textView font : \(font?.pointSize ?? 0)")
         guard var expectedFont = font else {
-            Ext.debug("textView font is nil", tag: .warning)
+            Ext.log("textView font is nil", tag: .warning)
             return
         }
-        Ext.debug("current font: \(expectedFont.pointSize)")
+        Ext.log("current font: \(expectedFont.pointSize)")
         
         guard expectedSize.height > currentSize.height else {
-            Ext.debug("需要将字体放大")
+            Ext.log("需要将字体放大")
             while sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude)).height < currentSize.height {
                 expectedFont = expectedFont.withSize(expectedFont.pointSize + 1)
                 guard expectedFont.pointSize <= maxFontSize else { break }
-                //Ext.debug("放大字体 \(font?.pointSize ?? 0) -> \(expectedFont.pointSize)")
+                //Ext.log("放大字体 \(font?.pointSize ?? 0) -> \(expectedFont.pointSize)")
                 font = expectedFont
                 placeholderFont = expectedFont
             }
             return
         }
-        Ext.debug("需要将字体缩小")
+        Ext.log("需要将字体缩小")
         while sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude)).height > currentSize.height {
             expectedFont = expectedFont.withSize(expectedFont.pointSize - 1)
             guard expectedFont.pointSize >= minFontSize else { break }
-            //Ext.debug("缩小字体: \(font?.pointSize ?? 0) -> \(expectedFont.pointSize)")
+            //Ext.log("缩小字体: \(font?.pointSize ?? 0) -> \(expectedFont.pointSize)")
             font = expectedFont
             placeholderFont = expectedFont
         }

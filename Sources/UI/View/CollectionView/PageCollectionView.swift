@@ -121,9 +121,9 @@ open class PageCollectionView<Item: PageCollectionItem, Cell: PageCollectionCell
         let offsetX = targetContentOffset.pointee.x
         let itemW = scrollView.frame.height - leftOffset - rightOffset
         let index = itemW > 0 ? Int(offsetX/itemW) : 0
-        Ext.debug("offsetX: \(offsetX) | index: \(index) | velocity \(velocity)", logEnabled: logEnabled)
+        Ext.log("offsetX: \(offsetX) | index: \(index) | velocity \(velocity)", logEnabled: logEnabled)
         guard index != item.currentIndex, 0 <= index, index < item.items.count else {
-            Ext.debug("dialog index 没有改变.", logEnabled: logEnabled)
+            Ext.log("dialog index 没有改变.", logEnabled: logEnabled)
             return
         }
         self.didScrollTo(index, isManual: true)
@@ -158,19 +158,19 @@ private extension PageCollectionView {
     private func scrollTo(_ index: Int?, animated: Bool = true) {
         guard let index = index, 0 <= index, index < (item?.items.count ?? 0) else { return }
         collectionView.scrollToItem(at: IndexPath(item: index, section: 0), at: .left, animated: animated)
-        Ext.debug("scroll to \(index)", logEnabled: logEnabled)
+        Ext.log("scroll to \(index)", logEnabled: logEnabled)
     }
     
     /// 滚动完成
     private func didScrollTo(_ index: Int, isManual: Bool) {
-        Ext.debug("did scroll To \(index) | isManual: \(isManual)", logEnabled: logEnabled)
+        Ext.log("did scroll To \(index) | isManual: \(isManual)", logEnabled: logEnabled)
         item?.currentIndex = index
         UISelectionFeedbackGenerator().selectionChanged()
         doAction(.scrollTo(index))
     }
     
     private func doAction(_ action: PageCollectionView.Action) {
-        Ext.debug("\(actionHandlers)")
+        Ext.log("\(actionHandlers)")
         for handler in actionHandlers {
             handler(action)
         }

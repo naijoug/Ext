@@ -27,7 +27,7 @@ public class LineIndicatorView: ExtView, IndicatorViewProtocol {
         super.layoutSubviews()
         
         gradientLayer.bounds = self.bounds
-        //Ext.debug("line gradinet layout isAnimating \(isAnimating)")
+        //Ext.log("line gradinet layout isAnimating \(isAnimating)")
     }
     public override func setupUI() {
         super.setupUI()

@@ -111,7 +111,7 @@ open class WebView: ExtView {
     public private(set) var progress: Double = 0 {
         didSet {
             guard Int(oldValue * 10) != Int(progress * 10) else { return }
-            Ext.debug("web progress: \(oldValue) -> \(progress)", logEnabled: logEnabled)
+            Ext.log("web progress: \(oldValue) -> \(progress)", logEnabled: logEnabled)
         }
     }
     
@@ -220,7 +220,7 @@ open class WebView: ExtView {
         
         progressObserver = webView.observe(\.estimatedProgress, options: [.initial, .new], changeHandler: { [weak self] _, change in
             guard let `self` = self else { return }
-            Ext.debug("estimatedProgress : \(change.oldValue ?? 0) -> \(change.newValue ?? 0)")
+            Ext.log("estimatedProgress : \(change.oldValue ?? 0) -> \(change.newValue ?? 0)")
             self.progress = change.newValue ?? 0
         })
     }
@@ -274,13 +274,13 @@ public extension WebView {
             for (key, value) in header ?? [:] {
                 request.setValue(value, forHTTPHeaderField: key)
             }
-            Ext.debug("open url: \(url.absoluteString) | header: \(request.allHTTPHeaderFields ?? [:])", logEnabled: logEnabled)
+            Ext.log("open url: \(url.absoluteString) | header: \(request.allHTTPHeaderFields ?? [:])", logEnabled: logEnabled)
             webView.load(request)
         case .html(let htmlString):
-            Ext.debug("open html: \(htmlString)", logEnabled: logEnabled)
+            Ext.log("open html: \(htmlString)", logEnabled: logEnabled)
             webView.loadHTMLString(htmlString, baseURL: nil)
         case .file(let filePath):
-            Ext.debug("open file: \(filePath)", logEnabled: logEnabled)
+            Ext.log("open file: \(filePath)", logEnabled: logEnabled)
             let fileURL = URL(fileURLWithPath: filePath)
             webView.loadFileURL(fileURL, allowingReadAccessTo: fileURL.deletingLastPathComponent())
         }
@@ -306,10 +306,10 @@ public extension WebView {
 
 extension WebView: WKUIDelegate {
     open func webViewDidClose(_ webView: WKWebView) {
-        Ext.debug("", logEnabled: logEnabled)
+        Ext.log("", logEnabled: logEnabled)
     }
     open func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
-        Ext.debug(message, logEnabled: logEnabled)
+        Ext.log(message, logEnabled: logEnabled)
         //completionHandler()
         guard let topController = topController else {
             completionHandler()
@@ -323,7 +323,7 @@ extension WebView: WKUIDelegate {
         
     }
     open func webView(_ webView: WKWebView, runJavaScriptConfirmPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (Bool) -> Void) {
-        Ext.debug(message, logEnabled: logEnabled)
+        Ext.log(message, logEnabled: logEnabled)
         //completionHandler(false)
         guard let topController = topController else {
             completionHandler(false)
@@ -339,7 +339,7 @@ extension WebView: WKUIDelegate {
         topController.present(alert, animated: true)
     }
     open func webView(_ webView: WKWebView, runJavaScriptTextInputPanelWithPrompt prompt: String, defaultText: String?, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping (String?) -> Void) {
-        Ext.debug("prompt: \(prompt) | defaultText: \(defaultText ?? "")", logEnabled: logEnabled)
+        Ext.log("prompt: \(prompt) | defaultText: \(defaultText ?? "")", logEnabled: logEnabled)
         //completionHandler(nil)
         guard let topController = topController else {
             completionHandler(nil)
@@ -372,10 +372,10 @@ extension WebView: WKNavigationDelegate {
     public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         endNetworking()
         loadingSeconds = Date().timeIntervalSince(startDate)
-        Ext.debug("webView load succeeded. \(loadingSeconds)", logEnabled: logEnabled)
+        Ext.log("webView load succeeded. \(loadingSeconds)", logEnabled: logEnabled)
     }
     public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        Ext.debug("webView load failed.", error: error, logEnabled: Ext.logEnabled)
+        Ext.log("webView load failed.", error: error, logEnabled: Ext.logEnabled)
         endNetworking()
     }
     
@@ -393,7 +393,7 @@ extension WebView: WKNavigationDelegate {
 extension WebView: WKScriptMessageHandler {
     
     public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        Ext.debug("names: \(jsHandlers.keys) | name: \(message.name) | body: \(message.body) | \(message.frameInfo)", logEnabled: logEnabled)
+        Ext.log("names: \(jsHandlers.keys) | name: \(message.name) | body: \(message.body) | \(message.frameInfo)", logEnabled: logEnabled)
         guard let handler = jsHandlers[message.name] else { return }
         handler(message.name, message.body)
     }
@@ -412,9 +412,9 @@ private extension WebView {
         addJSHandler(defaultJSHandlerName) { [weak self] name, body in
             guard let self = `self` else { return }
             guard let dict = self.prase(body) else { return }
-            Ext.debug("\(dict)", logEnabled: self.logEnabled)
+            Ext.log("\(dict)", logEnabled: self.logEnabled)
             guard let method = dict["method"] as? String else {
-                Ext.debug("method not exist.", logEnabled: self.logEnabled)
+                Ext.log("method not exist.", logEnabled: self.logEnabled)
                 return
             }
             switch method {
@@ -427,7 +427,7 @@ private extension WebView {
             case "toRoot": // 回到根控制器
                 self.topController?.navigationController?.popToRootViewController(animated: true)
             default:
-                Ext.debug("method: \(method) not implement.", logEnabled: self.logEnabled)
+                Ext.log("method: \(method) not implement.", logEnabled: self.logEnabled)
             }
         }
     }
@@ -439,7 +439,7 @@ private extension WebView {
                 let json = try JSONSerialization.jsonObject(with: data, options: [.allowFragments, .mutableLeaves])
                 return json as? [String: Any]
             } catch {
-                Ext.debug("parse web js body to dict failed.", error: error, logEnabled: self.logEnabled)
+                Ext.log("parse web js body to dict failed.", error: error, logEnabled: self.logEnabled)
             }
         } else if body is [String: Any], let json = body as? [String: Any] {
             return json

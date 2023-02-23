@@ -105,7 +105,7 @@ public extension AlbumManager {
         options.isNetworkAccessAllowed = true
         options.isSynchronous = false
         phManager.requestImage(for: asset, targetSize: size, contentMode: .aspectFill, options: options) { image, userInfo in
-            Ext.debug("request image | \(userInfo ?? [:])")
+            Ext.log("request image | \(userInfo ?? [:])")
             queue.async {
                 guard let image = image else {
                     handler(.failure(Ext.Error.inner("request image error.")))
@@ -127,7 +127,7 @@ public extension AlbumManager {
         options.deliveryMode = .highQualityFormat
         if #available(iOS 13, *) {
             phManager.requestImageDataAndOrientation(for: asset, options: options) { data, identifier, orientation, userInfo in
-                Ext.debug("\(identifier ?? "") | \(orientation) | \(userInfo ?? [:])")
+                Ext.log("\(identifier ?? "") | \(orientation) | \(userInfo ?? [:])")
                 queue.async {
                     guard let data = data else {
                         handler(.failure(Ext.Error.inner("request image data error.")))
@@ -138,7 +138,7 @@ public extension AlbumManager {
             }
         } else {
             phManager.requestImageData(for: asset, options: options) { data, identifier, orientation, userInfo in
-                Ext.debug("\(identifier ?? "") | \(orientation) | \(userInfo ?? [:])")
+                Ext.log("\(identifier ?? "") | \(orientation) | \(userInfo ?? [:])")
                 queue.async {
                     guard let data = data else {
                         handler(.failure(Ext.Error.inner("request image data error.")))
@@ -161,7 +161,7 @@ public extension AlbumManager {
         options.isNetworkAccessAllowed = true
         options.deliveryMode = .highQualityFormat
         phManager.requestPlayerItem(forVideo: asset, options: options) { playerItem, userInfo in
-            Ext.debug("request playerItem | \(userInfo ?? [:])")
+            Ext.log("request playerItem | \(userInfo ?? [:])")
             queue.async {
                 guard let playerItem = playerItem else {
                     handler(.failure(Ext.Error.inner("request playerItem error.")))
@@ -184,7 +184,7 @@ public extension AlbumManager {
         options.deliveryMode = .highQualityFormat
         phManager.requestAVAsset(forVideo: asset, options: options) { avAsset, audioMix, userInfo in
             queue.async {
-                Ext.debug("request avAsset | \(String(describing: avAsset)) | \(String(describing: audioMix)) | \(userInfo ?? [:])")
+                Ext.log("request avAsset | \(String(describing: avAsset)) | \(String(describing: audioMix)) | \(userInfo ?? [:])")
                 queue.async {
                     guard let avAsset = avAsset else {
                         handler(.failure(Ext.Error.inner("request avAsset error.")))

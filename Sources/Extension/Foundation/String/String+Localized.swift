@@ -35,11 +35,11 @@ public extension ExtWrapper where Base == String {
         guard !base.isEmpty else { return base }
         let lprojBundle = (bundle ?? Ext.localizedBundle).ext.bundle(for: "\(code).lproj") ?? .main
         let result = lprojBundle.localizedString(forKey: base, value: nil, table: nil)
-        //Ext.debug("code: \(String(describing: code)) | base: \(base) => result: \(result)")
-        //Ext.debug("localized lproj path: \(lprojBundle.bundlePath)")
+        //Ext.log("code: \(String(describing: code)) | base: \(base) => result: \(result)")
+        //Ext.log("localized lproj path: \(lprojBundle.bundlePath)")
         guard base == result, code != Ext.LocalizedDefaultLangCode else { return result }
         // 如果指定的多语言处理不成功，再使用默认语言进行一次多语言处理
-        //Ext.debug("default \(Ext.LocalizedDefaultLangCode) again | base: \(base) => result: \(result)", tag: .custom("🌐"))
+        //Ext.log("default \(Ext.LocalizedDefaultLangCode) again | base: \(base) => result: \(result)", tag: .custom("🌐"))
         return localized(code: Ext.LocalizedDefaultLangCode)
     }
     

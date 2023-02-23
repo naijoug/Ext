@@ -93,12 +93,12 @@ extension Networker {
         let key = task.url.absoluteString
         var tasks = downloadTasks[key] ?? [DownloadTask]()
         if !tasks.isEmpty, tasks.contains(where: { $0.stamp == task.stamp }) {
-            Ext.debug("已经包含该 \(task.stamp) 任务", logEnabled: downloadLogged, locationEnabled: false)
+            Ext.log("已经包含该 \(task.stamp) 任务", logEnabled: downloadLogged, locationEnabled: false)
             return false
         }
         tasks.append(task)
         downloadTasks[key] = tasks
-        Ext.debug("添加下载任务: \(task.stamp) | \(task.startTime) | \(key)", logEnabled: downloadLogged, locationEnabled: false)
+        Ext.log("添加下载任务: \(task.stamp) | \(task.startTime) | \(key)", logEnabled: downloadLogged, locationEnabled: false)
         return true
     }
     /// 查询下载任务

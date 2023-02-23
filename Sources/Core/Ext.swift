@@ -92,7 +92,7 @@ extension Ext.Error: LocalizedError {
 
 public extension Ext {
     
-    /// Ext 全局 log 开关 (用于重要日志, 如发生错误时)
+    /// Ext 全局 log 开关
     static var logEnabled: Bool = true
     
     /// 代码定位
@@ -101,20 +101,23 @@ public extension Ext {
     ///   - line: 日志打印行数
     ///   - function: 函数名
     static func codeLocation(file: String = #file, line: Int = #line, function: String = #function) -> String {
-        return "\((file as NSString).lastPathComponent):\(line) \t\(function)"
+        "\((file as NSString).lastPathComponent):\(line) \t\(function)"
     }
     
     /// 调试日志
     ///
     /// - Parameters:
     ///   - message: 日志消息
-    ///   - errir: 错误信息
+    ///   - error: 错误信息
     ///   - tag: 日志标记
     ///   - logEnabled: 是否显示日志
     ///   - locationEnabled: 是否打印代码定位日志
-    static func debug<T>(_ message: T, error: Swift.Error? = nil, tag: Tag = .normal,
-                         logEnabled: Bool = true, locationEnabled: Bool = true,
-                         file: String = #file, line: Int = #line, function: String = #function) {
+    static func log(_ message: Any,
+                    error: Swift.Error? = nil,
+                    tag: Tag = .normal,
+                    logEnabled: Bool = true,
+                    locationEnabled: Bool = true,
+                    file: String = #file, line: Int = #line, function: String = #function) {
         /**
          Reference:
             - https://swift.gg/2016/08/03/swift-prettify-your-print-statements-pt-1/
@@ -123,79 +126,82 @@ public extension Ext {
         #if DEBUG
         guard logEnabled else { return }
         logToTerminal(
-            logMessage(message, error: error, tag: tag, locationEnabled: locationEnabled,
-                file: file, line: line, function: function)
+            messageToLog(message, error: error, tag: tag, locationEnabled: locationEnabled, file: file, line: line, function: function)
         )
         #endif
     }
     
     ///   - logToFileEnabled: 是否保存日志到文件
-    static func debug<T>(_ message: T, error: Swift.Error? = nil, tag: Tag = .normal,
-                         logEnabled: Bool = true, locationEnabled: Bool = true, logToFileEnabled: Bool,
-                         file: String = #file, line: Int = #line, function: String = #function) {
-        #if DEBUG
-        guard logEnabled else { return }
-        logToTerminal(
-            logMessage(message, error: error, tag: tag, locationEnabled: locationEnabled,
-                file: file, line: line, function: function)
-        )
-        #endif
-        
+    static func log(_ message: Any,
+                    error: Swift.Error? = nil,
+                    tag: Tag = .normal,
+                    logEnabled: Bool = true,
+                    locationEnabled: Bool = true,
+                    logToFileEnabled: Bool,
+                    file: String = #file, line: Int = #line, function: String = #function) {
+        log(message, error: error, tag: tag, logEnabled: logEnabled, locationEnabled: locationEnabled, file: file, line: line, function: function)
         guard logToFileEnabled else { return }
-        DispatchQueue.global().async {
-            logToFile(
-                logMessage(message, error: error, tag: tag, locationEnabled: locationEnabled,
-                    file: file, line: line, function: function)
-            )
-        }
+        logToFile(
+            messageToLog(message, error: error, tag: tag, locationEnabled: locationEnabled, file: file, line: line, function: function)
+        )
     }
     
 }
 private extension Ext {
     
-    /// 输出日志到终端
-    private static func logToTerminal(_ message: String) {
-        print(message)
-    }
-    
-    /// 添加 log 到日志文件
-    private static func logToFile(_ message: String) {
-        // Reference: https://stackoverflow.com/questions/27327067/append-text-or-data-to-text-file-in-swift
-        guard let cachesUrl = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return }
-        let logFolder = cachesUrl.appendingPathComponent("Logs", isDirectory: true)
-        if !FileManager.default.fileExists(atPath: logFolder.path) {
-            try? FileManager.default.createDirectory(atPath: logFolder.path, withIntermediateDirectories: true)
-        }
-        let date = Date()
-        let formatter = DateFormatter()
-        
-        formatter.dateFormat = "yyyy-MM-dd"
-        let logFile = logFolder.appendingPathComponent("Ext_\(formatter.string(from: date)).log")
-        
-        formatter.dateFormat = "HH:mm:ss SSS"
-        guard let data = (formatter.string(from: date) + " | " + message + "\n").data(using: String.Encoding.utf8) else { return }
-        
-        if FileManager.default.fileExists(atPath: logFile.path) {
-            if let fileHandle = try? FileHandle(forWritingTo: logFile) {
-                fileHandle.seekToEndOfFile()
-                fileHandle.write(data)
-                fileHandle.closeFile()
-            }
-        } else {
-            try? data.write(to: logFile)
-        }
-    }
-    
     /// 日志内容
-    private static func logMessage<T>(_ message: T, error: Swift.Error? = nil, tag: Tag = .normal, locationEnabled: Bool = true,
-                                      file: String = #file, line: Int = #line, function: String = #function) -> String {
+    static func messageToLog(_ message: Any,
+                             error: Swift.Error? = nil,
+                             tag: Tag = .normal,
+                             locationEnabled: Bool = true,
+                             file: String = #file, line: Int = #line, function: String = #function) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss SSS"
-        var log = "Debug \(formatter.string(from: Date())) \(tag)"
+        var log = "LOG \(formatter.string(from: Date())) \(tag)"
         if locationEnabled { log += " 【\(codeLocation(file: file, line: line, function: function))】" }
         log += " \(message)"
         if let error = error { log += " \(Tag.error) \(error)" }
         return log
+    }
+    
+    /// 日志队列
+    private static let logQueue = DispatchQueue(label: "ext.log.queue")
+    
+    /// 输出日志到终端
+    static func logToTerminal(_ log: String) {
+        logQueue.async {
+            Swift.print(log)
+        }
+    }
+    
+    /// 添加 log 到日志文件
+    static func logToFile(_ log: String) {
+        logQueue.async {
+            // Reference: https://stackoverflow.com/questions/27327067/append-text-or-data-to-text-file-in-swift
+            guard let cachesUrl = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first else { return }
+            let logFolder = cachesUrl.appendingPathComponent("Logs", isDirectory: true)
+            if !FileManager.default.fileExists(atPath: logFolder.path) {
+                try? FileManager.default.createDirectory(atPath: logFolder.path, withIntermediateDirectories: true)
+            }
+            let date = Date()
+            let formatter = DateFormatter()
+            
+            formatter.dateFormat = "yyyy-MM-dd"
+            let logFile = logFolder.appendingPathComponent("Ext_\(formatter.string(from: date)).log")
+            
+            formatter.dateFormat = "HH:mm:ss SSS"
+            guard let data = (formatter.string(from: date) + " | " + log + "\n").data(using: String.Encoding.utf8) else { return }
+            
+            if FileManager.default.fileExists(atPath: logFile.path) {
+                if let fileHandle = try? FileHandle(forWritingTo: logFile) {
+                    fileHandle.seekToEndOfFile()
+                    fileHandle.write(data)
+                    fileHandle.closeFile()
+                }
+            } else {
+                try? data.write(to: logFile)
+            }
+        }
     }
 }
 
@@ -254,7 +260,7 @@ public extension Ext {
 extension Ext.Tag: CustomStringConvertible {
     public var description: String {
         switch self {
-        case .normal:           return "# "
+        case .normal:           return "##"
         case .success:          return "✅"
         case .failure:          return "🚫"
         case .warning:          return "⚠️"

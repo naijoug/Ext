@@ -65,7 +65,7 @@ public class ExtPlayer: NSObject {
     public private(set) var status: ExtPlayer.Status = .unknown {
         didSet {
             guard status != oldValue else { return }
-            Ext.debug("\(oldValue) ===> \(status)", logEnabled: logEnabled)
+            Ext.log("\(oldValue) ===> \(status)", logEnabled: logEnabled)
             delegate?.extPlayer(self, status: status)
         }
     }
@@ -73,7 +73,7 @@ public class ExtPlayer: NSObject {
     public private(set) var bufferStatus: ExtPlayer.BufferStatus = .unknown {
         didSet {
             guard bufferStatus != oldValue else { return }
-            Ext.debug("\(oldValue) -> \(bufferStatus)", logEnabled: logEnabled)
+            Ext.log("\(oldValue) -> \(bufferStatus)", logEnabled: logEnabled)
             delegate?.extPlayer(self, bufferStatus: bufferStatus)
         }
     }
@@ -119,7 +119,7 @@ public class ExtPlayer: NSObject {
     }
     deinit {
         clear()
-        Ext.debug("", tag: .recycle)
+        Ext.log("", tag: .recycle)
     }
     
 // MARK: - Params
@@ -139,7 +139,7 @@ public class ExtPlayer: NSObject {
     /// 播放资源 Item
     public var playerItem: AVPlayerItem? {
         didSet {
-            Ext.debug("\(String(describing: oldValue)) -> \(String(describing: playerItem))", logEnabled: logEnabled)
+            Ext.log("\(String(describing: oldValue)) -> \(String(describing: playerItem))", logEnabled: logEnabled)
             func addNotifications() {
                 if let item = oldValue {
                     NotificationCenter.default.removeObserver(self, name: .AVPlayerItemDidPlayToEndTime, object: item)
@@ -183,7 +183,7 @@ extension ExtPlayer {
         timeHandlers.append(handler)
     }
     private func handleTime(_ status: TimeStatus) {
-        Ext.debug("\(status)", logEnabled: timeLogEnabled)
+        Ext.log("\(status)", logEnabled: timeLogEnabled)
         delegate?.extPlayer(self, timeStatus: status)
         
         for handler in timeHandlers {
@@ -196,7 +196,7 @@ extension ExtPlayer {
         playHandlers.append(handler)
     }
     private func handlePlay(_ isPlaying: Bool) {
-        Ext.debug("isPlaying: \(isPlaying) | status: \(self.status) | timeControlStatus: \(avPlayer.timeControlStatus) | \(playHandlers)", logEnabled: self.logEnabled)
+        Ext.log("isPlaying: \(isPlaying) | status: \(self.status) | timeControlStatus: \(avPlayer.timeControlStatus) | \(playHandlers)", logEnabled: self.logEnabled)
         
         for handler in playHandlers {
             handler(isPlaying)
@@ -261,14 +261,14 @@ public extension ExtPlayer {
     
     /// 播放
     func play(_ speed: Float = 1.0) {
-        Ext.debug("play currentTime: \(currentTime) | duration: \(duration ?? 0)", logEnabled: logEnabled)
+        Ext.log("play currentTime: \(currentTime) | duration: \(duration ?? 0)", logEnabled: logEnabled)
         //avPlayer.play()
         avPlayer.rate = speed
         status = .playing
     }
     /// 暂停播放
     func pause() {
-        Ext.debug("pause currentTime: \(currentTime) | duration: \(duration ?? 0)", logEnabled: logEnabled)
+        Ext.log("pause currentTime: \(currentTime) | duration: \(duration ?? 0)", logEnabled: logEnabled)
         avPlayer.pause()
         status = .paused
     }
@@ -279,21 +279,21 @@ public extension ExtPlayer {
     ///   - handler: 调整完成回调
     func seek(_ time: TimeInterval?, handler: Ext.ResultVoidHandler?) {
         guard let time = time else {
-            Ext.debug("ext player not need to seek", logEnabled: self.logEnabled)
+            Ext.log("ext player not need to seek", logEnabled: self.logEnabled)
             handler?(.success(()))
             return
         }
         if isPlaying {
             avPlayer.pause()
-            Ext.debug("before seeking, player is playing to pause", logEnabled: self.logEnabled)
+            Ext.log("before seeking, player is playing to pause", logEnabled: self.logEnabled)
         }
         let newTime = CMTimeMakeWithSeconds(max(0, time), preferredTimescale: playerItem?.asset.duration.timescale ?? 600)
-        Ext.debug("begin seeking newTime: \(newTime) | \(newTime.seconds) | \(time)", tag: .launch, logEnabled: logEnabled)
+        Ext.log("begin seeking newTime: \(newTime) | \(newTime.seconds) | \(time)", tag: .launch, logEnabled: logEnabled)
         isSeeking = true
         avPlayer.seek(to: newTime, toleranceBefore: .zero, toleranceAfter: .zero) { [weak self] completion in
             guard let self else { return }
             self.isSeeking = false
-            Ext.debug("end player seeking \(completion) | \(self.currentTime)", error: self.avPlayer.error, tag: .bingo, logEnabled: self.logEnabled)
+            Ext.log("end player seeking \(completion) | \(self.currentTime)", error: self.avPlayer.error, tag: .bingo, logEnabled: self.logEnabled)
             guard completion else {
                 handler?(.failure(Ext.Error.inner("seek time failure.")))
                 return
@@ -319,7 +319,7 @@ private extension ExtPlayer {
         guard let times = boundaryTimes, times.count > 0 else { return }
         boundaryObserver = avPlayer.addBoundaryTimeObserver(forTimes: times, queue: .main) { [weak self] in
             guard let `self` = self, let duration = self.duration else { return }
-            Ext.debug("boundary: \(self.currentTime) / \(duration) | playerStatus: \(self.status) | isPlaying: \(self.isPlaying)", logEnabled: self.timeLogEnabled)
+            Ext.log("boundary: \(self.currentTime) / \(duration) | playerStatus: \(self.status) | isPlaying: \(self.isPlaying)", logEnabled: self.timeLogEnabled)
             guard self.isPlaying  else { return }
             self.handleTime(.boundary(self.currentTime, duration))
         }
@@ -338,7 +338,7 @@ private extension ExtPlayer {
         guard let time = periodicTime, time > 0 else { return }
         periodicObserver = avPlayer.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(time, preferredTimescale: 600), queue: .main) { [weak self] time in
             guard let `self` = self, let duration = self.duration else { return }
-            Ext.debug("periodic: \(self.currentTime) / \(duration) | playerStatus: \(self.status) | isPlaying: \(self.isPlaying)", logEnabled: self.timeLogEnabled)
+            Ext.log("periodic: \(self.currentTime) / \(duration) | playerStatus: \(self.status) | isPlaying: \(self.isPlaying)", logEnabled: self.timeLogEnabled)
             guard self.isPlaying else { return }
             self.handleTime(.periodic(self.currentTime, duration))
         }
@@ -347,8 +347,8 @@ private extension ExtPlayer {
     @objc
     func didPlayToEnd(_ noti: Notification) {
         guard let item = noti.object as? AVPlayerItem, item == playerItem else { return }
-        Ext.debug("didPlayToEnd", logEnabled: logEnabled)
-        Ext.debug("didPlayToEnd, \(self)")
+        Ext.log("didPlayToEnd", logEnabled: logEnabled)
+        Ext.log("didPlayToEnd, \(self)")
         // play to end, seek to start
         if item.duration.seconds > 0 {
             avPlayer.seek(to: .zero)
@@ -358,7 +358,7 @@ private extension ExtPlayer {
     @objc
     func failedToPlayToEnd(_ noti: Notification) {
         guard let item = noti.object as? AVPlayerItem, item == playerItem else { return }
-        Ext.debug("failedToPlayToEnd", logEnabled: logEnabled)
+        Ext.log("failedToPlayToEnd", logEnabled: logEnabled)
         status = .failed(item.error ?? Ext.Error.inner("failed to play to end."))
     }
 }
@@ -381,7 +381,7 @@ private extension ExtPlayer {
         // status : 播放器状态
         playerObservers.append(avPlayer.observe(\.status, options: [.new], changeHandler: { [weak self] player, change in
             guard let `self` = self else { return }
-            Ext.debug("player status: \(player.status)", logEnabled: self.logEnabled)
+            Ext.log("player status: \(player.status)", logEnabled: self.logEnabled)
             switch player.status {
             case .failed: // AVPlayer 错误
                 self.status = .failed(player.error ?? Ext.Error.inner("AVPlayer failed."))
@@ -391,7 +391,7 @@ private extension ExtPlayer {
         // timeControlStatus : 播放器时间控制状态
         playerObservers.append(avPlayer.observe(\.timeControlStatus, options: [.initial, .new], changeHandler: { [weak self] player, change in
             guard let `self` = self else { return }
-            Ext.debug("player timeControlStatus: \(player.timeControlStatus) | currentTime: \(self.currentTime)", logEnabled: self.logEnabled)
+            Ext.log("player timeControlStatus: \(player.timeControlStatus) | currentTime: \(self.currentTime)", logEnabled: self.logEnabled)
             // 缓冲区域内容不够播放时，变为缓冲状态
             let isBuffering = player.timeControlStatus == .waitingToPlayAtSpecifiedRate && !(player.currentItem?.isPlaybackLikelyToKeepUp ?? false)
             self.bufferStatus = isBuffering ? .buffering : .bufferToReady
@@ -419,10 +419,10 @@ private extension ExtPlayer {
         // item status : 播放资源状态
         itemObservers.append(avPlayer.observe(\.currentItem?.status, options: [.new], changeHandler: { [weak self] item, change in
             guard let `self` = self else { return }
-            Ext.debug("playerItem status: \(item.status)", logEnabled: self.logEnabled)
+            Ext.log("playerItem status: \(item.status)", logEnabled: self.logEnabled)
             switch item.status {
             case .readyToPlay:
-                Ext.debug("playerItem readyToPlay.")
+                Ext.log("playerItem readyToPlay.")
                 self.bufferStatus = .bufferToReady
             case .failed: // AVPlayerItem 错误 (播放资源错误)
                 self.status = .failed(item.error ?? Ext.Error.inner("player item failed."))
@@ -432,13 +432,13 @@ private extension ExtPlayer {
         // isPlaybackBufferEmpty : 当前缓冲区去是否为空 [true: 缓冲区为空，不能播放 | false: 缓冲区不为空，可以播放]
         itemObservers.append(avPlayer.observe(\.currentItem?.isPlaybackBufferEmpty, options: [.new], changeHandler: { [weak self] player, change in
             guard let `self` = self, let isPlaybackBufferEmpty = player.currentItem?.isPlaybackBufferEmpty else { return }
-            Ext.debug("isPlaybackBufferEmpty: \(isPlaybackBufferEmpty)", logEnabled: self.logEnabled)
+            Ext.log("isPlaybackBufferEmpty: \(isPlaybackBufferEmpty)", logEnabled: self.logEnabled)
             self.bufferStatus = .buffering
         }))
         // isPlaybackLikelyToKeepUp : 缓冲区内容是否可以播放
         itemObservers.append(avPlayer.observe(\.currentItem?.isPlaybackLikelyToKeepUp, options: [.new], changeHandler: { [weak self] player, change in
             guard let `self` = self, let isPlaybackLikelyToKeepUp = player.currentItem?.isPlaybackLikelyToKeepUp else { return }
-            Ext.debug("isPlaybackLikelyToKeepUp: \(isPlaybackLikelyToKeepUp)", logEnabled: self.logEnabled)
+            Ext.log("isPlaybackLikelyToKeepUp: \(isPlaybackLikelyToKeepUp)", logEnabled: self.logEnabled)
             guard isPlaybackLikelyToKeepUp else { return }
             self.bufferStatus = .bufferToReady
         }))
@@ -448,13 +448,13 @@ private extension ExtPlayer {
             guard let bufferTimeRange = player.currentItem?.loadedTimeRanges.first?.timeRangeValue, let duration = self.duration else { return }
             // 缓冲到的时间
             let bufferTime = bufferTimeRange.start.seconds  + bufferTimeRange.duration.seconds
-            Ext.debug("buffering: \(bufferTime) / \(duration) | \(player.currentItem?.loadedTimeRanges ?? [])", logEnabled: self.timeLogEnabled)
+            Ext.log("buffering: \(bufferTime) / \(duration) | \(player.currentItem?.loadedTimeRanges ?? [])", logEnabled: self.timeLogEnabled)
             self.handleTime(.buffer(bufferTime, duration))
         }))
         // isPlaybackBufferFull : 缓冲区是否完成
         itemObservers.append(avPlayer.observe(\.currentItem?.isPlaybackBufferFull, options: [.new], changeHandler: { [weak self] player, change in
             guard let `self` = self, let isPlaybackBufferFull = player.currentItem?.isPlaybackBufferFull else { return }
-            Ext.debug("isPlaybackBufferFull: \(isPlaybackBufferFull)", logEnabled: self.logEnabled)
+            Ext.log("isPlaybackBufferFull: \(isPlaybackBufferFull)", logEnabled: self.logEnabled)
             guard isPlaybackBufferFull else { return }
             self.bufferStatus = .bufferToEnd
         }))

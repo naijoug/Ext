@@ -17,10 +17,10 @@ public protocol SpeakerUIType: UIView {
 public final class Speaker {
     public static let shared = Speaker()
     private init() {
-        Ext.debug("rate: \([AVSpeechUtteranceMinimumSpeechRate, AVSpeechUtteranceDefaultSpeechRate, AVSpeechUtteranceMaximumSpeechRate])")
-        Ext.debug("voices: \(AVSpeechSynthesisVoice.currentLanguageCode()) - \(AVSpeechSynthesisVoice.speechVoices().map({ $0.log }))")
-        Ext.debug("voiceMap: \(voiceMap.mapValues({ $0.map({ $0.log }) }))")
-        Ext.debug("enabled languages: \(enabledLanguages)")
+        Ext.log("rate: \([AVSpeechUtteranceMinimumSpeechRate, AVSpeechUtteranceDefaultSpeechRate, AVSpeechUtteranceMaximumSpeechRate])")
+        Ext.log("voices: \(AVSpeechSynthesisVoice.currentLanguageCode()) - \(AVSpeechSynthesisVoice.speechVoices().map({ $0.log }))")
+        Ext.log("voiceMap: \(voiceMap.mapValues({ $0.map({ $0.log }) }))")
+        Ext.log("enabled languages: \(enabledLanguages)")
     }
     
     /// 说话口音表 (eg: [en-US: [voice1, voice2]])
@@ -52,16 +52,16 @@ public extension Speaker {
     /// 根据语言码获取最优语言
     /// - Parameter languageCode: 语言码 (eg: zh、en)
     func language(languageCode: String) -> String? {
-        Ext.debug("preferredLanguages: \(Locale.preferredLanguages)")
+        Ext.log("preferredLanguages: \(Locale.preferredLanguages)")
         if let language = Locale.preferredLanguages.first(where: { $0.hasPrefix(languageCode) }),
            isEnabled(language: language) {
-            Ext.debug("use pref langugae: \(language)")
+            Ext.log("use pref langugae: \(language)")
             return language
         }
         if let countryCode = Locale.current.regionCode {
             let language = "\(languageCode)-\(countryCode)"
             if isEnabled(language: language) {
-                Ext.debug("use current country : \(language)")
+                Ext.log("use current country : \(language)")
                 return language
             }
         }
@@ -76,7 +76,7 @@ public extension Speaker {
     ///   - speakerUI: 绑定的 UI
     func speak(text: String, languageCode: String, speakerUI: SpeakerUIType? = nil) {
         guard let language = language(languageCode: languageCode) else {
-            Ext.debug("speak language code: \(languageCode) not available.", tag: .error)
+            Ext.log("speak language code: \(languageCode) not available.", tag: .error)
             return
         }
         speak(text: text, language: language, speakerUI: speakerUI)
@@ -89,15 +89,15 @@ public extension Speaker {
     ///   - speakerUI: 绑定的 UI
     func speak(text: String, language: String, speakerUI: SpeakerUIType? = nil) {
         if synthesizer.isSpeaking {
-            Ext.debug("正在说话")
+            Ext.log("正在说话")
             synthesizer.stop()
-            Ext.debug("立即停止")
+            Ext.log("立即停止")
             self.speakerUI?.isSpeaking = false
             self.speakerUI = nil
         }
-        Ext.debug("speak: \(language) - \(text)")
+        Ext.log("speak: \(language) - \(text)")
         guard isEnabled(language: language) else {
-            Ext.debug("speak language \(language) not available.", tag: .error)
+            Ext.log("speak language \(language) not available.", tag: .error)
             return
         }
         self.speakerUI = speakerUI
@@ -152,7 +152,7 @@ private class ExtSynthesizer: NSObject {
             self.handler = nil
         }
         self.handler = handler
-        Ext.debug("speak: \(language) - \(text)")
+        Ext.log("speak: \(language) - \(text)")
         let utterance = AVSpeechUtterance(string: text)
         let voice = AVSpeechSynthesisVoice(language: language)
         utterance.voice = voice
@@ -176,27 +176,27 @@ private class ExtSynthesizer: NSObject {
 }
 extension ExtSynthesizer: AVSpeechSynthesizerDelegate {
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didStart utterance: AVSpeechUtterance) {
-        Ext.debug("start - \(utterance.log)", logEnabled: logEnabled)
+        Ext.log("start - \(utterance.log)", logEnabled: logEnabled)
         handler?(.start)
     }
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didFinish utterance: AVSpeechUtterance) {
-        Ext.debug("finish - \(utterance.log)", logEnabled: logEnabled)
+        Ext.log("finish - \(utterance.log)", logEnabled: logEnabled)
         handler?(.finish)
     }
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didPause utterance: AVSpeechUtterance) {
-        Ext.debug("pause - \(utterance.log)", logEnabled: logEnabled)
+        Ext.log("pause - \(utterance.log)", logEnabled: logEnabled)
         handler?(.pause)
     }
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didContinue utterance: AVSpeechUtterance) {
-        Ext.debug("continue - \(utterance.log)", logEnabled: logEnabled)
+        Ext.log("continue - \(utterance.log)", logEnabled: logEnabled)
         handler?(.continue)
     }
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, didCancel utterance: AVSpeechUtterance) {
-        Ext.debug("cancel - \(utterance.log)", logEnabled: logEnabled)
+        Ext.log("cancel - \(utterance.log)", logEnabled: logEnabled)
         handler?(.cancel)
     }
     func speechSynthesizer(_ synthesizer: AVSpeechSynthesizer, willSpeakRangeOfSpeechString characterRange: NSRange, utterance: AVSpeechUtterance) {
-        //Ext.debug("\(characterRange) - \(utterance.log)", logEnabled: logEnabled)
+        //Ext.log("\(characterRange) - \(utterance.log)", logEnabled: logEnabled)
     }
 }
 

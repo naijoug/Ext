@@ -51,7 +51,7 @@ public extension ExtWrapper where Base == URL {
             guard values.isRegularFile ?? false else { return 0 }
             return UInt64(values.totalFileAllocatedSize ?? values.fileAllocatedSize ?? 0)
         } catch {
-            Ext.debug("regularFileAllocatedSize error.", error: error, locationEnabled: false)
+            Ext.log("regularFileAllocatedSize error.", error: error, locationEnabled: false)
             return 0
         }
     }
@@ -80,7 +80,7 @@ public extension ExtWrapper where Base == URL {
             }
             return totalSize
         } catch {
-            Ext.debug("clac size error", error: error, tag: .file, locationEnabled: false)
+            Ext.log("clac size error", error: error, tag: .file, locationEnabled: false)
         }
         return 0
     }
@@ -94,7 +94,7 @@ public extension ExtWrapper where Base == URL {
             guard values.isRegularFile ?? false else { return 0 }
             return values.totalFileSize ?? values.fileSize ?? 0
         } catch {
-            Ext.debug("regularFileAllocatedSize error.", error: error, locationEnabled: false)
+            Ext.log("regularFileAllocatedSize error.", error: error, locationEnabled: false)
             return 0
         }
     }

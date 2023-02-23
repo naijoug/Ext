@@ -38,13 +38,13 @@ public class PageableFlowLayout: RTLFlowLayout {
     }
     
     open override func targetContentOffset(forProposedContentOffset proposedContentOffset: CGPoint, withScrollingVelocity velocity: CGPoint) -> CGPoint {
-        Ext.debug("\(proposedContentOffset) | velocity: \(velocity)", logEnabled: logEnabled)
+        Ext.log("\(proposedContentOffset) | velocity: \(velocity)", logEnabled: logEnabled)
         guard let collectionView = self.collectionView,
               let attris = layoutAttributesForElements(in: collectionView.bounds), attris.count > 0 else {
             return super.targetContentOffset(forProposedContentOffset: proposedContentOffset, withScrollingVelocity: velocity)
         }
         
-        Ext.debug("ext: \(ext.pageWidth) | itemSize: \(ext.itemSize) | lineSpacing \(ext.minimumLineSpacing) | interitemSpacing \(ext.minimumInteritemSpacing)", logEnabled: logEnabled)
+        Ext.log("ext: \(ext.pageWidth) | itemSize: \(ext.itemSize) | lineSpacing \(ext.minimumLineSpacing) | interitemSpacing \(ext.minimumInteritemSpacing)", logEnabled: logEnabled)
         
         var offsetX = ext.pageWidth/2
         if abs(velocity.x) > 0.3 {
@@ -57,9 +57,9 @@ public class PageableFlowLayout: RTLFlowLayout {
             if attri.representedElementCategory != .cell { continue }
             let offset1 = abs(attri.center.x - proposedContentOffsetCenterX)
             let offset2 = abs(targetAttri.center.x - proposedContentOffsetCenterX)
-            Ext.debug("attri centerX: \(attri.center.x) | \(targetAttri.center.x) | offset: \(offset1) - \(offset2)", logEnabled: logEnabled)
+            Ext.log("attri centerX: \(attri.center.x) | \(targetAttri.center.x) | offset: \(offset1) - \(offset2)", logEnabled: logEnabled)
             if offset1 < offset2 {
-                Ext.debug("taregt changed.", logEnabled: logEnabled)
+                Ext.log("taregt changed.", logEnabled: logEnabled)
                 targetAttri = attri
             }
         }
@@ -69,7 +69,7 @@ public class PageableFlowLayout: RTLFlowLayout {
         case .center:   targetX -= collectionView.bounds.width/2
         case .right:    targetX += ext.minimumLineSpacing
         }
-        Ext.debug("targetX: \(targetAttri.center.x) -> \(targetX) | \(ext.itemSize.width/4)", logEnabled: logEnabled)
+        Ext.log("targetX: \(targetAttri.center.x) -> \(targetX) | \(ext.itemSize.width/4)", logEnabled: logEnabled)
         return CGPoint(x: targetX, y: proposedContentOffset.y)
     }
 }

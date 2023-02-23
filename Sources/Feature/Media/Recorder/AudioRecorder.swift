@@ -37,13 +37,13 @@ public class AudioRecorder: BaseRecorder {
             
             return true
         } catch {
-            Ext.debug("start audio recording failed.", error: error)
+            Ext.log("start audio recording failed.", error: error)
             self.recordHandler?(.failure(error))
             return false
         }
     }
     public override func stopRecord(_ handler: Ext.DataHandler<String>? = nil) {
-        Ext.debug("stop audio record \(recorder?.url.path ?? "").")
+        Ext.log("stop audio record \(recorder?.url.path ?? "").")
         
         guard let recorder = recorder else { return }
         recorder.stop()
@@ -54,7 +54,7 @@ public class AudioRecorder: BaseRecorder {
         if isMeteringEnabled {
             self.levelHandler?(0)
         }
-        Ext.debug("stop audio record succeeded", tag: .bingo)
+        Ext.log("stop audio record succeeded", tag: .bingo)
     }
     
     override func timerAction() {
@@ -62,7 +62,7 @@ public class AudioRecorder: BaseRecorder {
         recorder.updateMeters()
         let average = recorder.averagePower(forChannel: 0) // 均值分贝
         let db = CGFloat(pow(10, (0.06 * average))) // 分贝
-        //Ext.debug("average: \(average) | db: \(db)")
+        //Ext.log("average: \(average) | db: \(db)")
         self.levelHandler?(db)
     }
 }
@@ -70,7 +70,7 @@ public class AudioRecorder: BaseRecorder {
 extension AudioRecorder: AVAudioRecorderDelegate {
     
     public func audioRecorderDidFinishRecording(_ recorder: AVAudioRecorder, successfully flag: Bool) {
-        Ext.debug("finish audio recording, \(flag)")
+        Ext.log("finish audio recording, \(flag)")
         if !flag { // 录制失败
             stopRecording(nil)
         }

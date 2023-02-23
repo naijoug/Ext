@@ -175,23 +175,23 @@ public class ScrollViewDragger {
         self.minRatio = minRatio
         self.maxRatio = maxRatio
         guard minRatio > 0, maxRatio > 0, maxRatio > minRatio else { return }
-        //Ext.debug("status: \(status)", logEnabled: scrollLog)
+        //Ext.log("status: \(status)", logEnabled: scrollLog)
         switch status {
         case .willBeginDragging(let scrollView):
-            Ext.debug("will begin draging dragOffsetY: \(dragOffsetY)", logEnabled: logEnabled)
+            Ext.log("will begin draging dragOffsetY: \(dragOffsetY)", logEnabled: logEnabled)
             // 记录拖拽位置
             dragOffsetY = scrollView.contentOffset.y
         case .didScroll(let scrollView):
             guard scrollView.isDragging, scrollView.isTracking else { return }
-            //Ext.debug("\(scrollView.isDragging) | \(scrollView.isTracking)", logEnabled: scrollLog)
+            //Ext.log("\(scrollView.isDragging) | \(scrollView.isTracking)", logEnabled: scrollLog)
             let vel = scrollView.panGestureRecognizer.velocity(in: scrollView)
             let deltaY = scrollView.contentOffset.y - dragOffsetY
-            Ext.debug("didScroll | deltaY: \(deltaY) | vel: \(vel)", logEnabled: logEnabled)
+            Ext.log("didScroll | deltaY: \(deltaY) | vel: \(vel)", logEnabled: logEnabled)
             self.handleDragging(scrollView, deltaY: deltaY)
         case .willEndDragging(let scrollView, let velocity, let targetContentOffset):
             let targetOffsetY = targetContentOffset.pointee.y
             let deltaY = targetOffsetY - dragOffsetY
-            Ext.debug("willEndDragging | dragOffsetY: \(dragOffsetY) | targetOffsetY: \(targetOffsetY) | deltaY: \(deltaY) | vel: \(velocity)", logEnabled: logEnabled)
+            Ext.log("willEndDragging | dragOffsetY: \(dragOffsetY) | targetOffsetY: \(targetOffsetY) | deltaY: \(deltaY) | vel: \(velocity)", logEnabled: logEnabled)
             self.handleDragging(scrollView, deltaY: deltaY, velocityY: velocity.y, isEnd: true)
         default: ()
         }
@@ -201,7 +201,7 @@ public class ScrollViewDragger {
         guard let targetView = targetView else { return }
         
         let offsetY = scrollView.contentOffset.y
-        Ext.debug("isEnd: \(isEnd) | deltaY: \(deltaY) | dragOffsetY: \(dragOffsetY) | offsetY: \(offsetY)", logEnabled: logEnabled)
+        Ext.log("isEnd: \(isEnd) | deltaY: \(deltaY) | dragOffsetY: \(dragOffsetY) | offsetY: \(offsetY)", logEnabled: logEnabled)
         guard deltaY != 0 else { return }
         
         let currentW = targetView.frame.width.rounded()
@@ -210,7 +210,7 @@ public class ScrollViewDragger {
         
         if offsetY == 0, dragOffsetY != 0 {
             dragOffsetY = offsetY
-            Ext.debug("回零", logEnabled: logEnabled)
+            Ext.log("回零", logEnabled: logEnabled)
             return
         }
         
@@ -219,43 +219,43 @@ public class ScrollViewDragger {
         
         var targetH = max(minH, min(maxH, currentH - deltaY)).rounded()
         
-        Ext.debug("height: \(minH) ~ \(maxH) | currentH \(currentH) -> targetH \(targetH)", logEnabled: logEnabled)
+        Ext.log("height: \(minH) ~ \(maxH) | currentH \(currentH) -> targetH \(targetH)", logEnabled: logEnabled)
         
         guard isEnd else {
-            Ext.debug("拖动中:", logEnabled: logEnabled)
+            Ext.log("拖动中:", logEnabled: logEnabled)
             if deltaY > 0 {
                 let upEnabled = currentH > minH
-                Ext.debug("     向上推 \(upEnabled)", logEnabled: logEnabled)
+                Ext.log("     向上推 \(upEnabled)", logEnabled: logEnabled)
                 guard upEnabled else { return }
             } else {
                 let downEnabled = currentH < maxH
-                Ext.debug("     向下拉 \(downEnabled)", logEnabled: logEnabled)
+                Ext.log("     向下拉 \(downEnabled)", logEnabled: logEnabled)
                 guard downEnabled else { return }
             }
             guard currentH != targetH else { return }
-            Ext.debug("     目标视图高度改变: \(currentH) -> \(targetH)", logEnabled: logEnabled)
+            Ext.log("     目标视图高度改变: \(currentH) -> \(targetH)", logEnabled: logEnabled)
             
             scrollView.contentOffset.y = dragOffsetY
             updateHandler?(targetH)
             return
         }
-        Ext.debug("拖动结束:", logEnabled: logEnabled)
+        Ext.log("拖动结束:", logEnabled: logEnabled)
         if velocityY == 0 {
-            Ext.debug("     无加速度", logEnabled: logEnabled)
+            Ext.log("     无加速度", logEnabled: logEnabled)
             if targetH < minH {
-                Ext.debug("     最小化", logEnabled: logEnabled)
+                Ext.log("     最小化", logEnabled: logEnabled)
                 targetH = minH
             } else {
-                Ext.debug("     最小 ~ 最大中间", logEnabled: logEnabled)
+                Ext.log("     最小 ~ 最大中间", logEnabled: logEnabled)
                 guard offsetY <= 0 else { return }
             }
         } else {
-            Ext.debug("     有加速度 \(velocityY)", logEnabled: logEnabled)
+            Ext.log("     有加速度 \(velocityY)", logEnabled: logEnabled)
             if velocityY > 0 { // 向上
-                Ext.debug("     向上推", logEnabled: logEnabled)
+                Ext.log("     向上推", logEnabled: logEnabled)
                 targetH = minH
             } else { // 向下
-                Ext.debug("     向下拉 \(targetH)", logEnabled: logEnabled)
+                Ext.log("     向下拉 \(targetH)", logEnabled: logEnabled)
                 guard offsetY <= 0 else { return }
                 targetH = maxH
             }
@@ -267,11 +267,11 @@ public class ScrollViewDragger {
     private func adjust(_ targetView: UIView, targetH: CGFloat, completion handler: Ext.VoidHandler? = nil) {
         let currentH = targetView.frame.height.rounded()
         guard currentH != targetH else {
-            Ext.debug("不需要改变高度", logEnabled: logEnabled)
+            Ext.log("不需要改变高度", logEnabled: logEnabled)
             handler?()
             return
         }
-        Ext.debug("目标视图改变高度... \(currentH) -> \(targetH)", logEnabled: logEnabled)
+        Ext.log("目标视图改变高度... \(currentH) -> \(targetH)", logEnabled: logEnabled)
         UIView.animate(withDuration: 0.3) {
             self.updateHandler?(targetH)
             targetView.superview?.layoutIfNeeded()

@@ -36,7 +36,7 @@ public extension ExtWrapper where Base == AVAsset {
         // Reference: https://stackoverflow.com/questions/10433774/avurlasset-getting-video-size
         guard let videoTrack = base.tracks(withMediaType: .video).first else { return nil }
         let size = videoTrack.naturalSize.applying(videoTrack.preferredTransform)
-        //Ext.debug("naturalSize: \(videoTrack.naturalSize) => \(size)")
+        //Ext.log("naturalSize: \(videoTrack.naturalSize) => \(size)")
         return CGSize(width: abs(size.width), height: abs(size.height))
     }
 }
@@ -52,9 +52,9 @@ public extension Ext {
     ///   - sourceURL: 源文件
     ///   - outputURL: 输出的 Wav 音频文件
     static func convertToWav(sourceURL: URL, outputURL: URL) {
-        Ext.debug("convert to Wav start...", tag: .begin, logEnabled: Ext.logEnabled, locationEnabled: false)
+        Ext.log("convert to Wav start...", tag: .begin, logEnabled: Ext.logEnabled, locationEnabled: false)
         guard FileManager.default.fileExists(atPath: sourceURL.path) else {
-            Ext.debug("convert file not exist.", logEnabled: Ext.logEnabled, locationEnabled: false)
+            Ext.log("convert file not exist.", logEnabled: Ext.logEnabled, locationEnabled: false)
             return
         }
         
@@ -66,12 +66,12 @@ public extension Ext {
         var dstFormat: AudioStreamBasicDescription = AudioStreamBasicDescription()
         
         func log(_ message: String) {
-            Ext.debug("\(message) \(error == noErr ? "succeeded." : "failed. \(error.description)")", logEnabled: error != noErr, locationEnabled: false)
+            Ext.log("\(message) \(error == noErr ? "succeeded." : "failed. \(error.description)")", logEnabled: error != noErr, locationEnabled: false)
         }
         
         ExtAudioFileOpenURL(sourceURL as CFURL, &sourceFile)
         guard let sourceFile = sourceFile else {
-            Ext.debug("audio file open failed", tag: .error)
+            Ext.log("audio file open failed", tag: .error)
             return
         }
         
@@ -99,7 +99,7 @@ public extension Ext {
             AudioFileFlags.eraseFile.rawValue,
             &destinationFile)
         guard let destinationFile = destinationFile else {
-            Ext.debug("destination file create failed. \(error.description)", logEnabled: Ext.logEnabled, locationEnabled: false)
+            Ext.log("destination file create failed. \(error.description)", logEnabled: Ext.logEnabled, locationEnabled: false)
             return
         }
         log("① create audio file")
@@ -150,7 +150,7 @@ public extension Ext {
         log("⑥ dispose destination")
         error = ExtAudioFileDispose(sourceFile)
         log("⑦ dispose source")
-        Ext.debug("convert to Wav end.", tag: .end, logEnabled: Ext.logEnabled, locationEnabled: false)
+        Ext.log("convert to Wav end.", tag: .end, logEnabled: Ext.logEnabled, locationEnabled: false)
     }
     
     /// 转化为 MP4
@@ -200,7 +200,7 @@ public extension ExtWrapper where Base: AVAsset {
             DispatchQueue.main.async {
                 switch export.status {
                 case .completed:
-                    //Ext.debug("crop video completed.")
+                    //Ext.log("crop video completed.")
                     handler(.success(outputURL))
                 case .cancelled:
                     handler(.failure(Ext.Error.inner("crop video cancelled")))
@@ -249,7 +249,7 @@ public extension ExtWrapper where Base: AVAsset {
         let fullFrames = Int(durationT/frameInterval) // 完整帧数
         let remainderT = durationT - TimeInterval(fullFrames)*frameInterval // 剩余时长
         let lastW = size.width * CGFloat(remainderT/frameInterval)  // 最后一帧图片宽度
-        //Ext.debug("总时长: \(seconds) | 完整帧数: \(fullFrames) | 剩余时长: \(remainderT) | 最后一帧图片宽度\(lastW)")
+        //Ext.log("总时长: \(seconds) | 完整帧数: \(fullFrames) | 剩余时长: \(remainderT) | 最后一帧图片宽度\(lastW)")
         let times = stride(from: 0, to: durationT, by: frameInterval).map {
             CMTime(seconds: $0, preferredTimescale: base.duration.timescale)
         }
@@ -291,7 +291,7 @@ public extension ExtWrapper where Base: AVAsset {
         generator.appliesPreferredTrackTransform = true
         generator.maximumSize = size
         
-        //Ext.debug("times: \(times)")
+        //Ext.log("times: \(times)")
         var frames = [Ext.ImageFrame]()
         var count = 0
         generator.generateCGImagesAsynchronously(forTimes: times.map { NSValue(time: $0) }) { (requestedTime, cgImage, actualTime, result, error) in
@@ -301,10 +301,10 @@ public extension ExtWrapper where Base: AVAsset {
                     frames.append((UIImage(cgImage: cgImage), actualTime))
                 }
             case .cancelled:
-                Ext.debug("export \(requestedTime) image cancelled.", error: error)
+                Ext.log("export \(requestedTime) image cancelled.", error: error)
                 handleResult(.failure(Ext.Error.inner("export \(requestedTime) image cancelled.")))
             default:
-                Ext.debug("export \(requestedTime) image failed.", error: error)
+                Ext.log("export \(requestedTime) image failed.", error: error)
                 handleResult(.failure(error ?? Ext.Error.inner("export \(requestedTime) image failed.")))
             }
             
@@ -331,7 +331,7 @@ public extension ExtWrapper where Base: AVAsset {
             let cgImage = try generator.copyCGImage(at: time, actualTime: &actualTime)
             return (UIImage(cgImage: cgImage), actualTime)
         } catch {
-            Ext.debug("image generate failed.", error: error)
+            Ext.log("image generate failed.", error: error)
             return nil
         }
     }

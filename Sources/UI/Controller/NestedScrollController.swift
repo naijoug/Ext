@@ -106,7 +106,7 @@ open class NestedScrollController: UIViewController {
     open override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
-        Ext.debug("contentSize: \(nestedScrollView.contentSize)", logEnabled: logEnabled)
+        Ext.log("contentSize: \(nestedScrollView.contentSize)", logEnabled: logEnabled)
     }
 }
 
@@ -117,15 +117,15 @@ extension NestedScrollController: UIScrollViewDelegate {
         guard scrollView == self.nestedScrollView else { return }
         
         let offsetY = scrollView.contentOffset.y
-        Ext.debug("outer scroll | offsetY: \(offsetY) | outerScrollable \(outerScrollable) | innerScrollable: \(innerScrollable) | outerMaxOffsetY: \(outerMaxOffsetY)", logEnabled: logEnabled)
+        Ext.log("outer scroll | offsetY: \(offsetY) | outerScrollable \(outerScrollable) | innerScrollable: \(innerScrollable) | outerMaxOffsetY: \(outerMaxOffsetY)", logEnabled: logEnabled)
         guard outerScrollable else {
-            Ext.debug("外部视图不能滚动", logEnabled: logEnabled)
+            Ext.log("外部视图不能滚动", logEnabled: logEnabled)
             scrollView.contentOffset.y = outerMaxOffsetY
             return
         }
         
         if offsetY >= outerMaxOffsetY {
-            Ext.debug("外部视图滑动到顶端 => 外部视图不能滑动，内部视图可以滑动", logEnabled: logEnabled)
+            Ext.log("外部视图滑动到顶端 => 外部视图不能滑动，内部视图可以滑动", logEnabled: logEnabled)
             outerScrollable = false
             innerScrollable = true
             scrollView.contentOffset.y = outerMaxOffsetY
@@ -134,15 +134,15 @@ extension NestedScrollController: UIScrollViewDelegate {
     /// 内部滚动视图，滚动回调
     private func innerScrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
-        Ext.debug("inner scroll | offsetY: \(offsetY) | outerScrollable \(outerScrollable) | innerScrollable: \(innerScrollable) | outerMaxOffsetY: \(outerMaxOffsetY)", logEnabled: logEnabled)
+        Ext.log("inner scroll | offsetY: \(offsetY) | outerScrollable \(outerScrollable) | innerScrollable: \(innerScrollable) | outerMaxOffsetY: \(outerMaxOffsetY)", logEnabled: logEnabled)
         guard innerScrollable else {
-            Ext.debug("内部视图不能滚动", logEnabled: logEnabled)
+            Ext.log("内部视图不能滚动", logEnabled: logEnabled)
             scrollView.contentOffset.y = 0
             return
         }
         
         if offsetY <= 0 {
-            Ext.debug("内部视图滑动到顶端 => 外部视图能滑动，内部视图不能滑动", logEnabled: logEnabled)
+            Ext.log("内部视图滑动到顶端 => 外部视图能滑动，内部视图不能滑动", logEnabled: logEnabled)
             outerScrollable = true
             innerScrollable = false
             

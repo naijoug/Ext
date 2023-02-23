@@ -85,21 +85,21 @@ public class DiskCache {
                 let resource = resources[i]
                 let filePath = resource.url.ext.filePathWithoutSandboxPrefix
                 let values = resource.resourceValues
-                Ext.debug("\(i) - \(values.isDirectory ?? false) \t - \((values.contentAccessDate ?? Date()).ext.logTime) - \(values.totalFileAllocatedSize ?? 0) | \(filePath)", logEnabled: logEnabled)
+                Ext.log("\(i) - \(values.isDirectory ?? false) \t - \((values.contentAccessDate ?? Date()).ext.logTime) - \(values.totalFileAllocatedSize ?? 0) | \(filePath)", logEnabled: logEnabled)
                 guard let expiredDate = resource.resourceValues.contentAccessDate?.addingTimeInterval(maxTime.seconds), expiredDate < Date() else { continue }
-                Ext.debug("时间过期文件, 移除 \(i) - \(expiredDate.ext.logTime) - \(Date().ext.logTime) | \(filePath)", logEnabled: logEnabled)
+                Ext.log("时间过期文件, 移除 \(i) - \(expiredDate.ext.logTime) - \(Date().ext.logTime) | \(filePath)", logEnabled: logEnabled)
                 try? FileManager.default.removeItem(at: resource.url)
                 resources.remove(at: i)
             }
             var totalSize = UInt(resources.compactMap({ $0.resourceValues.totalFileAllocatedSize ?? 0 }).reduce(0, +))
-            Ext.debug("移除过期时间完成: \(resources.count) | 已缓存空间: \(totalSize) = \(Double(totalSize)/1024/1024) mb | 最大缓存空间 = \(maxSize.title)", logEnabled: logEnabled)
+            Ext.log("移除过期时间完成: \(resources.count) | 已缓存空间: \(totalSize) = \(Double(totalSize)/1024/1024) mb | 最大缓存空间 = \(maxSize.title)", logEnabled: logEnabled)
             if totalSize > maxSize.bytes {
                 for i in stride(from: resources.count - 1, to: -1, by: -1) {
                     let resource = resources[i]
                     let filePath = resource.url.ext.filePathWithoutSandboxPrefix
                     let values = resource.resourceValues
                     let fileSize = UInt(values.totalFileAllocatedSize ?? 0)
-                    Ext.debug("移除 \(i) -\(fileSize) - \(values.isDirectory ?? false) \t - \(values.contentAccessDate ?? Date()) - \(values.totalFileAllocatedSize ?? 0) | \(filePath)", logEnabled: logEnabled)
+                    Ext.log("移除 \(i) -\(fileSize) - \(values.isDirectory ?? false) \t - \(values.contentAccessDate ?? Date()) - \(values.totalFileAllocatedSize ?? 0) | \(filePath)", logEnabled: logEnabled)
                     try? FileManager.default.removeItem(at: resource.url)
                     resources.remove(at: i)
                     totalSize -= fileSize
@@ -108,7 +108,7 @@ public class DiskCache {
                 }
             }
             
-            Ext.debug("缓存移除完成. 缓存尺寸: \(totalSize) = \(Double(totalSize)/1024/1024) mb", logEnabled: logEnabled)
+            Ext.log("缓存移除完成. 缓存尺寸: \(totalSize) = \(Double(totalSize)/1024/1024) mb", logEnabled: logEnabled)
             self.isCleaning = false
             DispatchQueue.main.async {
                 successHandler()
@@ -127,11 +127,11 @@ public class DiskCache {
         let keys: Set<URLResourceKey> = [.isDirectoryKey, .contentAccessDateKey, .totalFileAllocatedSizeKey]
         for folderURL in folderURLs {
             guard let enumerator = FileManager.default.enumerator(at: folderURL, includingPropertiesForKeys: Array(keys)) else {
-                Ext.debug("enumerator is nil. \(folderURL)", logEnabled: logEnabled)
+                Ext.log("enumerator is nil. \(folderURL)", logEnabled: logEnabled)
                 continue
             }
             for (index, value) in enumerator.enumerated() {
-                Ext.debug("\(index) - \(value)", logEnabled: logEnabled)
+                Ext.log("\(index) - \(value)", logEnabled: logEnabled)
                 guard let url = value as? URL, let resourceValues = try? url.resourceValues(forKeys: keys) else { continue }
                 resources.append(CacheResource(url: url, resourceValues: resourceValues))
             }

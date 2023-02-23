@@ -38,9 +38,9 @@ public final class AudioSession {
     
     /// 初始化
     public func setup() {
-        Ext.debug("availableCategories: \(avSession.availableCategories.map({ $0.rawValue }))", tag: .debug, logEnabled: logEnabled)
-        Ext.debug("availableModes: \(avSession.availableModes.map({ $0.rawValue }))", tag: .debug, logEnabled: logEnabled)
-        Ext.debug("default: \(avSession)", tag: .debug, logEnabled: logEnabled)
+        Ext.log("availableCategories: \(avSession.availableCategories.map({ $0.rawValue }))", tag: .debug, logEnabled: logEnabled)
+        Ext.log("availableModes: \(avSession.availableModes.map({ $0.rawValue }))", tag: .debug, logEnabled: logEnabled)
+        Ext.log("default: \(avSession)", tag: .debug, logEnabled: logEnabled)
     }
 }
 
@@ -50,13 +50,13 @@ private extension AudioSession {
     
     func addObservers() {
         observers.append(avSession.observe(\.category, options: [.initial, .new]) { _, change in
-            Ext.debug("changed category: \(change))", tag: .fire, logEnabled: self.logEnabled)
+            Ext.log("changed category: \(change))", tag: .fire, logEnabled: self.logEnabled)
         })
         observers.append(avSession.observe(\.mode, options: [.initial, .new], changeHandler: { _, change in
-            Ext.debug("changed mode: \(change)", tag: .fire, logEnabled: self.logEnabled)
+            Ext.log("changed mode: \(change)", tag: .fire, logEnabled: self.logEnabled)
         }))
         observers.append(avSession.observe(\.categoryOptions, options: [.initial, .new], changeHandler: { _, change in
-            Ext.debug("changed options: \(change)", tag: .fire, logEnabled: self.logEnabled)
+            Ext.log("changed options: \(change)", tag: .fire, logEnabled: self.logEnabled)
         }))
     }
     func removeObservers() {
@@ -78,21 +78,21 @@ private extension AudioSession {
         guard let reasonValue = noti.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt,
               let reason = AVAudioSession.RouteChangeReason(rawValue: reasonValue) else { return }
         
-        Ext.debug("routeChange reason: \(reason)", logEnabled: logEnabled)
+        Ext.log("routeChange reason: \(reason)", logEnabled: logEnabled)
         switch reason {
         case .newDeviceAvailable:
             let previousRoute = noti.userInfo?[AVAudioSessionRouteChangePreviousRouteKey] as? AVAudioSessionRouteDescription
             let newInputs = avSession.currentRoute.inputs.filter { !(previousRoute?.inputs.contains($0) ?? false) }
             let newOutputs = avSession.currentRoute.outputs.filter { !(previousRoute?.outputs.contains($0) ?? false) }
-            Ext.debug("\(String(describing: previousRoute)) -> \(avSession.currentRoute)", logEnabled: logEnabled)
-            Ext.debug("new inputs: \(newInputs) | new outputs: \(newOutputs)")
+            Ext.log("\(String(describing: previousRoute)) -> \(avSession.currentRoute)", logEnabled: logEnabled)
+            Ext.log("new inputs: \(newInputs) | new outputs: \(newOutputs)")
             
             for output in newOutputs {
                 switch output.portType {
                 case .headphones:
-                    Ext.debug("headphone plugged in", tag: .custom("🎧"), logEnabled: logEnabled)
+                    Ext.log("headphone plugged in", tag: .custom("🎧"), logEnabled: logEnabled)
                 case .bluetoothHFP:
-                    Ext.debug("bluetooth connected", tag: .custom("🌶"), logEnabled: logEnabled)
+                    Ext.log("bluetooth connected", tag: .custom("🌶"), logEnabled: logEnabled)
                 default: ()
                 }
             }
@@ -100,8 +100,8 @@ private extension AudioSession {
             guard let previousRoute = noti.userInfo?[AVAudioSessionRouteChangePreviousRouteKey] as? AVAudioSessionRouteDescription else { return }
             let oldInputs = previousRoute.inputs.filter { !avSession.currentRoute.inputs.contains($0) }
             let oldOutputs = previousRoute.outputs.filter { !avSession.currentRoute.outputs.contains($0) }
-            Ext.debug("previous route: \(previousRoute)", logEnabled: logEnabled)
-            Ext.debug("old inputs: \(oldInputs) | old outputs: \(oldOutputs)")
+            Ext.log("previous route: \(previousRoute)", logEnabled: logEnabled)
+            Ext.log("old inputs: \(oldInputs) | old outputs: \(oldOutputs)")
             for output in oldOutputs {
                 switch output.portType {
                     /**
@@ -110,17 +110,17 @@ private extension AudioSession {
                         2> 但是 Category 为 playAndRecord 时，则会把输入设备设置为听筒
                      */
                 case .headphones:
-                    Ext.debug("headphone pulled out", tag: .custom("🎧"), logEnabled: logEnabled)
+                    Ext.log("headphone pulled out", tag: .custom("🎧"), logEnabled: logEnabled)
                 case .bluetoothHFP, .bluetoothA2DP:
-                    Ext.debug("bluetooth disconnected.", tag: .custom("🌶"), logEnabled: logEnabled)
+                    Ext.log("bluetooth disconnected.", tag: .custom("🌶"), logEnabled: logEnabled)
                 default: ()
                 }
             }
         case .categoryChange:
-            Ext.debug("audio session category changed.", tag: .replay)
+            Ext.log("audio session category changed.", tag: .replay)
         default: break
         }
-        Ext.debug("\(avSession)", tag: .audio, logEnabled: logEnabled)
+        Ext.log("\(avSession)", tag: .audio, logEnabled: logEnabled)
     }
 }
 
@@ -190,12 +190,12 @@ public extension AudioSession {
     /// 激活音频分类
     func active(_ kind: Kind) {
         let session = AVAudioSession.sharedInstance()
-        Ext.debug("set \(kind) begin...", tag: .begin, logEnabled: logEnabled)
+        Ext.log("set \(kind) begin...", tag: .begin, logEnabled: logEnabled)
         guard session.category != kind.avCategory || session.categoryOptions != kind.avOptions  else {
-            Ext.debug("no need to set \(kind)", logEnabled: logEnabled)
+            Ext.log("no need to set \(kind)", logEnabled: logEnabled)
             return
         }
-        Ext.debug("\(session.category) -> \(kind.avCategory)", tag: .fire, logEnabled: logEnabled)
+        Ext.log("\(session.category) -> \(kind.avCategory)", tag: .fire, logEnabled: logEnabled)
         do {
             //if category == .playAndRecord, #available(iOS 13.0, *) {
             //    try session.setAllowHapticsAndSystemSoundsDuringRecording(true)
@@ -205,9 +205,9 @@ public extension AudioSession {
             
             //if kind == .playAndRecord { try setPreferredInput() }
         } catch {
-            Ext.debug("set \(kind) failed.", error: error, tag: .failure, logEnabled: Ext.logEnabled)
+            Ext.log("set \(kind) failed.", error: error, tag: .failure, logEnabled: Ext.logEnabled)
         }
-        Ext.debug("set \(kind) end.", tag: .end, logEnabled: logEnabled)
+        Ext.log("set \(kind) end.", tag: .end, logEnabled: logEnabled)
     }
     
     /// 设置最优输入设备
@@ -227,16 +227,16 @@ public extension AudioSession {
             fatalError("no avalible input")
         }
         try session.setPreferredInput(input)
-        Ext.debug("set preferred input: \(input)", logEnabled: logEnabled)
+        Ext.log("set preferred input: \(input)", logEnabled: logEnabled)
     }
     
     /// 强制音频输出为扬声器🔈
     func overrideSpeaker() {
         do {
             try avSession.overrideOutputAudioPort(.speaker)
-            Ext.debug("override output to speaker.", logEnabled: logEnabled)
+            Ext.log("override output to speaker.", logEnabled: logEnabled)
         } catch {
-            Ext.debug("overrride ouput to speaker failed.", error: error, logEnabled: Ext.logEnabled)
+            Ext.log("overrride ouput to speaker failed.", error: error, logEnabled: Ext.logEnabled)
         }
     }
 }

@@ -12,7 +12,7 @@ extension ExtWrapper where Base: UIViewController {
     /// Debug UIViewController Lifecycle
     static func lifecycle() {
         guard Ext.isDebug else { return }
-        //Ext.debug("UIViewController Lifecycle debugging", tag: .recycle, locationEnabled: false)
+        //Ext.log("UIViewController Lifecycle debugging", tag: .recycle, locationEnabled: false)
         UIViewController.lifecycle()
     }
 }
@@ -47,7 +47,7 @@ private extension ExtWrapper where Base: UIViewController {
     
     func log(_ lifecycle: Lifecycle) {
         guard isValid else { return }
-        Ext.debug("\(lifecycle.title) \t | \(typeName)", tag: .custom(lifecycle.tag), locationEnabled: false)
+        Ext.log("\(lifecycle.title) \t | \(typeName)", tag: .custom(lifecycle.tag), locationEnabled: false)
     }
 }
 
@@ -81,7 +81,7 @@ private extension UIViewController {
     func lifecycle_viewDidLoad() {
         let deallocator = Deallocator { [weak self] in
             guard let self else { return }
-            Ext.debug("Deallocated: \(self.ext.typeName)", tag: .recycle)
+            Ext.log("Deallocated: \(self.ext.typeName)", tag: .recycle)
         }
         ext.setAssociatedObject(&Self.deallocatorKey, value: deallocator, policy: .retainNonatomic)
         

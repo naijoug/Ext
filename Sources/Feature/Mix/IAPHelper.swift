@@ -134,11 +134,11 @@ public extension IAPHelper {
                 guard let receiptUrl = Bundle.main.appStoreReceiptURL,
                       FileManager.default.fileExists(atPath: receiptUrl.path),
                       let receipt = try? Data(contentsOf: receiptUrl, options: .alwaysMapped).base64EncodedString(options: []) else {
-                    Ext.debug("transaction \(product.productIdentifier) no receipt", logEnabled: self.logEnabled, locationEnabled: false)
+                    Ext.log("transaction \(product.productIdentifier) no receipt", logEnabled: self.logEnabled, locationEnabled: false)
                     handler(.failure(IAPError.paymentNoReceipt))
                     return
                 }
-                Ext.debug("appstore receipt url: \(receiptUrl.path)")
+                Ext.log("appstore receipt url: \(receiptUrl.path)")
                 handler(.success((tx, receipt)))
             }
         }
@@ -157,7 +157,7 @@ private extension IAPHelper {
             handleProducts(nil, error: IAPError.productIdEmpty)
             return
         }
-        Ext.debug("load products: \(productIdentifiers)")
+        Ext.log("load products: \(productIdentifiers)")
         productsRequest?.cancel()
         productsHandler = handler
         productsRequest = SKProductsRequest(productIdentifiers: productIdentifiers)
@@ -171,7 +171,7 @@ private extension IAPHelper {
             handler(.failure(IAPError.paymentDisabled))
             return
         }
-        Ext.debug("buy product \(product.productIdentifier) ...", logEnabled: logEnabled, locationEnabled: false)
+        Ext.log("buy product \(product.productIdentifier) ...", logEnabled: logEnabled, locationEnabled: false)
         paymentHandler = handler
         let payment = SKPayment(product: product)
         SKPaymentQueue.default().add(payment)
@@ -179,7 +179,7 @@ private extension IAPHelper {
     
     /// 恢复产品
     func _resotre() {
-        Ext.debug("restore product...", logEnabled: logEnabled, locationEnabled: false)
+        Ext.log("restore product...", logEnabled: logEnabled, locationEnabled: false)
         SKPaymentQueue.default().restoreCompletedTransactions()
     }
 }
@@ -189,13 +189,13 @@ private extension IAPHelper {
 extension IAPHelper: SKProductsRequestDelegate {
 
     public func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
-        Ext.debug("load products success: \(response.products)", logEnabled: logEnabled, locationEnabled: false)
+        Ext.log("load products success: \(response.products)", logEnabled: logEnabled, locationEnabled: false)
         let products = response.products
         handleProducts(products, error: nil)
     }
     
     public func request(_ request: SKRequest, didFailWithError error: Error) {
-        Ext.debug("load products failed.", error: error, logEnabled: logEnabled, locationEnabled: false)
+        Ext.log("load products failed.", error: error, logEnabled: logEnabled, locationEnabled: false)
         handleProducts(nil, error: error)
     }
     
@@ -218,7 +218,7 @@ extension IAPHelper: SKPaymentTransactionObserver {
     
     public func paymentQueue(_ queue: SKPaymentQueue, updatedTransactions transactions: [SKPaymentTransaction]) {
         for transaction in transactions {
-            Ext.debug("updated transaction: \(transaction)", logEnabled: logEnabled, locationEnabled: false)
+            Ext.log("updated transaction: \(transaction)", logEnabled: logEnabled, locationEnabled: false)
             
             switch transaction.transactionState {
             case .purchased:
@@ -235,28 +235,28 @@ extension IAPHelper: SKPaymentTransactionObserver {
     }
     public func paymentQueue(_ queue: SKPaymentQueue, removedTransactions transactions: [SKPaymentTransaction]) {
         for transaction in transactions {
-            Ext.debug("removed transaction: \(transaction)")
+            Ext.log("removed transaction: \(transaction)")
         }
     }
     
 
     private func complete(transaction: SKPaymentTransaction) {
-        Ext.debug("complete... \(transaction.payment.productIdentifier)", logEnabled: logEnabled, locationEnabled: false)
+        Ext.log("complete... \(transaction.payment.productIdentifier)", logEnabled: logEnabled, locationEnabled: false)
         handlePayment(transaction, error: nil)
         SKPaymentQueue.default().finishTransaction(transaction)
     }
 
     private func restore(transaction: SKPaymentTransaction) {
-        Ext.debug("restore... \(transaction.payment.productIdentifier)", logEnabled: logEnabled, locationEnabled: false)
+        Ext.log("restore... \(transaction.payment.productIdentifier)", logEnabled: logEnabled, locationEnabled: false)
         SKPaymentQueue.default().finishTransaction(transaction)
     }
 
     private func fail(transaction: SKPaymentTransaction) {
         if let txError = transaction.error as? NSError, txError.code == SKError.paymentCancelled.rawValue {
-            Ext.debug("transaction cancelled.", error: transaction.error, logEnabled: logEnabled, locationEnabled: false)
+            Ext.log("transaction cancelled.", error: transaction.error, logEnabled: logEnabled, locationEnabled: false)
             handlePayment(transaction, error: IAPError.paymentCancelled)
         } else {
-            Ext.debug("transaction error.", error: transaction.error, logEnabled: logEnabled, locationEnabled: false)
+            Ext.log("transaction error.", error: transaction.error, logEnabled: logEnabled, locationEnabled: false)
             handlePayment(transaction, error: transaction.error)
         }
         SKPaymentQueue.default().finishTransaction(transaction)

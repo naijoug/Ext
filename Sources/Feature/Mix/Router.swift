@@ -151,7 +151,7 @@ public extension Router {
         let routerMode = mode ?? param?.mode() ?? self.mode(for: key)
         var log = "route to \(key.url) | mode \(String(describing: mode)) - \(String(describing: routerMode))"
         if let param = param { log += " | \(param)" }
-        Ext.debug(log, tag: .custom("✈️"), locationEnabled: false)
+        Ext.log(log, tag: .custom("✈️"), locationEnabled: false)
         
         goto(controller, mode: routerMode)
     }
@@ -205,7 +205,7 @@ public extension Router {
     /// - Parameter url: url
     func openURL(_ url: URL?) {
         guard let url = url else { return }
-        Ext.debug("open url: \(url.absoluteString)")
+        Ext.log("open url: \(url.absoluteString)")
         guard UIApplication.shared.canOpenURL(url) else { return }
         
         if #available(iOS 10.0, *) {
@@ -252,7 +252,7 @@ public extension Router {
             .openInIBooks
         ]
         vc.completionWithItemsHandler = { (type, succeeded, items, error) in
-            Ext.debug("\(String(describing: type)) \(succeeded) \(String(describing: items)) \(String(describing: error))")
+            Ext.log("\(String(describing: type)) \(succeeded) \(String(describing: items)) \(String(describing: error))")
             guard succeeded else {
                 handler?(.failure(error ?? Ext.Error.inner("share fialure.")))
                 return

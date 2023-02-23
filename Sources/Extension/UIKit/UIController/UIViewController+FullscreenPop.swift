@@ -73,10 +73,10 @@ private extension UINavigationController {
             interactivePopGestureRecognizer?.view?.addGestureRecognizer(ext.fullscreenPopGestureRecognizer)
             
             let internalTargets = (interactivePopGestureRecognizer?.value(forKey: "targets") as? [AnyObject]) ?? []
-            //Ext.debug("internalTargets: \(internalTargets) | \(String(describing: interactivePopGestureRecognizer?.value(forKey: "targets")))")
+            //Ext.log("internalTargets: \(internalTargets) | \(String(describing: interactivePopGestureRecognizer?.value(forKey: "targets")))")
             if let internalTarget = internalTargets.first?.value(forKey: "target") {
                 let internalAction: Selector = NSSelectorFromString("handleNavigationTransition:")
-                //Ext.debug("target: \(internalTarget) | action: \(internalAction)")
+                //Ext.log("target: \(internalTarget) | action: \(internalAction)")
                 ext.fullscreenPopGestureRecognizer.delegate = self.popGestueRecognizerDelegate
                 ext.fullscreenPopGestureRecognizer.addTarget(internalTarget, action: internalAction)
             }
@@ -85,7 +85,7 @@ private extension UINavigationController {
         }
         
         guard !viewControllers.contains(viewController) else { return }
-        //Ext.debug("push \(viewController)", locationEnabled: false)
+        //Ext.log("push \(viewController)", locationEnabled: false)
         fullscreenPop_pushViewController(viewController, animated: animated)
     }
     

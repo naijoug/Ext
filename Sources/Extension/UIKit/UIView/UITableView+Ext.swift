@@ -100,11 +100,11 @@ public extension ExtWrapper where Base: UITableView {
         let height = headerSize.height
         var frame = headerView.frame
      
-        Ext.debug("layout before")
+        Ext.log("layout before")
         
         guard height != frame.size.height else { return }
         
-        Ext.debug("layout after")
+        Ext.log("layout after")
         
         frame.size.height = height
         headerView.frame = frame
