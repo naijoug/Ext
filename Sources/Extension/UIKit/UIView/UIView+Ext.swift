@@ -502,7 +502,7 @@ private extension ExtWrapper where Base: UIImage {
             }
             //Ext.log("date end | pixelBuffer [0, 0]: \(pixelBuffer[0]) | [x: y] [\(bitmapBytesPerRow - 1), \(pixelHeight - 1)]")
         }
-        Ext.log("subtract mask image duration: \(Date().timeIntervalSince(startTime))", logEnabled: Ext.logEnabled)
+        Ext.log("subtract mask image duration: \(Date().timeIntervalSince(startTime))")
         guard let maskCGImage = context.makeImage() else { return nil }
         //Ext.log("444")
         return UIImage(cgImage: maskCGImage)

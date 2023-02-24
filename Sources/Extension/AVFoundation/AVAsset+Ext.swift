@@ -52,9 +52,9 @@ public extension Ext {
     ///   - sourceURL: 源文件
     ///   - outputURL: 输出的 Wav 音频文件
     static func convertToWav(sourceURL: URL, outputURL: URL) {
-        Ext.log("convert to Wav start...", tag: .begin, logEnabled: Ext.logEnabled, locationEnabled: false)
+        Ext.log("convert to Wav start...", tag: .begin, locationEnabled: false)
         guard FileManager.default.fileExists(atPath: sourceURL.path) else {
-            Ext.log("convert file not exist.", logEnabled: Ext.logEnabled, locationEnabled: false)
+            Ext.log("convert file not exist.", locationEnabled: false)
             return
         }
         
@@ -99,7 +99,7 @@ public extension Ext {
             AudioFileFlags.eraseFile.rawValue,
             &destinationFile)
         guard let destinationFile = destinationFile else {
-            Ext.log("destination file create failed. \(error.description)", logEnabled: Ext.logEnabled, locationEnabled: false)
+            Ext.log("destination file create failed. \(error.description)", locationEnabled: false)
             return
         }
         log("① create audio file")
@@ -150,7 +150,7 @@ public extension Ext {
         log("⑥ dispose destination")
         error = ExtAudioFileDispose(sourceFile)
         log("⑦ dispose source")
-        Ext.log("convert to Wav end.", tag: .end, logEnabled: Ext.logEnabled, locationEnabled: false)
+        Ext.log("convert to Wav end.", tag: .end, locationEnabled: false)
     }
     
     /// 转化为 MP4

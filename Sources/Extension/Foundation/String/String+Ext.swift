@@ -123,7 +123,7 @@ public extension ExtWrapper where Base == String {
             return true
         }
         guard checkValid() else {
-            Ext.log("string format failed: \(base) | \(arguments)", tag: .warning, logEnabled: Ext.logEnabled, locationEnabled: false)
+            Ext.log("string format failed: \(base) | \(arguments)", tag: .warning, locationEnabled: false)
             return base
         }
         return String(format: base, arguments: arguments)

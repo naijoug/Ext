@@ -92,9 +92,6 @@ extension Ext.Error: LocalizedError {
 
 public extension Ext {
     
-    /// Ext 全局 log 开关
-    static var logEnabled: Bool = true
-    
     /// 代码定位
     /// - Parameters:
     ///   - file: 文件名
