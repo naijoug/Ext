@@ -16,9 +16,10 @@ public protocol SpeakerUIType: UIView {
 /// 文本说话(文本转语音并播放)
 public final class Speaker: ExtLogable {
     public var logEnabled: Bool = true {
-        didSet {
-            synthesizer.logEnabled = logEnabled
-        }
+        didSet { synthesizer.logEnabled = logEnabled }
+    }
+    public var logLocated: Bool = false {
+        didSet { synthesizer.logLocated = logLocated }
     }
     
     public static let shared = Speaker()
@@ -129,6 +130,7 @@ public extension Speaker {
 
 private class ExtSynthesizer: NSObject, ExtLogable {
     var logEnabled: Bool = false
+    var logLocated: Bool = false
     
     enum Action {
         case start

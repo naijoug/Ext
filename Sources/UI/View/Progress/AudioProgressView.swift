@@ -60,7 +60,6 @@ public class AudioProgressView: ExtView {
             let barX = itemW * CGFloat(i) + (itemW - barW)/2
             let barY = (itemH - barH) / 2
             let barRect = CGRect(x: barX, y: barY, width: barW, height: barH)
-            //Ext.log("bar rect: \(barRect) | \(count)")
             let color = barX > progressW ? trackColor : progressColor
             context?.setFillColor(color.cgColor)
             context?.addRect(barRect)

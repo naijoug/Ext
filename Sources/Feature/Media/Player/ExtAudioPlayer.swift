@@ -18,7 +18,10 @@ public protocol ExtAudioPlayerDelegate: AnyObject {
  
  说明: 仅支持播放本地音频文件
  */
-public class ExtAudioPlayer: NSObject {
+public class ExtAudioPlayer: NSObject, ExtLogable {
+    public var logEnabled: Bool = true
+    public var logLocated: Bool = false
+    
     /// 播放状态
     public enum Status {
         case playing
@@ -64,12 +67,12 @@ public class ExtAudioPlayer: NSObject {
             player.currentTime = time ?? 0
             player.play()
 //            player.play(atTime: time ?? 0)
-            Ext.log("play audio url: \(player.currentTime) -> \(time ?? 0) | device \(player.deviceCurrentTime) | \(url.path)")
+            ext.log("play audio url: \(player.currentTime) -> \(time ?? 0) | device \(player.deviceCurrentTime) | \(url.path)")
             
             delegate?.extAudioPlayer(self, status: .playing)
             startTimer()
         } catch {
-            Ext.log("播放音频失败")
+            ext.log("播放音频失败")
             delegate?.extAudioPlayer(self, status: .failed(error))
         }
     }
@@ -81,7 +84,7 @@ private extension ExtAudioPlayer {
     func startTimer() {
         stopTimer()
         
-        Ext.log("start timer...")
+        ext.log("start timer...")
         timer = CADisplayLink(target: self, selector: #selector(timerAction))
         timer?.add(to: .current, forMode: .common)
     }
@@ -90,45 +93,45 @@ private extension ExtAudioPlayer {
         
         timer?.invalidate()
         timer = nil
-        Ext.log("stop timer.")
+        ext.log("stop timer.")
     }
     @objc
     func timerAction() {
         guard let avPlayer = self.avPlayer, !avPlayer.duration.isNaN else {
-            Ext.log("avPlayer duration: \(avPlayer?.duration ?? 0)")
+            ext.log("avPlayer duration: \(avPlayer?.duration ?? 0)")
             return
         }
-        Ext.log("currentTime: \(avPlayer.currentTime) | duration: \(avPlayer.duration)")
+        ext.log("currentTime: \(avPlayer.currentTime) | duration: \(avPlayer.duration)")
         delegate?.extAudioPlayer(self, timeStatus: .progress(avPlayer.currentTime, duration: avPlayer.duration))
         
         guard isMeteringEnabled else { return }
         avPlayer.updateMeters()
         let average = avPlayer.averagePower(forChannel: 0) // 均值分贝
         let db = CGFloat(pow(10, (0.06 * average))) // 分贝
-        //Ext.log("average: \(average) | db: \(db)")
+        //ext.log("average: \(average) | db: \(db)")
         delegate?.extAudioPlayer(self, timeStatus: .level(db))
     }
 }
 
 extension ExtAudioPlayer: AVAudioPlayerDelegate {
     public func audioPlayerDecodeErrorDidOccur(_ player: AVAudioPlayer, error: Error?) {
-        Ext.log("audio 播放出错 \(error?.localizedDescription ?? "")")
+        ext.log("audio play failed.", error: error)
         delegate?.extAudioPlayer(self, status: .failed(error))
     }
     public func audioPlayerDidFinishPlaying(_ player: AVAudioPlayer, successfully flag: Bool) {
-        Ext.log("audio 播放完成 \(flag)")
+        ext.log("audio play finished. \(flag)")
         
         stopTimer()
         avPlayer?.stop()
         avPlayer = nil
         
         guard playIndex == urls.count - 1 else {
-            Ext.log("播放下一个资源")
+            ext.log("play next audio.")
             self.play()
             return
         }
         playIndex = -1
-        Ext.log("全部播放完成.")
+        ext.log("all audio play finished.")
         self.delegate?.extAudioPlayer(self, status: .playEnd)
     }
 }
@@ -154,7 +157,7 @@ public extension ExtAudioPlayer {
                 player.currentTime = time
             }
             player.play()
-            Ext.log("play audio url: \(player.currentTime) -> \(time ?? 0) | device \(player.deviceCurrentTime)")
+            ext.log("play audio url: \(player.currentTime) -> \(time ?? 0) | device \(player.deviceCurrentTime)")
             
             delegate?.extAudioPlayer(self, status: .playing)
             startTimer()
@@ -166,7 +169,7 @@ public extension ExtAudioPlayer {
         guard 0 <= playIndex, playIndex < urls.count else { return }
         
         let url = urls[playIndex]
-        Ext.log("播放 \(playIndex) url: \(url.path)")
+        ext.log("播放 \(playIndex) url: \(url.path)")
         playAudio(url)
     }
     
@@ -177,7 +180,7 @@ public extension ExtAudioPlayer {
         guard isPlaying else { return }
         avPlayer?.pause()
         delegate?.extAudioPlayer(self, status: .paused)
-        Ext.log("暂停播放")
+        ext.log("暂停播放")
     }
     
     /// 清空播放器
@@ -188,6 +191,6 @@ public extension ExtAudioPlayer {
         stopTimer()
         avPlayer?.stop()
         avPlayer = nil
-        Ext.log("停止播放，清空播放器")
+        ext.log("停止播放，清空播放器")
     }
 }

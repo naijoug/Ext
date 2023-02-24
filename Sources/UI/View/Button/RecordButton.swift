@@ -185,11 +185,9 @@ private extension RecordButton {
         Ext.Permission.microphone { [weak self] status in
             guard let `self` = self else { return }
             guard status.isAuthorized else {
-                Ext.log("麦克风未授权")
                 self.unauthHandler?()
                 return
             }
-            Ext.log("麦克风授权")
             handler?()
         }
     }

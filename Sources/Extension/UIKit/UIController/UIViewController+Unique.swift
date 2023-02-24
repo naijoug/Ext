@@ -24,23 +24,23 @@ public protocol UniqueController: UIViewController {
 private extension UniqueController {
     /// 删除导航堆栈相邻控制器重复
     func remove() {
-        Ext.log("\(navigationController?.viewControllers ?? [])")
+        Ext.inner.ext.log("\(navigationController?.viewControllers ?? [])")
         guard var controllers = navigationController?.viewControllers, controllers.count >= 2 else { return }
         let count = controllers.count
         let prev = controllers[count - 2]
         let current = controllers[count - 1]
-        Ext.log("\(prev.ext.typeFullName) -> \(current.ext.typeName) | prev: \(prev) -> current: \(current)")
+        Ext.inner.ext.log("\(prev.ext.typeFullName) -> \(current.ext.typeName) | prev: \(prev) -> current: \(current)")
         guard prev.ext.typeFullName == current.ext.typeFullName else { return }
-        Ext.log("type equal => ")
+        Ext.inner.ext.log("type equal => ")
         guard let prevUnique = prev as? UniqueController,
               let currentUnique = current as? UniqueController else { return }
-        Ext.log("\(prevUnique.unique) vs \(currentUnique.unique)")
+        Ext.inner.ext.log("\(prevUnique.unique) vs \(currentUnique.unique)")
         guard prevUnique.unique == currentUnique.unique else { return }
         let controller = controllers.remove(at: count - 2)
         controller.removeFromParent()
         navigationController?.setViewControllers(controllers, animated: false)
         //navigationController?.viewControllers.remove(at: count - 2)
-        Ext.log("result: \(controller) | \(controllers) | \(navigationController?.viewControllers ?? [])")
+        Ext.inner.ext.log("result: \(controller) | \(controllers) | \(navigationController?.viewControllers ?? [])")
     }
 }
 

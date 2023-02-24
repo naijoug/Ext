@@ -41,10 +41,10 @@ public extension ExtWrapper where Base: UINavigationBar {
     func reset(clipsToBounds: Bool) {
         // Solution: https://stackoverflow.com/questions/47121427/make-navigationbars-titleview-larger-than-itself
         for subview in base.subviews {
-            //Ext.log("\(subview)")
+            //Ext.inner.ext.log("\(subview)")
             guard subview.clipsToBounds else { continue }
             subview.clipsToBounds = false
-            //Ext.log("clipsToBounds: \(subview)")
+            //Ext.inner.ext.log("clipsToBounds: \(subview)")
         }
     }
     

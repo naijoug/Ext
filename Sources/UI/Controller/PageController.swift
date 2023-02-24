@@ -13,6 +13,7 @@ public protocol PageControllerDelegate: AnyObject {
 
 public class PageController: UIViewController, ExtLogable {
     public var logEnabled: Bool = false
+    public var logLocated: Bool = false
     
     public enum Action {
         case scrollTo(_ index: Int)

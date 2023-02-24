@@ -7,7 +7,7 @@
 
 import Foundation
 
-public final class Ext {}
+public enum Ext {}
 
 public extension Ext {
     /// Debug 模式
@@ -101,19 +101,19 @@ public extension Ext {
         "\((file as NSString).lastPathComponent):\(line) \t\(function)"
     }
     
-    /// 调试日志
+    /// 日志记录
     ///
     /// - Parameters:
     ///   - message: 日志消息
     ///   - error: 错误信息
     ///   - tag: 日志标记
-    ///   - logEnabled: 是否显示日志
-    ///   - locationEnabled: 是否打印代码定位日志
+    ///   - logEnabled: 是否打印日志
+    ///   - logLocated: 是否打印代码位置日志
     static func log(_ message: Any,
                     error: Swift.Error? = nil,
                     tag: Tag = .normal,
                     logEnabled: Bool = true,
-                    locationEnabled: Bool = true,
+                    logLocated: Bool = true,
                     file: String = #file, line: Int = #line, function: String = #function) {
         /**
          Reference:
@@ -123,7 +123,7 @@ public extension Ext {
         #if DEBUG
         guard logEnabled else { return }
         logToTerminal(
-            messageToLog(message, error: error, tag: tag, locationEnabled: locationEnabled, file: file, line: line, function: function)
+            messageToLog(message, error: error, tag: tag, logLocated: logLocated, file: file, line: line, function: function)
         )
         #endif
     }
@@ -133,13 +133,13 @@ public extension Ext {
                     error: Swift.Error? = nil,
                     tag: Tag = .normal,
                     logEnabled: Bool = true,
-                    locationEnabled: Bool = true,
+                    logLocated: Bool = true,
                     logToFileEnabled: Bool,
                     file: String = #file, line: Int = #line, function: String = #function) {
-        log(message, error: error, tag: tag, logEnabled: logEnabled, locationEnabled: locationEnabled, file: file, line: line, function: function)
+        log(message, error: error, tag: tag, logEnabled: logEnabled, logLocated: logLocated, file: file, line: line, function: function)
         guard logToFileEnabled else { return }
         logToFile(
-            messageToLog(message, error: error, tag: tag, locationEnabled: locationEnabled, file: file, line: line, function: function)
+            messageToLog(message, error: error, tag: tag, logLocated: logLocated, file: file, line: line, function: function)
         )
     }
     
@@ -150,12 +150,12 @@ private extension Ext {
     static func messageToLog(_ message: Any,
                              error: Swift.Error? = nil,
                              tag: Tag = .normal,
-                             locationEnabled: Bool = true,
+                             logLocated: Bool = true,
                              file: String = #file, line: Int = #line, function: String = #function) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss SSS"
         var log = "LOG \(formatter.string(from: Date())) \(tag)"
-        if locationEnabled { log += " 【\(codeLocation(file: file, line: line, function: function))】" }
+        if logLocated { log += " 【\(codeLocation(file: file, line: line, function: function))】" }
         log += " \(message)"
         if let error = error { log += " \(Tag.error) \(error)" }
         return log
@@ -307,19 +307,44 @@ extension Ext.Tag: CustomStringConvertible {
 public protocol ExtLogable: ExtCompatible {
     /// 是否启用日志开关
     var logEnabled: Bool { get }
+    /// 是否显示代码位置日志
+    var logLocated: Bool { get }
 }
 public extension ExtLogable {
-    /// 默认开启日志
+    /// 默认: 开启
     var logEnabled: Bool { true }
+    /// 默认: 开启
+    var logLocated: Bool { true }
 }
 
 public extension ExtWrapper where Base: ExtLogable {
+    
+    /// 根据日志开关输出
+    /// - Parameters:
+    ///   - message: 日志消息
+    ///   - error: 错误消息
+    ///   - logEnabled: 是否启用日志
+    ///   - logLocated: 是否显示代码位置日志
     func log(_ message: Any,
              error: Swift.Error? = nil,
              logEnabled: Bool = true,
-             locationEnabled: Bool = true,
+             logLocated: Bool = true,
              file: String = #file, line: Int = #line, function: String = #function) {
-        Ext.log(message, error: error, logEnabled: logEnabled && base.logEnabled,
-                locationEnabled: locationEnabled, file: file, line: line, function: function)
+        Ext.log(message, error: error,
+                logEnabled: logEnabled && base.logEnabled,
+                logLocated: logLocated && base.logLocated,
+                file: file, line: line, function: function)
+    }
+}
+
+extension Ext {
+    static let inner = Inner()
+    
+    /// 内部类
+    struct Inner: ExtLogable {
+        /// 内部默认: 开启日志
+        var logEnabled: Bool = true
+        /// 内部默认: 关闭代码位置日志
+        var logLocated: Bool = false
     }
 }

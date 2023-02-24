@@ -22,12 +22,12 @@ public extension Animation {
             let startView = startView, let endView = endView,
             let startPoint = startView.superview?.convert(startView.center, to: view),
             let endPoint = endView.superview?.convert(endView.center, to: view) else {
-            Ext.log("fly animation path error.")
+            Ext.inner.ext.log("fly animation path error.")
             handler?(.failure(Ext.Error.inner("animation path error.")))
             return
         }
-        Ext.log("\(startView) | \(endView)")
-        Ext.log("animation start: \(startPoint) -> end: \(endPoint)")
+        Ext.inner.ext.log("\(startView) | \(endView)")
+        Ext.inner.ext.log("animation start: \(startPoint) -> end: \(endPoint)")
         
         let animationImageView = UIImageView(image: image)
         view.addSubview(animationImageView)
@@ -35,7 +35,7 @@ public extension Animation {
         
         CATransaction.begin()
         CATransaction.setCompletionBlock {
-            Ext.log("fly animation completion.")
+            Ext.inner.ext.log("fly animation completion.")
             animationImageView.removeFromSuperview()
             handler?(.success(()))
         }

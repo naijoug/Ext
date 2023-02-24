@@ -32,7 +32,7 @@ public extension ExtWrapper where Base == Data {
             let data = try JSONSerialization.data(withJSONObject: jsonObject, options: isPrettyPrinted ? [.prettyPrinted] : [])
             return String(data: data, encoding: .utf8)
         } catch {
-            Ext.log("data to JSONString failed.", error: error, logEnabled: errorLogged, locationEnabled: false)
+            Ext.inner.ext.log("data to JSONString failed.", error: error, logEnabled: errorLogged)
             return nil
         }
     }
@@ -42,7 +42,7 @@ public extension ExtWrapper where Base == Data {
         do {
             return try JSONSerialization.jsonObject(with: base, options: options)
         } catch {
-            Ext.log("data to jsonObject failed.", error: error, locationEnabled: false)
+            Ext.inner.ext.log("data to jsonObject failed.", error: error)
             return nil
         }
     }
@@ -52,7 +52,7 @@ public extension ExtWrapper where Base == Data {
         do {
             return try JSONDecoder().decode(modelType, from: base)
         } catch {
-            Ext.log("data to decodable model failed.", error: error, locationEnabled: false)
+            Ext.inner.ext.log("data to decodable model failed.", error: error)
             return nil
         }
     }

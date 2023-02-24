@@ -25,7 +25,7 @@ public extension Ext.JSON {
             let options: JSONSerialization.WritingOptions = prettyPrinted ? [.prettyPrinted, .fragmentsAllowed] : [.fragmentsAllowed]
             return try JSONSerialization.data(withJSONObject: jsonObject, options: options)
         } catch {
-            Ext.log("jsonObject to data failed.", error: error)
+            Ext.inner.ext.log("jsonObject to data failed.", error: error)
             return nil
         }
     }
@@ -35,20 +35,20 @@ public extension Ext.JSON {
         do {
             return try JSONEncoder().encode(value)
         } catch {
-            Ext.log("encodable to data failed.", error: error)
+            Ext.inner.ext.log("encodable to data failed.", error: error)
             return nil
         }
     }
     /// JSON file --> Data
     static func toData(filePath: String) -> Data? {
         guard FileManager.default.fileExists(atPath: filePath) else {
-            Ext.log("JSON file not exist.", tag: .error)
+            Ext.inner.ext.log("❌ JSON file not exist.")
             return nil
         }
         do {
             return try Data(contentsOf: URL(fileURLWithPath: filePath))
         } catch {
-            Ext.log("JSON file to Data failed.", error: error)
+            Ext.inner.ext.log("JSON file to Data failed.", error: error)
             return nil
         }
     }
@@ -80,7 +80,7 @@ public extension Ext.JSON {
         do {
             return try JSONSerialization.jsonObject(with: data, options: [.allowFragments, .mutableLeaves])
         } catch {
-            Ext.log("data to jsonObject failed.", error: error)
+            Ext.inner.ext.log("data to jsonObject failed.", error: error)
             return nil
         }
     }
@@ -107,7 +107,7 @@ public extension Ext.JSON {
         do {
             return try JSONDecoder().decode(modelType, from: data)
         } catch {
-            Ext.log("data to decodable failed.", error: error)
+            Ext.inner.ext.log("data to decodable failed.", error: error)
             return nil
         }
     }

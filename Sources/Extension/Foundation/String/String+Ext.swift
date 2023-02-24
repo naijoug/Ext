@@ -97,7 +97,7 @@ public extension ExtWrapper where Base == String {
     /// test swift format
     func test() {
         // https://stackoverflow.com/questions/52332747/what-are-the-supported-swift-string-format-specifiers
-        Ext.log("\(String(format: "%2$@ %1$@", "world", "Hello"))")
+        Ext.inner.ext.log("\(String(format: "%2$@ %1$@", "world", "Hello"))")
     }
     
     /**
@@ -123,7 +123,7 @@ public extension ExtWrapper where Base == String {
             return true
         }
         guard checkValid() else {
-            Ext.log("string format failed: \(base) | \(arguments)", tag: .warning, locationEnabled: false)
+            Ext.inner.ext.log("⚠️ string format failed: \(base) | \(arguments)")
             return base
         }
         return String(format: base, arguments: arguments)

@@ -73,7 +73,7 @@ public extension ExtWrapper where Base == FileManager {
         do {
             try base.removeItem(at: url)
         } catch {
-            Ext.log("remove \(url.absoluteString) failed.", error: error, tag: .file, locationEnabled: false)
+            Ext.inner.ext.log("remove failed. | \(url.absoluteString)", error: error)
         }
     }
     
@@ -93,17 +93,17 @@ public extension ExtWrapper where Base == FileManager {
     /// 如果文件夹不存在，创建
     func createIfNotExists(_ folderUrl: URL?) {
         guard let folderUrl = folderUrl else {
-            Ext.log("folder url is nil", tag: .file, locationEnabled: false)
+            Ext.inner.ext.log("folder url is nil")
             return
         }
         guard !base.fileExists(atPath: folderUrl.path) else {
-            //print("📂 已存在: Url: \(folderUrl.path)")
+            //Ext.inner.ext.log("📂 已存在: Url: \(folderUrl.path)")
             return
         }
         do {
             try base.createDirectory(at: folderUrl, withIntermediateDirectories: true, attributes: nil)
         } catch {
-            Ext.log("folder create failure | \(folderUrl.path)", error: error, tag: .file, locationEnabled: false)
+            Ext.inner.ext.log("folder create failed. | \(folderUrl.path)", error: error)
         }
     }
     
@@ -114,7 +114,7 @@ public extension ExtWrapper where Base == FileManager {
             let data = try Data(contentsOf: url)
             return String(data: data, encoding: .utf8)
         } catch {
-            Ext.log("read failed.", error: error, tag: .file, locationEnabled: false)
+            Ext.inner.ext.log("read failed.", error: error)
             return nil
         }
     }
@@ -124,9 +124,9 @@ public extension ExtWrapper where Base == FileManager {
     ///   - url: 保存 url
     func save(_ string: String?, to url: URL?) {
         guard let string = string, let url = url else { return }
-        //Ext.log("save data to \(url.path): \(string)")
+        //Ext.inner.ext.log("save data to \(url.path): \(string)")
         let folderUrl = url.deletingLastPathComponent()
-        //Ext.log("文件夹路径: \(folderUrl.path)")
+        //Ext.inner.ext.log("文件夹路径: \(folderUrl.path)")
         // 目标目录不存在，创建
         createIfNotExists(folderUrl)
         do {
@@ -137,7 +137,7 @@ public extension ExtWrapper where Base == FileManager {
             // 保存数据
             try string.write(to: url, atomically: false, encoding: .utf8)
         } catch {
-            Ext.log("save failed.", error: error, tag: .file, locationEnabled: false)
+            Ext.inner.ext.log("save failed.", error: error)
         }
     }
     
@@ -158,7 +158,7 @@ public extension ExtWrapper where Base == FileManager {
             // 保存数据
             try data.write(to: url)
         } catch {
-            Ext.log("save failure.", error: error, locationEnabled: false)
+            Ext.inner.ext.log("save failed.", error: error)
         }
     }
     
@@ -166,31 +166,31 @@ public extension ExtWrapper where Base == FileManager {
     @discardableResult
     func save(_ sourceUrl: URL?, to url: URL?) -> Bool {
         guard let sourceUrl = sourceUrl else {
-            Ext.log("源资源 Url 为 nil")
+            Ext.inner.ext.log("源资源 Url 为 nil")
             return false
         }
         guard let url = url else {
-            Ext.log("目标资源 Url 为 nil")
+            Ext.inner.ext.log("目标资源 Url 为 nil")
             return false
         }
         guard base.fileExists(atPath: sourceUrl.path) else {
-            Ext.log("源资源不存在 : \(sourceUrl.path)")
+            Ext.inner.ext.log("源资源不存在 : \(sourceUrl.path)")
             return false
         }
         let folderUrl = url.deletingLastPathComponent()
-        // Ext.log("文件夹路径: \(folderUrl.path)")
+        // Ext.inner.ext.log("文件夹路径: \(folderUrl.path)")
         // 目标目录不存在，创建
         createIfNotExists(folderUrl)
         do {
             try base.moveItem(at: sourceUrl, to: url)
             return true
         } catch {
-            Ext.log("move failure.", error: error, tag: .file, locationEnabled: false)
+            Ext.inner.ext.log("move failed.", error: error)
             do {
                 try base.copyItem(at: sourceUrl, to: url)
                 return true
             } catch {
-                Ext.log("copy failure.", error: error, tag: .file, locationEnabled: false)
+                Ext.inner.ext.log("copy failed.", error: error)
                 return false
             }
         }
@@ -200,26 +200,26 @@ public extension ExtWrapper where Base == FileManager {
     @discardableResult
     func copy(_ sourceUrl: URL?, to url: URL?) -> Bool {
         guard let sourceUrl = sourceUrl else {
-            Ext.log("源资源 Url 为 nil")
+            Ext.inner.ext.log("源资源 Url 为 nil")
             return false
         }
         guard let url = url else {
-            Ext.log("目标资源 Url 为 nil")
+            Ext.inner.ext.log("目标资源 Url 为 nil")
             return false
         }
         guard base.fileExists(atPath: sourceUrl.path) else {
-            Ext.log("源资源不存在 : \(sourceUrl.path)")
+            Ext.inner.ext.log("源资源不存在 : \(sourceUrl.path)")
             return false
         }
         let folderUrl = url.deletingLastPathComponent()
-        //Ext.log("文件夹路径: \(folderUrl.path)")
+        //Ext.inner.ext.log("文件夹路径: \(folderUrl.path)")
         // 目标目录不存在，创建
         createIfNotExists(folderUrl)
         do {
             try base.copyItem(at: sourceUrl, to: url)
             return true
         } catch {
-            Ext.log("copy failure.", error: error, tag: .file, locationEnabled: false)
+            Ext.inner.ext.log("copy failed.", error: error)
             return false
         }
     }

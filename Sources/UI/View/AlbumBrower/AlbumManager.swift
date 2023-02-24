@@ -9,7 +9,10 @@ import Foundation
 import Photos
 
 /// 相册管理
-public final class AlbumManager {
+public final class AlbumManager: ExtLogable {
+    public var logEnabled: Bool = true
+    public var logLocated: Bool = false
+    
     public static let shared = AlbumManager()
     private init() {}
     
@@ -104,8 +107,9 @@ public extension AlbumManager {
         options.deliveryMode = .highQualityFormat
         options.isNetworkAccessAllowed = true
         options.isSynchronous = false
-        phManager.requestImage(for: asset, targetSize: size, contentMode: .aspectFill, options: options) { image, userInfo in
-            Ext.log("request image | \(userInfo ?? [:])")
+        phManager.requestImage(for: asset, targetSize: size, contentMode: .aspectFill, options: options) { [weak self] image, userInfo in
+            guard let self else { return }
+            self.ext.log("request image | \(userInfo ?? [:])")
             queue.async {
                 guard let image = image else {
                     handler(.failure(Ext.Error.inner("request image error.")))
@@ -126,8 +130,9 @@ public extension AlbumManager {
         options.isNetworkAccessAllowed = true
         options.deliveryMode = .highQualityFormat
         if #available(iOS 13, *) {
-            phManager.requestImageDataAndOrientation(for: asset, options: options) { data, identifier, orientation, userInfo in
-                Ext.log("\(identifier ?? "") | \(orientation) | \(userInfo ?? [:])")
+            phManager.requestImageDataAndOrientation(for: asset, options: options) { [weak self] data, identifier, orientation, userInfo in
+                guard let self else { return }
+                self.ext.log("\(identifier ?? "") | \(orientation) | \(userInfo ?? [:])")
                 queue.async {
                     guard let data = data else {
                         handler(.failure(Ext.Error.inner("request image data error.")))
@@ -137,8 +142,9 @@ public extension AlbumManager {
                 }
             }
         } else {
-            phManager.requestImageData(for: asset, options: options) { data, identifier, orientation, userInfo in
-                Ext.log("\(identifier ?? "") | \(orientation) | \(userInfo ?? [:])")
+            phManager.requestImageData(for: asset, options: options) { [weak self] data, identifier, orientation, userInfo in
+                guard let self else { return }
+                self.ext.log("\(identifier ?? "") | \(orientation) | \(userInfo ?? [:])")
                 queue.async {
                     guard let data = data else {
                         handler(.failure(Ext.Error.inner("request image data error.")))
@@ -160,8 +166,9 @@ public extension AlbumManager {
         let options = PHVideoRequestOptions()
         options.isNetworkAccessAllowed = true
         options.deliveryMode = .highQualityFormat
-        phManager.requestPlayerItem(forVideo: asset, options: options) { playerItem, userInfo in
-            Ext.log("request playerItem | \(userInfo ?? [:])")
+        phManager.requestPlayerItem(forVideo: asset, options: options) { [weak self] playerItem, userInfo in
+            guard let self else { return }
+            self.ext.log("request playerItem | \(userInfo ?? [:])")
             queue.async {
                 guard let playerItem = playerItem else {
                     handler(.failure(Ext.Error.inner("request playerItem error.")))
@@ -182,9 +189,10 @@ public extension AlbumManager {
         let options = PHVideoRequestOptions()
         options.isNetworkAccessAllowed = true
         options.deliveryMode = .highQualityFormat
-        phManager.requestAVAsset(forVideo: asset, options: options) { avAsset, audioMix, userInfo in
+        phManager.requestAVAsset(forVideo: asset, options: options) { [weak self] avAsset, audioMix, userInfo in
+            guard let self else { return }
             queue.async {
-                Ext.log("request avAsset | \(String(describing: avAsset)) | \(String(describing: audioMix)) | \(userInfo ?? [:])")
+                self.ext.log("request avAsset | \(String(describing: avAsset)) | \(String(describing: audioMix)) | \(userInfo ?? [:])")
                 queue.async {
                     guard let avAsset = avAsset else {
                         handler(.failure(Ext.Error.inner("request avAsset error.")))

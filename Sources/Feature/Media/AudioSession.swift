@@ -20,6 +20,7 @@ private var AudioSessionCategoryContext = 0
 /// 音频 Session
 public final class AudioSession: ExtLogable {
     public var logEnabled: Bool = true
+    public var logLocated: Bool = false
     
     public static let shared = AudioSession()
     
@@ -86,8 +87,8 @@ private extension AudioSession {
             let previousRoute = noti.userInfo?[AVAudioSessionRouteChangePreviousRouteKey] as? AVAudioSessionRouteDescription
             let newInputs = avSession.currentRoute.inputs.filter { !(previousRoute?.inputs.contains($0) ?? false) }
             let newOutputs = avSession.currentRoute.outputs.filter { !(previousRoute?.outputs.contains($0) ?? false) }
-            Ext.log("\(String(describing: previousRoute)) -> \(avSession.currentRoute)")
-            Ext.log("new inputs: \(newInputs) | new outputs: \(newOutputs)")
+            ext.log("\(String(describing: previousRoute)) -> \(avSession.currentRoute)")
+            ext.log("new inputs: \(newInputs) | new outputs: \(newOutputs)")
             
             for output in newOutputs {
                 switch output.portType {

@@ -8,7 +8,9 @@
 import UIKit
 
 /// 自动缩放字体大小 textView
-public class AutoFontSizeTextView: PlaceholderTextView {
+public class AutoFontSizeTextView: PlaceholderTextView, ExtLogable {
+    public var logEnabled: Bool = true
+    public var logLocated: Bool = false
     
     private var minFontSize: CGFloat = 6
     private var maxFontSize: CGFloat = 60
@@ -33,32 +35,32 @@ public class AutoFontSizeTextView: PlaceholderTextView {
         let expectedSize = sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude))
         
         guard expectedSize.height != currentSize.height else {
-            Ext.log("字体不需要缩放")
+            ext.log("字体不需要缩放")
             return
         }
-        Ext.log("textView font : \(font?.pointSize ?? 0)")
+        ext.log("textView font : \(font?.pointSize ?? 0)")
         guard var expectedFont = font else {
-            Ext.log("textView font is nil", tag: .warning)
+            Ext.log("textView font is nil")
             return
         }
-        Ext.log("current font: \(expectedFont.pointSize)")
+        ext.log("current font: \(expectedFont.pointSize)")
         
         guard expectedSize.height > currentSize.height else {
-            Ext.log("需要将字体放大")
+            ext.log("需要将字体放大")
             while sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude)).height < currentSize.height {
                 expectedFont = expectedFont.withSize(expectedFont.pointSize + 1)
                 guard expectedFont.pointSize <= maxFontSize else { break }
-                //Ext.log("放大字体 \(font?.pointSize ?? 0) -> \(expectedFont.pointSize)")
+                //ext.log("放大字体 \(font?.pointSize ?? 0) -> \(expectedFont.pointSize)")
                 font = expectedFont
                 placeholderFont = expectedFont
             }
             return
         }
-        Ext.log("需要将字体缩小")
+        ext.log("需要将字体缩小")
         while sizeThatFits(CGSize(width: fixedWidth, height: CGFloat.greatestFiniteMagnitude)).height > currentSize.height {
             expectedFont = expectedFont.withSize(expectedFont.pointSize - 1)
             guard expectedFont.pointSize >= minFontSize else { break }
-            //Ext.log("缩小字体: \(font?.pointSize ?? 0) -> \(expectedFont.pointSize)")
+            //ext.log("缩小字体: \(font?.pointSize ?? 0) -> \(expectedFont.pointSize)")
             font = expectedFont
             placeholderFont = expectedFont
         }

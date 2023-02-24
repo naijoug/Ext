@@ -145,8 +145,8 @@ extension BaseScrollController: UIScrollViewDelegate {
   | ----------- |
  **/
 public class ScrollViewDragger: ExtLogable {
-    /// 是否打印日志
     public var logEnabled: Bool = false
+    public var logLocated: Bool = false
     
     /**
      Reference:

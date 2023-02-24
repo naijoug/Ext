@@ -52,6 +52,7 @@ public protocol ExtPlayerViewDelegate: AnyObject {
 
 open class ExtPlayerView: UIView, ExtLogable {
     public var logEnabled: Bool = true
+    public var logLocated: Bool = false
     
     /// 播放器视图状态
     public enum Status: Equatable {
@@ -153,7 +154,7 @@ open class ExtPlayerView: UIView, ExtLogable {
     
     deinit {
         clear()
-        Ext.log("", tag: .recycle)
+        ext.log("♻️")
     }
     public override init(frame: CGRect) {
         super.init(frame: frame)

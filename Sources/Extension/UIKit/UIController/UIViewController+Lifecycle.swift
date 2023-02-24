@@ -12,42 +12,8 @@ extension ExtWrapper where Base: UIViewController {
     /// Debug UIViewController Lifecycle
     static func lifecycle() {
         guard Ext.isDebug else { return }
-        //Ext.log("UIViewController Lifecycle debugging", tag: .recycle, locationEnabled: false)
+        //Ext.inner.ext.log("♻️ UIViewController Lifecycle debugging")
         UIViewController.lifecycle()
-    }
-}
-private extension ExtWrapper where Base: UIViewController {
-    /// 控制器生命周期
-    enum Lifecycle {
-        case viewDidLoad
-        case viewWillAppear
-        case viewDidAppear
-        case viewWillDisappear
-        case viewDidDisappear
-        
-        var tag: String {
-            switch self {
-            case .viewDidLoad:          return "🌞"
-            case .viewWillAppear:       return "🌖"
-            case .viewDidAppear:        return "🌕"
-            case .viewWillDisappear:    return "🌒"
-            case .viewDidDisappear:     return "🌑"
-            }
-        }
-        var title: String {
-            switch self {
-            case .viewDidLoad:          return "viewDidLoad         "
-            case .viewWillAppear:       return "viewWillAppear      "
-            case .viewDidAppear:        return "viewDidAppear       "
-            case .viewWillDisappear:    return "viewWillDisappear   "
-            case .viewDidDisappear:     return "viewDidDisappear    "
-            }
-        }
-    }
-    
-    func log(_ lifecycle: Lifecycle) {
-        guard isValid else { return }
-        Ext.log("\(lifecycle.title) \t | \(typeName)", tag: .custom(lifecycle.tag), locationEnabled: false)
     }
 }
 
@@ -81,7 +47,7 @@ private extension UIViewController {
     func lifecycle_viewDidLoad() {
         let deallocator = Deallocator { [weak self] in
             guard let self else { return }
-            Ext.log("Deallocated: \(self.ext.typeName)", tag: .recycle)
+            Ext.inner.ext.log("♻️ Deallocated: \(self.ext.typeName)")
         }
         ext.setAssociatedObject(&Self.deallocatorKey, value: deallocator, policy: .retainNonatomic)
         
@@ -111,6 +77,34 @@ private extension UIViewController {
 }
 
 private extension ExtWrapper where Base: UIViewController {
+    /// 控制器生命周期
+    enum Lifecycle {
+        case viewDidLoad
+        case viewWillAppear
+        case viewDidAppear
+        case viewWillDisappear
+        case viewDidDisappear
+        
+        var tag: String {
+            switch self {
+            case .viewDidLoad:          return "🌞"
+            case .viewWillAppear:       return "🌖"
+            case .viewDidAppear:        return "🌕"
+            case .viewWillDisappear:    return "🌒"
+            case .viewDidDisappear:     return "🌑"
+            }
+        }
+        var title: String {
+            switch self {
+            case .viewDidLoad:          return "viewDidLoad         "
+            case .viewWillAppear:       return "viewWillAppear      "
+            case .viewDidAppear:        return "viewDidAppear       "
+            case .viewWillDisappear:    return "viewWillDisappear   "
+            case .viewDidDisappear:     return "viewDidDisappear    "
+            }
+        }
+    }
+    
     /// 是否为 UIKit 系统控制器
     private var isUIKit: Bool {
         let name = typeName
@@ -132,5 +126,11 @@ private extension ExtWrapper where Base: UIViewController {
         return name.hasPrefix("Doraemon") && name.hasSuffix("Controller")
     }
     
-    private var isValid: Bool { !isUIKit && !isDoKit }
+    /// 控制器是否显示生命周期日志
+    private var lifecycleEnabled: Bool { !isUIKit && !isDoKit }
+    
+    func log(_ lifecycle: Lifecycle) {
+        guard base.ext.lifecycleEnabled else { return }
+        Ext.inner.ext.log("\(lifecycle.tag) \(lifecycle.title) \t | \(base.ext.typeName)")
+    }
 }

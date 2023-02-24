@@ -67,7 +67,7 @@ public extension Sandbox {
 
 private class FileController: UITableViewController, ExtLogable {
     var logEnabled: Bool = false
-    
+    var logLocated: Bool = false
     
     /// 根路径
     private static let rootPath = NSHomeDirectory()

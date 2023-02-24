@@ -68,7 +68,7 @@ public class WaveformView: ExtView {
     }
     deinit {
         stop()
-        Ext.log("", tag: .recycle)
+        Ext.inner.ext.log("♻️")
     }
 }
 
@@ -77,7 +77,7 @@ public class WaveformView: ExtView {
 extension WaveformView {
     
     public func update(_ level: CGFloat) {
-        // Ext.log("level: \(level)")
+        // Ext.inner.ext.log("level: \(level)")
         amplitude = max(level, idleAmplitude)
     }
     

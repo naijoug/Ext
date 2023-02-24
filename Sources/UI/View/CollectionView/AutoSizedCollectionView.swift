@@ -25,7 +25,7 @@ public class AutoSizedCollectionView: UICollectionView {
     public override func layoutSubviews() {
         super.layoutSubviews()
         
-        Ext.log("\(bounds) | \(collectionViewLayout.collectionViewContentSize)", tag: .debug)
+        Ext.inner.ext.log("\(bounds) | \(collectionViewLayout.collectionViewContentSize)")
         guard bounds.size != intrinsicContentSize else { return }
         invalidateIntrinsicContentSize()
     }

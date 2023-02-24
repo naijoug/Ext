@@ -26,11 +26,11 @@ public extension Array where Element: Equatable {
         var nextIndex = index + 1
         guard loop else {
             guard 0 <= nextIndex, nextIndex < count else { return nil }
-            Ext.log("\(index) -> \(nextIndex)")
+            Ext.inner.ext.log("\(index) -> \(nextIndex)")
             return nextIndex
         }
         nextIndex = nextIndex % count
-        Ext.log("loop: \(index) -> \(nextIndex)")
+        Ext.inner.ext.log("loop: \(index) -> \(nextIndex)")
         return nextIndex
     }
     /// 指定索引的上一个元素索引
@@ -42,11 +42,11 @@ public extension Array where Element: Equatable {
         var preIndex = index - 1
         guard loop else {
             guard 0 <= preIndex, preIndex < count else { return nil }
-            Ext.log("\(index) -> \(preIndex)")
+            Ext.inner.ext.log("\(index) -> \(preIndex)")
             return preIndex
         }
         preIndex = (count + preIndex) % count
-        Ext.log("loop: \(index) -> \(preIndex)")
+        Ext.inner.ext.log("loop: \(index) -> \(preIndex)")
         return preIndex
     }
 }
@@ -71,11 +71,11 @@ public extension Array where Element: Equatable {
         var nextIndex = index + 1
         guard loop else {
             guard 0 <= nextIndex, nextIndex < count else { return nil }
-            Ext.log("\(index) -> \(nextIndex)")
+            Ext.inner.ext.log("\(index) -> \(nextIndex)")
             return self[nextIndex]
         }
         nextIndex = nextIndex % count
-        Ext.log("loop: \(index) -> \(nextIndex)")
+        Ext.inner.ext.log("loop: \(index) -> \(nextIndex)")
         return self[nextIndex]
     }
     
@@ -97,11 +97,11 @@ public extension Array where Element: Equatable {
         var preIndex = index - 1
         guard loop else {
             guard 0 <= preIndex, preIndex < count else { return nil }
-            Ext.log("\(index) -> \(preIndex)")
+            Ext.inner.ext.log("\(index) -> \(preIndex)")
             return self[preIndex]
         }
         preIndex = (count + preIndex) % count
-        Ext.log("loop: \(index) -> \(preIndex)")
+        Ext.inner.ext.log("loop: \(index) -> \(preIndex)")
         return self[preIndex]
     }
 }

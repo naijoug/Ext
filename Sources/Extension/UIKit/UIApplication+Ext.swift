@@ -83,7 +83,7 @@ public extension ExtWrapper where Base == UIApplication {
         } else if let presented = controller?.presentedViewController {
             return topViewController(presented)
         }
-        //Ext.log("\(controller?.ext.typeFullName ?? "")", tag: .custom("⛰"), locationEnabled: false)
+        //Ext.inner.ext.log("\(controller?.ext.typeFullName ?? "")")
         return controller
     }
 }
@@ -162,7 +162,7 @@ public extension ExtWrapper where Base == UIApplication {
                 try FileManager.default.removeItem(atPath: path2)
             }
         } catch {
-            Ext.log("Failed to clear LaunchScreen cache", error: error, tag: .fix, locationEnabled: false)
+            Ext.inner.ext.log("clear LaunchScreen cache failed.", error: error)
         }
     }
 }

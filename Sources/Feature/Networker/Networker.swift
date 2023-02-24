@@ -29,8 +29,9 @@ public typealias ProgressHandler = (_ progress: Double, _ speed: Double) -> Void
 
 /// Networker
 public final class Networker: NSObject, ExtLogable {
-    /// 是否打印日志
     public var logEnabled: Bool = true
+    public var logLocated: Bool = false
+    
     /// 是否打印 HTTP headers 日志
     public var headerLogged: Bool = false
     /// 是否打印下载日志
@@ -93,12 +94,12 @@ extension Networker {
         let key = task.url.absoluteString
         var tasks = downloadTasks[key] ?? [DownloadTask]()
         if !tasks.isEmpty, tasks.contains(where: { $0.stamp == task.stamp }) {
-            ext.log("已经包含该 \(task.stamp) 任务", logEnabled: downloadLogged, locationEnabled: false)
+            ext.log("已经包含该 \(task.stamp) 任务", logEnabled: downloadLogged)
             return false
         }
         tasks.append(task)
         downloadTasks[key] = tasks
-        ext.log("添加下载任务: \(task.stamp) | \(task.startTime) | \(key)", logEnabled: downloadLogged, locationEnabled: false)
+        ext.log("添加下载任务: \(task.stamp) | \(task.startTime) | \(key)", logEnabled: downloadLogged)
         return true
     }
     /// 查询下载任务

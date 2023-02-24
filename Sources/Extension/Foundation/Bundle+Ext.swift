@@ -28,7 +28,7 @@ public extension ExtWrapper where Base == Bundle {
             name = name ?? String(reflecting: cls).components(separatedBy: ".").first
         }
         guard let path = bundle.path(forResource: name, ofType: "bundle") else {
-            Ext.log("bundle path error. bundlePath: \(bundle.bundlePath) | bundleName: \(name ?? "")", tag: .error, locationEnabled: false)
+            Ext.inner.ext.log("❌ bundle path error. bundlePath: \(bundle.bundlePath) | bundleName: \(name ?? "")")
             return Bundle.main
         }
         return Bundle(path: path) ?? .main

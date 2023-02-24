@@ -15,6 +15,7 @@ import UIKit
 /// 可分页布局
 public class PageableFlowLayout: RTLFlowLayout, ExtLogable {
     public var logEnabled: Bool = false
+    public var logLocated: Bool = false
     
     public enum Alignment {
         case left

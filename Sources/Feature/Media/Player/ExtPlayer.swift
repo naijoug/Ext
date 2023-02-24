@@ -51,11 +51,11 @@ public extension ExtPlayer {
 }
 
 public class ExtPlayer: NSObject, ExtLogable {
-    /// 日志标识
     public var logEnabled: Bool = false
+    public var logLocated: Bool = false
+    
     /// 时间监听回调日志
     public var timeLogEnabled: Bool = false
-    
     
     public weak var delegate: ExtPlayerDelegate?
     
@@ -119,7 +119,7 @@ public class ExtPlayer: NSObject, ExtLogable {
     }
     deinit {
         clear()
-        Ext.log("", tag: .recycle)
+        ext.log("♻️")
     }
     
 // MARK: - Params

@@ -63,7 +63,7 @@ public extension ExtWrapper where Base == TimeInterval {
         let second = total % 60
         let minute = (total / 60) % 60
         let hour = total / 60 / 60
-        //Ext.log("total: \(total) | hour: \(hour) minute: \(minute) | second: \(second)")
+        //Ext.inner.ext.log("total: \(total) | hour: \(hour) minute: \(minute) | second: \(second)")
         let formater = "%02d"
         return "\(hour > 0 ? "\(formater.ext.format(hour)):" : "")\(formater.ext.format(minute)):\(formater.ext.format(second))"
     }

@@ -48,7 +48,7 @@ private final class InnerMediaPicker: NSObject, UIImagePickerControllerDelegate,
     
     private var isPicking: Bool = false {
         didSet {
-            Ext.log("\(oldValue) -> \(isPicking)")
+            Ext.inner.ext.log("\(oldValue) -> \(isPicking)")
         }
     }
     
@@ -67,7 +67,7 @@ private final class InnerMediaPicker: NSObject, UIImagePickerControllerDelegate,
     ///   - handler: 结果回调
     func pick(_ sourceType: UIImagePickerController.SourceType, mediaType: MediaPicker.MediaType, editEnabled: Bool = false, handler: @escaping Ext.DataHandler<MediaPicker.MediaResult>) {
         self.handler = handler
-        Ext.log("availableMediaTypes: \(UIImagePickerController.availableMediaTypes(for: .photoLibrary) ?? [])")
+        Ext.inner.ext.log("availableMediaTypes: \(UIImagePickerController.availableMediaTypes(for: .photoLibrary) ?? [])")
         
         let picker = UIImagePickerController()
         picker.delegate = self
@@ -80,27 +80,27 @@ private final class InnerMediaPicker: NSObject, UIImagePickerControllerDelegate,
         case .all:
             picker.mediaTypes = [imageMediaType, videoMediaType]
         }
-        Ext.log("picker mediaType \(mediaType) => \(picker.mediaTypes)")
+        Ext.inner.ext.log("picker mediaType \(mediaType) => \(picker.mediaTypes)")
         UIApplication.shared.ext.topViewController()?.present(picker, animated: true)
         isPicking = true
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
         let mediaType = info[.mediaType] as? String
-        Ext.log("picker finished mediaType: \(mediaType ?? "")")
+        Ext.inner.ext.log("picker finished mediaType: \(mediaType ?? "")")
         switch mediaType {
         case imageMediaType:
             let imageURL = info[.imageURL] as? URL
             let originalImage = info[.originalImage] as? UIImage
             let editedImage = info[.editedImage] as? UIImage
-            Ext.log("picker image | imageURL: \(imageURL?.path ?? "") | original \(String(describing: originalImage)) | edited \(String(describing: editedImage))")
+            Ext.inner.ext.log("picker image | imageURL: \(imageURL?.path ?? "") | original \(String(describing: originalImage)) | edited \(String(describing: editedImage))")
             handler?(.image(original: originalImage, edited: editedImage))
         case videoMediaType:
             let mediaURL = info[.mediaURL] as? URL
-            Ext.log("picker video | mediaURL: \(mediaURL?.path ?? "")")
+            Ext.inner.ext.log("picker video | mediaURL: \(mediaURL?.path ?? "")")
             handler?(.video(url: mediaURL))
         default:
-            Ext.log("picker unknown mediaType.")
+            Ext.inner.ext.log("picker unknown mediaType.")
             handler?(.unknown)
         }
         picker.dismiss(animated: true)

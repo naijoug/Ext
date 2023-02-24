@@ -9,7 +9,8 @@ import UIKit
 
 /// 用户引导
 public final class UserGuider: ExtLogable {
-    public var logEnabled = false
+    public var logEnabled: Bool = false
+    public var logLocated: Bool = false
     
     public static let shared = UserGuider()
     private init() {}
@@ -142,7 +143,7 @@ private class GuideView: UIView, ExtLogable {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
     deinit {
-        Ext.log("tip: \(titleLabel.text ?? "")", tag: .recycle)
+        Ext.log("♻️ tip: \(titleLabel.text ?? "")")
     }
     func setupUI() {
         topView.ext.active()

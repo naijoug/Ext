@@ -38,7 +38,7 @@ public extension Networker {
         let requestTime = Date()
         let requestLog = request.log + ((requestLog?.isEmpty ?? true) ? "" : " | \(requestLog ?? "")")
         let logEnabled = self.logEnabled
-        ext.log("Data Request | \(requestLog)", locationEnabled: false)
+        ext.log("Data Request | \(requestLog)")
         let task = dataSession.dataTask(with: request) { [weak self] (data, response, error) in
             guard let self else { return }
             
@@ -46,22 +46,22 @@ public extension Networker {
             var responseLog = "elapsed : \(String(format: "%.4f", elapsed)) / \(request.timeoutInterval) | \(requestLog)"
             
             guard let response = response, let data = data else {
-                self.ext.log("Data Response failed. | \(responseLog) \n", error: error, locationEnabled: false)
+                self.ext.log("Data Response failed. | \(responseLog) \n", error: error)
                 result(.failure(Ext.Error.error(error ?? Networker.Error.noResponseData)))
                 return
             }
             guard let httpResponse = response as? HTTPURLResponse else {
                 responseLog += " | not http response"
-                self.ext.log("Data Response failed. | \(responseLog) \n", error: error, locationEnabled: false)
+                self.ext.log("Data Response failed. | \(responseLog) \n", error: error)
                 result(.failure(Networker.Error.nonHTTPResponse(response: response)))
                 return
             }
             let dataString = data.ext.toJSONString() ?? data.ext.string ?? ""
             responseLog += " | \(httpResponse.ext.isSucceeded ? "✅" : "❎【\(httpResponse.statusCode) - \(HTTPURLResponse.localizedString(forStatusCode: httpResponse.statusCode))】") Data => \(dataString)"
-            self.ext.log("Data Response | \(responseLog) \n", locationEnabled: false)
+            self.ext.log("Data Response | \(responseLog) \n")
             
             guard httpResponse.ext.isSucceeded else {
-                self.ext.log("Data Response failed. | http response failed. \(httpResponse.statusCode) - \(httpResponse.ext.statusMessage)", locationEnabled: false)
+                self.ext.log("Data Response failed. | http response failed. \(httpResponse.statusCode) - \(httpResponse.ext.statusMessage)")
                 result(.failure(Networker.Error.httpResponseFailed(response: httpResponse, data: data)))
                 return
             }

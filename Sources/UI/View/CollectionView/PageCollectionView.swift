@@ -27,6 +27,7 @@ open class PageCollectionView<Item: PageCollectionItem, Cell: PageCollectionCell
                                                                                        UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout
                                                                                        where Item.Item == Cell.Item {
     public var logEnabled: Bool = true
+    public var logLocated: Bool = false
     
 // MARK: - Data
     

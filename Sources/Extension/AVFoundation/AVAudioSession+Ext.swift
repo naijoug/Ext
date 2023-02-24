@@ -12,7 +12,7 @@ public extension ExtWrapper where Base == AVAudioSession {
     /// 是否连接耳机输出
     var isHandphoneOuput: Bool {
         let route = AVAudioSession.sharedInstance().currentRoute
-        Ext.log("outputs: \(route.outputs)", locationEnabled: false)
+        Ext.inner.ext.log("outputs: \(route.outputs)")
         for output in route.outputs {
             switch output.portType {
             case .headphones, .bluetoothHFP, .bluetoothA2DP:
@@ -26,7 +26,7 @@ public extension ExtWrapper where Base == AVAudioSession {
     /// 是否为蓝牙设备输入 (AirPods、蓝牙🎧、...)
     var isBluetoothInput: Bool {
         let route = AVAudioSession.sharedInstance().currentRoute
-        Ext.log("inputs: \(route.inputs)", locationEnabled: false)
+        Ext.inner.ext.log("inputs: \(route.inputs)")
         for input in route.inputs {
             switch input.portType {
             case .bluetoothHFP, .bluetoothA2DP:

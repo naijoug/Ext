@@ -33,6 +33,7 @@ public protocol AutoPlayDelegate: AnyObject {
 
 public class TableAutoPlay: ExtLogable {
     public var logEnabled: Bool = false
+    public var logLocated: Bool = false
     
     public weak var delegate: AutoPlayDelegate?
     

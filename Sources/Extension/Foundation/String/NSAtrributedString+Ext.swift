@@ -158,7 +158,7 @@ public extension ExtWrapper where Base: NSAttributedString {
                                           options: [.documentType: NSAttributedString.DocumentType.html],
                                           documentAttributes: nil)
         } catch {
-            Ext.log("html decoded failure", error: error)
+            Ext.inner.ext.log("html decoded failed.", error: error)
             return nil
         }
     }

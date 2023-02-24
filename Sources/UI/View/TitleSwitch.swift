@@ -122,7 +122,7 @@ public extension TitleSwitch {
         let onW: CGFloat = on.title.ext.width(viewH, font: titleFont)
         let offW: CGFloat = off.title.ext.width(viewH, font: titleFont)
         let titleW = max(onW, offW) + 5 + viewH/2
-        Ext.log("onW: \(onW) : offW: \(offW) | titleW: \(titleW)")
+        Ext.inner.ext.log("onW: \(onW) : offW: \(offW) | titleW: \(titleW)")
         titleWidthConstraint.constant = titleW
         layoutIfNeeded()
         

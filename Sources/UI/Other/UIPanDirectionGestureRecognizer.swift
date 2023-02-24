@@ -35,10 +35,10 @@ open class UIPanDirectionGestureRecognizer: UIPanGestureRecognizer {
         let vel = velocity(in: self.view!)
         switch direction {
         case .horizontal where abs(vel.y) > abs(vel.x):
-            Ext.log("vertical cancelled")
+            Ext.inner.ext.log("vertical cancelled")
             state = .cancelled
         case .vertical where abs(vel.x) > abs(vel.y):
-            Ext.log("horizontal cancelled")
+            Ext.inner.ext.log("horizontal cancelled")
             state = .cancelled
         default:
             break
