@@ -52,8 +52,8 @@ public enum CacheSize {
 }
 
 /// 磁盘缓存
-public class DiskCache: ExtLogable {
-    public var logEnabled: Bool = false
+public class DiskCache: ExtInnerLogable {
+    public var logLevel: Ext.LogLevel = .off
     
     /// 管理的缓存目录
     private let folderURLs: [URL]

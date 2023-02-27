@@ -57,18 +57,18 @@ public extension Networker {
     func download(urlString: String, cacheUrl: URL?, stamp: String = "\(Date().timeIntervalSince1970)",
                   progressHandler: ProgressHandler? = nil, resultHandler: @escaping DownloadHandler) -> URLSessionDownloadTask? {
         guard let url = URL(string: urlString) else {
-            ext.log("Download HTTP url create failed. \(urlString)", logEnabled: downloadLogged)
+            ext.log("Download HTTP url create failed. \(urlString)", level: downloadLogLevel)
             resultHandler(.failure(Ext.Error.inner("download url error.")))
             return nil
         }
         
         let downloadTask = DownloadTask(url: url, cacheUrl: cacheUrl, stamp: stamp, progressHandler: progressHandler, resultHandler: resultHandler)
         guard append(downloadTask) else {
-            ext.log("Downloading... | \(url.absoluteString)", logEnabled: downloadLogged)
+            ext.log("Downloading... | \(url.absoluteString)", level: downloadLogLevel)
             return nil
         }
         
-        ext.log("Download Request | \(url.absoluteString)", logEnabled: downloadLogged)
+        ext.log("Download Request | \(url.absoluteString)", level: downloadLogLevel)
         let request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 60 * 3)
         let task = downloadSession.downloadTask(with: request)
         task.resume()
@@ -119,29 +119,29 @@ private extension DownloadTask {
         let elapsed = date.timeIntervalSince(startTime)
         guard let httpResponse = downloadTask.response as? HTTPURLResponse, httpResponse.ext.isSucceeded else {
             let statusCode = (downloadTask.response as? HTTPURLResponse)?.statusCode ?? -110
-            Ext.inner.ext.log("❌ Download failed. \(elapsed) | \(downloadUrlString) | statusCode !≈ 200, \(statusCode)", logEnabled: Networker.shared.downloadLogged)
+            Ext.inner.ext.log("❌ Download failed. \(elapsed) | \(downloadUrlString) | statusCode !≈ 200, \(statusCode)", level: Networker.shared.downloadLogLevel)
             resultHandler(.failure(Ext.Error.inner("download failed \(statusCode)")))
             return
         }
         
         if let url = cacheUrl, FileManager.default.fileExists(atPath: url.path) {
-            Ext.inner.ext.log("Download succeeded from cached. \(elapsed) | \(downloadUrlString)", logEnabled: Networker.shared.downloadLogged)
+            Ext.inner.ext.log("Download succeeded from cached. \(elapsed) | \(downloadUrlString)", level: Networker.shared.downloadLogLevel)
             resultHandler(.success(Ext.DownloadResponse(response: httpResponse, url: url, started: startTime.timeIntervalSince1970, elapsed: elapsed)))
         }
         let url = cacheUrl ?? URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent(location.lastPathComponent)
         guard FileManager.default.ext.save(location, to: url) else {
-            Ext.inner.ext.log("❌ Download file save failed.", logEnabled: Networker.shared.downloadLogged)
+            Ext.inner.ext.log("❌ Download file save failed.", level: Networker.shared.downloadLogLevel)
             resultHandler(.failure(Ext.Error.inner("download file save failed.")))
             return
         }
-        Ext.inner.ext.log("Download succeeded. \(elapsed) | \(downloadUrlString)", logEnabled: Networker.shared.downloadLogged)
+        Ext.inner.ext.log("Download succeeded. \(elapsed) | \(downloadUrlString)", level: Networker.shared.downloadLogLevel)
         resultHandler(.success(Ext.DownloadResponse(response: httpResponse, url: url, started: startTime.timeIntervalSince1970, elapsed: elapsed)))
     }
     func errorHandler(_ date: Date, session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
         let elapsed = date.timeIntervalSince(startTime)
         let statusCode = (task.response as? HTTPURLResponse)?.statusCode ?? -110
         Ext.inner.ext.log("Download error. \(elapsed) | \(task.currentRequest?.url?.absoluteString ?? "") | \(statusCode)",
-                          error: error, logEnabled: Networker.shared.downloadLogged)
+                          error: error, level: Networker.shared.downloadLogLevel)
         resultHandler(.failure(error ?? Ext.Error.inner("download error \(statusCode)")))
     }
     

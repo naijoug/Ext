@@ -24,9 +24,8 @@ public protocol Recorder {
 }
 
 /// 录制器 ⏺ 基类
-open class BaseRecorder: NSObject, ExtLogable {
-    public var logEnabled: Bool = true
-    public var logLocated: Bool = false
+open class BaseRecorder: NSObject, ExtInnerLogable {
+    public var logLevel: Ext.LogLevel = .default
     
     /// 录制定时器 ⏰
     private weak var timer: Timer?

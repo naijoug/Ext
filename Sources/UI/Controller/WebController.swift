@@ -96,9 +96,8 @@ public enum WebResource {
 }
 
 /// 网页视图
-open class WebView: ExtView, ExtLogable {
-    public var logEnabled: Bool = false
-    public var logLocated: Bool = false
+open class WebView: ExtView, ExtInnerLogable {
+    public var logLevel: Ext.LogLevel = .default
     
     /// 加载的网络资源
     public private(set) var resource: WebResource?

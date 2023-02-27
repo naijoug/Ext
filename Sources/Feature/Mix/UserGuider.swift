@@ -8,9 +8,8 @@
 import UIKit
 
 /// 用户引导
-public final class UserGuider: ExtLogable {
-    public var logEnabled: Bool = false
-    public var logLocated: Bool = false
+public final class UserGuider: ExtInnerLogable {
+    public var logLevel: Ext.LogLevel = .off
     
     public static let shared = UserGuider()
     private init() {}
@@ -54,7 +53,7 @@ public final class UserGuider: ExtLogable {
         self.currentView = guideView
         
         ext.log("begin.... guide view: \(guideView)")
-        guideView.logEnabled = logEnabled
+        guideView.logLevel = logLevel
         guideView.hideHandler = hideHandler
         guideView.guide(targetView, hitView: hitView, fillBackground: fillBackground, offset: offset)
         ext.log("end.")
@@ -64,7 +63,7 @@ public final class UserGuider: ExtLogable {
 
 /// 引导视图
 private class GuideView: UIView, ExtLogable {
-    var logEnabled: Bool = false
+    var logLevel: Ext.LogLevel = .off
     
     /// 点击隐藏的区域
     private var hitFrame: CGRect = .zero

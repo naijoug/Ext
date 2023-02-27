@@ -50,12 +50,11 @@ public extension ExtPlayer {
     }
 }
 
-public class ExtPlayer: NSObject, ExtLogable {
-    public var logEnabled: Bool = false
-    public var logLocated: Bool = false
+public class ExtPlayer: NSObject, ExtInnerLogable {
+    public var logLevel: Ext.LogLevel = .off
     
-    /// 时间监听回调日志
-    public var timeLogEnabled: Bool = false
+    /// 时间监听回调日志级别 (默认: 关闭)
+    public var timeLogLevel: Ext.LogLevel = .off
     
     public weak var delegate: ExtPlayerDelegate?
     
@@ -183,7 +182,7 @@ extension ExtPlayer {
         timeHandlers.append(handler)
     }
     private func handleTime(_ status: TimeStatus) {
-        ext.log("\(status)", logEnabled: timeLogEnabled)
+        ext.log("\(status)", level: timeLogLevel)
         delegate?.extPlayer(self, timeStatus: status)
         
         for handler in timeHandlers {
@@ -319,7 +318,7 @@ private extension ExtPlayer {
         guard let times = boundaryTimes, times.count > 0 else { return }
         boundaryObserver = avPlayer.addBoundaryTimeObserver(forTimes: times, queue: .main) { [weak self] in
             guard let self, let duration = self.duration else { return }
-            self.ext.log("boundary: \(self.currentTime) / \(duration) | playerStatus: \(self.status) | isPlaying: \(self.isPlaying)", logEnabled: self.timeLogEnabled)
+            self.ext.log("boundary: \(self.currentTime) / \(duration) | playerStatus: \(self.status) | isPlaying: \(self.isPlaying)", level: self.timeLogLevel)
             guard self.isPlaying  else { return }
             self.handleTime(.boundary(self.currentTime, duration))
         }
@@ -338,7 +337,7 @@ private extension ExtPlayer {
         guard let time = periodicTime, time > 0 else { return }
         periodicObserver = avPlayer.addPeriodicTimeObserver(forInterval: CMTimeMakeWithSeconds(time, preferredTimescale: 600), queue: .main) { [weak self] time in
             guard let self, let duration = self.duration else { return }
-            self.ext.log("periodic: \(self.currentTime) / \(duration) | playerStatus: \(self.status) | isPlaying: \(self.isPlaying)", logEnabled: self.timeLogEnabled)
+            self.ext.log("periodic: \(self.currentTime) / \(duration) | playerStatus: \(self.status) | isPlaying: \(self.isPlaying)", level: self.timeLogLevel)
             guard self.isPlaying else { return }
             self.handleTime(.periodic(self.currentTime, duration))
         }
@@ -446,7 +445,7 @@ private extension ExtPlayer {
             guard let self, let bufferTimeRange = player.currentItem?.loadedTimeRanges.first?.timeRangeValue, let duration = self.duration else { return }
             // 缓冲到的时间
             let bufferTime = bufferTimeRange.start.seconds  + bufferTimeRange.duration.seconds
-            self.ext.log("buffering: \(bufferTime) / \(duration) | \(player.currentItem?.loadedTimeRanges ?? [])", logEnabled: self.timeLogEnabled)
+            self.ext.log("buffering: \(bufferTime) / \(duration) | \(player.currentItem?.loadedTimeRanges ?? [])", level: self.timeLogLevel)
             self.handleTime(.buffer(bufferTime, duration))
         }))
         // isPlaybackBufferFull : 缓冲区是否完成
@@ -534,7 +533,7 @@ extension AVPlayerItem {
         msg += " | isPlaybackBufferEmpty: \(isPlaybackBufferEmpty)"
         msg += " | isPlaybackLikelyToKeepUp: \(isPlaybackLikelyToKeepUp)"
         msg += " | isPlaybackBufferFull: \(isPlaybackBufferFull)"
-        if let error = error { msg += " | \(Ext.Tag.error): \(error)" }
+        if let error = error { msg += " | ❌ : \(error)" }
         return msg
     }
 }
@@ -551,7 +550,7 @@ extension AVPlayerItem.Status: CustomStringConvertible {
 
 private extension ExtWrapper where Base == URL {
     var log: String {
-        let tag: Ext.Tag = base.isFileURL ? .file : .network
+        let tag: String = base.isFileURL ? "📂" : "🌏"
         let msg: String = base.isFileURL ? base.path.ext.removePrefix(Sandbox.path) : base.absoluteString
         return "{\(tag) - \(msg)}"
     }

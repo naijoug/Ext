@@ -18,9 +18,8 @@ public protocol ExtAudioPlayerDelegate: AnyObject {
  
  说明: 仅支持播放本地音频文件
  */
-public class ExtAudioPlayer: NSObject, ExtLogable {
-    public var logEnabled: Bool = true
-    public var logLocated: Bool = false
+public class ExtAudioPlayer: NSObject, ExtInnerLogable {
+    public var logLevel: Ext.LogLevel = .default
     
     /// 播放状态
     public enum Status {

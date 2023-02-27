@@ -18,9 +18,8 @@ private var AudioSessionCategoryContext = 0
  */
 
 /// 音频 Session
-public final class AudioSession: ExtLogable {
-    public var logEnabled: Bool = true
-    public var logLocated: Bool = false
+public final class AudioSession: ExtInnerLogable {
+    public var logLevel: Ext.LogLevel = .default
     
     public static let shared = AudioSession()
     

@@ -11,9 +11,8 @@ public protocol PageControllerDelegate: AnyObject {
     func pageController(_ controller: PageController, didAction action: PageController.Action)
 }
 
-public class PageController: UIViewController, ExtLogable {
-    public var logEnabled: Bool = false
-    public var logLocated: Bool = false
+public class PageController: UIViewController, ExtInnerLogable {
+    public var logLevel: Ext.LogLevel = .default
     
     public enum Action {
         case scrollTo(_ index: Int)

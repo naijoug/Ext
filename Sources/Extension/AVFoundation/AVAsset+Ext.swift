@@ -66,7 +66,7 @@ public extension Ext {
         var dstFormat: AudioStreamBasicDescription = AudioStreamBasicDescription()
         
         func log(_ message: String) {
-            Ext.inner.ext.log("\(message) \(error == noErr ? "succeeded." : "failed. \(error.description)")", logEnabled: error != noErr)
+            Ext.inner.ext.log("\(message) \(error == noErr ? "succeeded." : "failed. \(error.description)")", level: error == noErr ? .off : .default)
         }
         
         ExtAudioFileOpenURL(sourceURL as CFURL, &sourceFile)

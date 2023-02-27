@@ -90,15 +90,81 @@ extension Ext.Error: LocalizedError {
     }
 }
 
+// MARK: - Log
+
+public protocol ExtLogable: ExtCompatible {
+    /// 日志级别
+    var logLevel: Ext.LogLevel { get }
+    /// 日志配置
+    var logConfig: Ext.LogConfig { get }
+}
+public extension ExtLogable {
+    /// 默认日志级别
+    var logLevel: Ext.LogLevel { .default }
+    /// 默认日志配置
+    var logConfig: Ext.LogConfig { .init() }
+}
+
+public extension ExtWrapper where Base: ExtLogable {
+    
+    /// 根据日志开关输出
+    /// - Parameters:
+    ///   - message: 日志消息
+    ///   - error: 错误消息
+    ///   - logLevel: 日志级别
+    func log(_ message: Any, error: Swift.Error? = nil,
+             level: Ext.LogLevel? = nil, config: Ext.LogConfig? = nil,
+             file: String = #file, line: Int = #line, function: String = #function) {
+        Ext.log(message, error: error,
+                level: level ?? base.logLevel, config: config ?? base.logConfig,
+                file: file, line: line, function: function)
+    }
+}
+
+extension Ext {
+    static let inner = Inner()
+    
+    /// 内部类
+    struct Inner: ExtLogable {
+        var logLevel: Ext.LogLevel = .info
+        var logConfig: Ext.LogConfig = .init(located: false)
+    }
+}
+
+public protocol ExtInnerLogable: ExtLogable {}
+public extension ExtInnerLogable {
+    var logLevel: Ext.LogLevel { Ext.inner.logLevel }
+    var logConfig: Ext.LogConfig { Ext.inner.logConfig }
+}
+
 public extension Ext {
     
-    /// 代码定位
-    /// - Parameters:
-    ///   - file: 文件名
-    ///   - line: 日志打印行数
-    ///   - function: 函数名
-    static func codeLocation(file: String = #file, line: Int = #line, function: String = #function) -> String {
-        "\((file as NSString).lastPathComponent):\(line) \t\(function)"
+    /// 日志级别
+    enum LogLevel: Int {
+        /// 关闭日志
+        case off
+        /// 日志信息
+        case info
+        /// 日志调试信息(包含日志代码位置)
+        case debug
+        
+        /// 默认日志级别
+        public static var `default`: LogLevel = .debug
+    }
+    /// 日志内容配置
+    struct LogConfig {
+        /// 日志标记 (默认: ##)
+        public var tag: String
+        /// 是否显示日期信息 (默认: 开启)
+        public var dated: Bool
+        /// 是否显示代码定位信息 (默认: 开启)
+        public var located: Bool
+        
+        public init(tag: String = "##", dated: Bool = true, located: Bool = true) {
+            self.tag = tag
+            self.dated = dated
+            self.located = located
+        }
     }
     
     /// 日志记录
@@ -106,14 +172,9 @@ public extension Ext {
     /// - Parameters:
     ///   - message: 日志消息
     ///   - error: 错误信息
-    ///   - tag: 日志标记
-    ///   - logEnabled: 是否打印日志
-    ///   - logLocated: 是否打印代码位置日志
-    static func log(_ message: Any,
-                    error: Swift.Error? = nil,
-                    tag: Tag = .normal,
-                    logEnabled: Bool = true,
-                    logLocated: Bool = true,
+    ///   - level: 日志级别
+    static func log(_ message: Any, error: Swift.Error? = nil,
+                    level: Ext.LogLevel = .default, config: Ext.LogConfig = .init(),
                     file: String = #file, line: Int = #line, function: String = #function) {
         /**
          Reference:
@@ -121,44 +182,52 @@ public extension Ext {
             - https://swift.gg/2016/09/12/default-arguments-in-protocols/
          */
         #if DEBUG
-        guard logEnabled else { return }
+        guard level != .off else { return }
         logToTerminal(
-            messageToLog(message, error: error, tag: tag, logLocated: logLocated, file: file, line: line, function: function)
+            messageToLog(message, error: error, config: config, file: file, line: line, function: function)
         )
         #endif
     }
     
     ///   - logToFileEnabled: 是否保存日志到文件
-    static func log(_ message: Any,
-                    error: Swift.Error? = nil,
-                    tag: Tag = .normal,
-                    logEnabled: Bool = true,
-                    logLocated: Bool = true,
+    static func log(_ message: Any, error: Swift.Error? = nil,
+                    level: Ext.LogLevel = .default, config: Ext.LogConfig = .init(),
                     logToFileEnabled: Bool,
                     file: String = #file, line: Int = #line, function: String = #function) {
-        log(message, error: error, tag: tag, logEnabled: logEnabled, logLocated: logLocated, file: file, line: line, function: function)
+        log(message, error: error, level: level, config: config, file: file, line: line, function: function)
         guard logToFileEnabled else { return }
         logToFile(
-            messageToLog(message, error: error, tag: tag, logLocated: logLocated, file: file, line: line, function: function)
+            messageToLog(message, error: error, config: config, file: file, line: line, function: function)
         )
     }
-    
 }
 private extension Ext {
     
     /// 日志内容
-    static func messageToLog(_ message: Any,
-                             error: Swift.Error? = nil,
-                             tag: Tag = .normal,
-                             logLocated: Bool = true,
+    static func messageToLog(_ message: Any, error: Swift.Error? = nil, config: Ext.LogConfig,
                              file: String = #file, line: Int = #line, function: String = #function) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss SSS"
-        var log = "LOG \(formatter.string(from: Date())) \(tag)"
-        if logLocated { log += " 【\(codeLocation(file: file, line: line, function: function))】" }
+        var log = "LOG \(config.tag)"
+        if config.dated {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "yyyy-MM-dd HH:mm:ss SSS"
+            log += " \(formatter.string(from: Date()))"
+        }
+        if config.located {
+            log += " 【\(codeLocation(file: file, line: line, function: function))】"
+        }
         log += " \(message)"
-        if let error = error { log += " \(Tag.error) \(error)" }
+        if let error = error {
+            log += " ❌ \(error)"
+        }
         return log
+    }
+    /// 代码定位
+    /// - Parameters:
+    ///   - file: 文件名
+    ///   - line: 日志打印行数
+    ///   - function: 函数名
+    private static func codeLocation(file: String = #file, line: Int = #line, function: String = #function) -> String {
+        "\((file as NSString).lastPathComponent):\(line) \t\(function)"
     }
     
     /// 日志队列
@@ -199,152 +268,5 @@ private extension Ext {
                 try? data.write(to: logFile)
             }
         }
-    }
-}
-
-// MARK: - Tag
-
-public extension Ext {
-    /// 标记符号
-    enum Tag {
-        case normal
-        case success
-        case failure
-        case warning
-        case error
-        
-        case video
-        case audio
-        case image
-        
-        case play
-        case pause
-        case replay
-        case stop
-        
-        case begin
-        case end
-        
-        case debug
-        case programmer
-        
-        case ok
-        case pin
-        case sos
-        case fix
-        case bang
-        case fire
-        case file
-        case clean
-        case store
-        case timer
-        case bingo
-        case watch
-        case target
-        case launch
-        case network
-        case recycle
-        case perfect
-        case champion
-        case basketball
-        case notification
-        
-        /// 自定义符号
-        case custom(_ token: String)
-    }
-}
-
-extension Ext.Tag: CustomStringConvertible {
-    public var description: String {
-        switch self {
-        case .normal:           return "##"
-        case .success:          return "✅"
-        case .failure:          return "🚫"
-        case .warning:          return "⚠️"
-        case .error:            return "❌"
-        
-        case .video:            return "🎥"
-        case .audio:            return "🎙"
-        case .image:            return "🌌"
-        
-        case .play:             return "▶️"
-        case .pause:            return "⏸"
-        case .replay:           return "🔄"
-        case .stop:             return "⏹"
-            
-        case .begin:            return "🛫"
-        case .end:              return "🛬"
-            
-        case .debug:            return "🪲"
-        case .programmer:       return "🐵"
-            
-        case .ok:               return "👌"
-        case .pin:              return "📌"
-        case .sos:              return "🆘"
-        case .fix:              return "🛠"
-        case .bang:             return "💥"
-        case .fire:             return "🔥"
-        case .file:             return "📚"
-        case .clean:            return "🧹"
-        case .store:            return "📦"
-        case .timer:            return "⏰"
-        case .bingo:            return "🎉"
-        case .watch:            return "👀"
-        case .target:           return "🎯"
-        case .launch:           return "🚀"
-        case .network:          return "🌏"
-        case .recycle:          return "♻️"
-        case .perfect:          return "💯"
-        case .champion:         return "🏆"
-        case .basketball:       return "🏀"
-        case .notification:     return "📣"
-        
-        case .custom(let token): return token
-        }
-    }
-}
-
-public protocol ExtLogable: ExtCompatible {
-    /// 是否启用日志开关
-    var logEnabled: Bool { get }
-    /// 是否显示代码位置日志
-    var logLocated: Bool { get }
-}
-public extension ExtLogable {
-    /// 默认: 开启
-    var logEnabled: Bool { true }
-    /// 默认: 开启
-    var logLocated: Bool { true }
-}
-
-public extension ExtWrapper where Base: ExtLogable {
-    
-    /// 根据日志开关输出
-    /// - Parameters:
-    ///   - message: 日志消息
-    ///   - error: 错误消息
-    ///   - logEnabled: 是否启用日志
-    ///   - logLocated: 是否显示代码位置日志
-    func log(_ message: Any,
-             error: Swift.Error? = nil,
-             logEnabled: Bool = true,
-             logLocated: Bool = true,
-             file: String = #file, line: Int = #line, function: String = #function) {
-        Ext.log(message, error: error,
-                logEnabled: logEnabled && base.logEnabled,
-                logLocated: logLocated && base.logLocated,
-                file: file, line: line, function: function)
-    }
-}
-
-extension Ext {
-    static let inner = Inner()
-    
-    /// 内部类
-    struct Inner: ExtLogable {
-        /// 内部默认: 开启日志
-        var logEnabled: Bool = true
-        /// 内部默认: 关闭代码位置日志
-        var logLocated: Bool = false
     }
 }

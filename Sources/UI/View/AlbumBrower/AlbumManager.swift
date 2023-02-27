@@ -9,9 +9,7 @@ import Foundation
 import Photos
 
 /// 相册管理
-public final class AlbumManager: ExtLogable {
-    public var logEnabled: Bool = true
-    public var logLocated: Bool = false
+public final class AlbumManager: ExtInnerLogable {
     
     public static let shared = AlbumManager()
     private init() {}

@@ -31,9 +31,7 @@ public protocol AutoPlayDelegate: AnyObject {
     func autoPlay(_ autoPlay: TableAutoPlay, didAction action: AutoPlayAction)
 }
 
-public class TableAutoPlay: ExtLogable {
-    public var logEnabled: Bool = false
-    public var logLocated: Bool = false
+public class TableAutoPlay: ExtInnerLogable {
     
     public weak var delegate: AutoPlayDelegate?
     

@@ -65,9 +65,7 @@ public extension Sandbox {
     - https://github.com/music4kid/AirSandbox
  */
 
-private class FileController: UITableViewController, ExtLogable {
-    var logEnabled: Bool = false
-    var logLocated: Bool = false
+private class FileController: UITableViewController {
     
     /// 根路径
     private static let rootPath = NSHomeDirectory()
@@ -129,29 +127,29 @@ private extension FileController {
     
     /// 加载路径数据
     func loadData(_ path: String) {
-        ext.log("load path: \(path) | root path: \(FileController.rootPath)")
+        Ext.inner.ext.log("load path: \(path) | root path: \(FileController.rootPath)")
         
         var items = [FileItem]()
         do {
             let contents = try FileManager.default.contentsOfDirectory(atPath: path)
-            ext.log(contents)
+            Ext.inner.ext.log(contents)
             for content in contents {
                 guard !(content as NSString).lastPathComponent.hasPrefix(".") else { continue }
                 
                 let url = URL(fileURLWithPath: path).appendingPathComponent(content)
                 
-                ext.log("fullPath: \(url.path)")
+                Ext.inner.ext.log("fullPath: \(url.path)")
                 var isFolder: ObjCBool = false
                 guard FileManager.default.fileExists(atPath: url.path, isDirectory: &isFolder) else { continue }
                 
-                ext.log("isFolder: \(isFolder)")
+                Ext.inner.ext.log("isFolder: \(isFolder)")
                 items.append(FileItem(type: isFolder.boolValue ? .folder : .file, name: content, path: url.path))
             }
         } catch {
-            ext.log("load directory content error.", error: error)
+            Ext.inner.ext.log("load directory content error.", error: error)
         }
         
-        ext.log("items: \(items)")
+        Ext.inner.ext.log("items: \(items)")
         self.items = items
         self.tableView.reloadData()
     }

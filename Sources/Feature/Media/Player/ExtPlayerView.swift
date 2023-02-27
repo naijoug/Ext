@@ -50,9 +50,8 @@ public protocol ExtPlayerViewDelegate: AnyObject {
     func extPlayerView(_ playerView: ExtPlayerView, didAction action: ExtPlayerView.Action)
 }
 
-open class ExtPlayerView: UIView, ExtLogable {
-    public var logEnabled: Bool = true
-    public var logLocated: Bool = false
+open class ExtPlayerView: UIView, ExtInnerLogable {
+    public var logLevel: Ext.LogLevel = .default
     
     /// 播放器视图状态
     public enum Status: Equatable {

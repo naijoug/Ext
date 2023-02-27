@@ -56,9 +56,8 @@ public extension ExtWrapper where Base: SKProduct {
     }
 }
 
-public class IAPHelper: NSObject, ExtLogable {
-    public var logEnabled: Bool = true
-    public var logLocated: Bool = false
+public class IAPHelper: NSObject, ExtInnerLogable {
+    public var logLevel: Ext.LogLevel = .default
     
     public override init() {
         super.init()

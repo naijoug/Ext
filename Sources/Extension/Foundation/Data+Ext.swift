@@ -25,14 +25,14 @@ public extension ExtWrapper where Base == Data {
     /// data --> jsonString
     ///
     /// - Parameter isPrettyPrinted: 漂亮打印格式(换行展开)
-    /// - Parameter errorLogged: JSON 解析失败是否打印错误日志 (默认: 打印)
-    func toJSONString(_ isPrettyPrinted: Bool = false, errorLogged: Bool = true) -> String? {
+    /// - Parameter logLevel: JSON 解析失败日志级别
+    func toJSONString(_ isPrettyPrinted: Bool = false, logLevel: Ext.LogLevel? = nil) -> String? {
         do {
             let jsonObject = try JSONSerialization.jsonObject(with: base)
             let data = try JSONSerialization.data(withJSONObject: jsonObject, options: isPrettyPrinted ? [.prettyPrinted] : [])
             return String(data: data, encoding: .utf8)
         } catch {
-            Ext.inner.ext.log("data to JSONString failed.", error: error, logEnabled: errorLogged)
+            Ext.inner.ext.log("data to JSONString failed.", error: error, level: logLevel)
             return nil
         }
     }

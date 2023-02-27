@@ -23,11 +23,10 @@ public protocol PageCollectionItem {
     var items: [Item] { get set }
 }
 
-open class PageCollectionView<Item: PageCollectionItem, Cell: PageCollectionCellable>: ExtView, ExtLogable,
+open class PageCollectionView<Item: PageCollectionItem, Cell: PageCollectionCellable>: ExtView, ExtInnerLogable,
                                                                                        UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout
                                                                                        where Item.Item == Cell.Item {
-    public var logEnabled: Bool = true
-    public var logLocated: Bool = false
+    public var logLevel: Ext.LogLevel = .off
     
 // MARK: - Data
     
@@ -59,7 +58,7 @@ open class PageCollectionView<Item: PageCollectionItem, Cell: PageCollectionCell
     
     public private(set) lazy var collectionView: UICollectionView = {
         let layout = PageableFlowLayout( .left)
-        layout.logEnabled = true
+        layout.logLevel = logLevel
         let collectionView = ext.add(UICollectionView(frame: .zero, collectionViewLayout: layout))
         collectionView.delegate = self
         collectionView.dataSource = self

@@ -28,14 +28,13 @@ public enum HttpMethod: String {
 public typealias ProgressHandler = (_ progress: Double, _ speed: Double) -> Void
 
 /// Networker
-public final class Networker: NSObject, ExtLogable {
-    public var logEnabled: Bool = true
-    public var logLocated: Bool = false
+public final class Networker: NSObject, ExtInnerLogable {
+    public var logLevel: Ext.LogLevel = .default
     
-    /// 是否打印 HTTP headers 日志
-    public var headerLogged: Bool = false
-    /// 是否打印下载日志
-    public var downloadLogged: Bool = false
+    /// HTTP headers 日志级别 (默认: 关闭)
+    public var headerLogLevel: Ext.LogLevel = .off
+    /// 下载日志级别 (默认: 关闭)
+    public var downloadLogLevel: Ext.LogLevel = .off
     
     public static let shared = Networker()
     private override init() {
@@ -94,12 +93,12 @@ extension Networker {
         let key = task.url.absoluteString
         var tasks = downloadTasks[key] ?? [DownloadTask]()
         if !tasks.isEmpty, tasks.contains(where: { $0.stamp == task.stamp }) {
-            ext.log("已经包含该 \(task.stamp) 任务", logEnabled: downloadLogged)
+            ext.log("已经包含该 \(task.stamp) 任务", level: downloadLogLevel)
             return false
         }
         tasks.append(task)
         downloadTasks[key] = tasks
-        ext.log("添加下载任务: \(task.stamp) | \(task.startTime) | \(key)", logEnabled: downloadLogged)
+        ext.log("添加下载任务: \(task.stamp) | \(task.startTime) | \(key)", level: downloadLogLevel)
         return true
     }
     /// 查询下载任务

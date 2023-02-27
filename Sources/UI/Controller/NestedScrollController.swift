@@ -31,9 +31,8 @@ private class NestedScrollView: UIScrollView, UIGestureRecognizerDelegate {
 }
 
 /// 可嵌套滚动控制器
-open class NestedScrollController: UIViewController, ExtLogable {
-    public var logEnabled: Bool = true
-    public var logLocated: Bool = false
+open class NestedScrollController: UIViewController, ExtInnerLogable {
+    public var logLevel: Ext.LogLevel = .default
     
     private lazy var nestedScrollView: NestedScrollView = {
         let scrollView = view.ext.add(NestedScrollView())

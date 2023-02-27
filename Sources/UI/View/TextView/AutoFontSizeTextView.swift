@@ -8,9 +8,8 @@
 import UIKit
 
 /// 自动缩放字体大小 textView
-public class AutoFontSizeTextView: PlaceholderTextView, ExtLogable {
-    public var logEnabled: Bool = true
-    public var logLocated: Bool = false
+public class AutoFontSizeTextView: PlaceholderTextView, ExtInnerLogable {
+    public var logLevel: Ext.LogLevel = .off
     
     private var minFontSize: CGFloat = 6
     private var maxFontSize: CGFloat = 60
