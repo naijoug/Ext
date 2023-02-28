@@ -68,9 +68,7 @@ public final class Router {
     public var scheme: String = "app://"
     
     /// modal 模式导航控制器包装
-    public lazy var modalWrapper: Ext.FuncHandler<UIViewController, UINavigationController> = {
-        { UINavigationController(rootViewController: $0) }
-    }()
+    public lazy var modalWrapper: Ext.FuncHandler<UIViewController, UINavigationController> = { UINavigationController(rootViewController: $0) }
 }
 
 public extension Router {
@@ -124,7 +122,13 @@ public extension Router {
     
     /// 启动页面
     func launch(key: RouterKey, param: RouterParam? = nil) {
-        guard let controller = controller(for: key, param: param) else { return }
+        guard let controller = controller(for: key, param: param) else {
+            Ext.inner.ext.log("❌ router: \(key.url) unregistered.")
+            return
+        }
+        var log = "🚀 router launch \(key.url)"
+        if let param = param { log += " | \(param)" }
+        Ext.inner.ext.log(log)
         UIApplication.shared.ext.mainWindow?.rootViewController = controller
     }
     
@@ -147,9 +151,12 @@ public extension Router {
     ///   - param: 路由参数
     ///   - mode: 跳转模式 (默认: Push)
     func goto(key: RouterKey, param: RouterParam? = nil, mode: Mode? = nil) {
-        guard let controller = controller(for: key, param: param) else { return }
+        guard let controller = controller(for: key, param: param) else {
+            Ext.inner.ext.log("❌ router: \(key.url) unregistered.")
+            return
+        }
         let routerMode = mode ?? param?.mode() ?? self.mode(for: key)
-        var log = "✈️ route to \(key.url) | mode \(mode.debugDescription) - \(routerMode.debugDescription)"
+        var log = "✈️ router goto \(key.url) | mode \(mode.debugDescription) - \(routerMode.debugDescription)"
         if let param = param { log += " | \(param)" }
         Ext.inner.ext.log(log)
         
@@ -203,11 +210,12 @@ public extension Router {
     
     /// 系统打开 url
     /// - Parameter url: url
-    func openURL(_ url: URL?) {
-        guard let url = url else { return }
-        Ext.inner.ext.log("open url: \(url.absoluteString)")
-        guard UIApplication.shared.canOpenURL(url) else { return }
-        
+    func openURL(_ url: URL) {
+        guard UIApplication.shared.canOpenURL(url) else {
+            Ext.inner.ext.log("❌ router url can not open. | \(url.absoluteString)")
+            return
+        }
+        Ext.inner.ext.log("☄️ router open url: \(url.absoluteString)")
         if #available(iOS 10.0, *) {
             UIApplication.shared.open(url, options: [:], completionHandler: nil)
         } else {
