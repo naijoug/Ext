@@ -57,6 +57,9 @@ public extension ExtWrapper where Base == Double {
 }
 
 public extension ExtWrapper where Base == TimeInterval {
+    /// 动画默认时长: 0.3s
+    static var animationDuration: TimeInterval { 0.3 }
+    
     /// 时长串 xx:xx:xx
     var timeString: String {
         let total = Int(ceil(base))

@@ -291,9 +291,6 @@ public extension ExtWrapper where Base: UIView {
 
 public extension ExtWrapper where Base: UIView {
     
-    /// 默认动画时长 0.3
-    static var animationDuration: TimeInterval { 0.3 }
-    
     // Reference: https://www.hangge.com/blog/cache/detail_1603.html
     
     /// 抖动方向
