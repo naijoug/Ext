@@ -81,7 +81,7 @@ private final class InnerMediaPicker: NSObject, UIImagePickerControllerDelegate,
             picker.mediaTypes = [imageMediaType, videoMediaType]
         }
         Ext.inner.ext.log("picker mediaType \(mediaType) => \(picker.mediaTypes)")
-        UIApplication.shared.ext.topViewController()?.present(picker, animated: true)
+        UIApplication.ext.topViewController()?.present(picker, animated: true)
         isPicking = true
     }
     

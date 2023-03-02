@@ -118,7 +118,7 @@ public extension Router {
 public extension Router {
     
     /// 顶层显示控制器
-    var topController: UIViewController? { UIApplication.shared.ext.topViewController() }
+    var topController: UIViewController? { UIApplication.ext.topViewController() }
     
     /// 启动页面
     func launch(key: RouterKey, param: RouterParam? = nil) {
@@ -129,7 +129,7 @@ public extension Router {
         var log = "🚀 router launch \(key.url)"
         if let param = param { log += " | \(param)" }
         Ext.inner.ext.log(log)
-        UIApplication.shared.ext.mainWindow?.rootViewController = controller
+        UIWindow.ext.main?.rootViewController = controller
     }
     
     /// 页面跳转模式

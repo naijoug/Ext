@@ -203,7 +203,7 @@ open class WebView: ExtView, ExtInnerLogable {
         return indicator
     }()
     
-    private var topController: UIViewController? { UIApplication.shared.ext.topViewController() }
+    private var topController: UIViewController? { UIApplication.ext.topViewController() }
     
 // MARK: -
     

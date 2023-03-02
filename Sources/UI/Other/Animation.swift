@@ -18,7 +18,7 @@ public extension Animation {
             return
         }
         
-        guard let view = UIApplication.shared.ext.mainWindow,
+        guard let view = UIWindow.ext.main,
             let startView = startView, let endView = endView,
             let startPoint = startView.superview?.convert(startView.center, to: view),
             let endPoint = endView.superview?.convert(endView.center, to: view) else {

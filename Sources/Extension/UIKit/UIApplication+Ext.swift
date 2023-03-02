@@ -19,16 +19,17 @@ public extension ExtWrapper where Base == UIApplication {
     
     /// 状态栏高
     var statusBarHeight: CGFloat {
-        guard #available(iOS 13.0, *) else {
+        if #available(iOS 13.0, *) {
+            return UIWindow.ext.main?.windowScene?.statusBarManager?.statusBarFrame.size.height ?? 0
+        } else {
             return base.statusBarFrame.size.height
         }
-        return mainWindow?.windowScene?.statusBarManager?.statusBarFrame.size.height ?? 0
     }
     /// 安全区域 Insets
-    var safeAreaInsets: UIEdgeInsets { mainWindow?.safeAreaInsets ?? UIEdgeInsets(top: statusBarHeight, left: 0, bottom: 0, right: 0) }
+    var safeAreaInsets: UIEdgeInsets { UIWindow.ext.main?.safeAreaInsets ?? UIEdgeInsets(top: statusBarHeight, left: 0, bottom: 0, right: 0) }
     
     /// 是否为刘海屏( > iPhoneX )
-    var isHairScreen: Bool { (mainWindow?.safeAreaInsets.bottom ?? 0) > 0 }
+    var isHairScreen: Bool { (UIWindow.ext.main?.safeAreaInsets.bottom ?? 0) > 0 }
     
     /// 安全的底部间隙 safeAreaInsets.bottom > 0 ? safeAreaInsets.bottom : bottom
     func safeBottom(_ bottom: CGFloat) -> CGFloat { safeAreaInsets.bottom > 0 ? safeAreaInsets.bottom : bottom }
@@ -53,26 +54,18 @@ public extension ExtWrapper where Base == UIApplication {
 @available(iOSApplicationExtension, unavailable)
 public extension ExtWrapper where Base == UIApplication {
     
-    /// 主窗口
-    var mainWindow: UIWindow? {
-        /** Reference :
-           - https://stackoverflow.com/questions/57134259/how-to-resolve-keywindow-was-deprecated-in-ios-13-0
-        */
-        if #available(iOS 13.0, *),
-            let window = base.connectedScenes
+    @available(iOS 13.0, *)
+    var windowScenes: [UIWindowScene] {
+        base.connectedScenes
             .filter({ $0.activationState == .foregroundActive })
-            .map({ $0 as? UIWindowScene }).compactMap({ $0 }).first?.windows
-            .filter({ $0.isKeyWindow }).first {
-            return window
-        }
-        return base.windows.filter { $0.isKeyWindow }.first ?? base.keyWindow
+            .compactMap({ $0 as? UIWindowScene })
     }
     
     /// 返回顶层控制器
     ///
     /// - Parameter controller: 基础控制器
     /// - Returns: 可视控制器
-    func topViewController(_ controller: UIViewController? = UIApplication.shared.ext.mainWindow?.rootViewController) -> UIViewController? {
+    static func topViewController(_ controller: UIViewController? = UIWindow.ext.main?.rootViewController) -> UIViewController? {
         /** Reference:
             - https://stackoverflow.com/questions/26667009/get-top-most-uiviewcontroller
         */

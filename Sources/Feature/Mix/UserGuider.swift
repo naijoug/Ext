@@ -44,7 +44,7 @@ public final class UserGuider: ExtInnerLogable {
         ext.log("guide tip: \(tip) | target: \(String(describing: targetView)) | isVisiable: \(targetView?.ext.isVisible(fully: true, edgeInsets: visibleEdgeInsets) ?? false)")
         
         guard let targetView = targetView, targetView.frame.size != .zero, targetView.ext.isVisible(fully: true, edgeInsets: visibleEdgeInsets),
-              let containerView = UIApplication.shared.ext.mainWindow else { return }
+              let containerView = UIWindow.ext.main else { return }
         
         let guideView = GuideView(tip, upImage: upImage, downImage: downImage)
         guideView.frame = containerView.bounds
