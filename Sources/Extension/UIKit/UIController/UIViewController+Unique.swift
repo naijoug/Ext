@@ -17,6 +17,15 @@ extension ExtWrapper where Base: UIViewController {
     }
 }
 
+extension UIViewController {
+    static var isUniqueRemovedKey: UInt8 = 0
+    public var isUniqueRemoved: Bool {
+        get { ext.getAssociatedObject(&Self.isUniqueRemovedKey, valueType: Bool.self) ?? false }
+        set { ext.setAssociatedObject(&Self.isUniqueRemovedKey, value: newValue, policy: .retainNonatomic)
+        }
+    }
+}
+
 public protocol UniqueController: UIViewController {
     /// 唯一标记
     var unique: String { get }
@@ -24,23 +33,23 @@ public protocol UniqueController: UIViewController {
 private extension UniqueController {
     /// 删除导航堆栈相邻控制器重复
     func remove() {
-        Ext.inner.ext.log("\(navigationController?.viewControllers ?? [])")
+        Ext.inner.ext.log("Unique \(navigationController?.viewControllers ?? [])")
         guard var controllers = navigationController?.viewControllers, controllers.count >= 2 else { return }
         let count = controllers.count
         let prev = controllers[count - 2]
         let current = controllers[count - 1]
-        Ext.inner.ext.log("\(prev.ext.typeFullName) -> \(current.ext.typeName) | prev: \(prev) -> current: \(current)")
+        Ext.inner.ext.log("Unique \(prev.ext.typeFullName) -> \(current.ext.typeName) | prev: \(prev) -> current: \(current)")
         guard prev.ext.typeFullName == current.ext.typeFullName else { return }
-        Ext.inner.ext.log("type equal => ")
+        Ext.inner.ext.log("Unique type equal => ")
         guard let prevUnique = prev as? UniqueController,
               let currentUnique = current as? UniqueController else { return }
-        Ext.inner.ext.log("\(prevUnique.unique) vs \(currentUnique.unique)")
+        Ext.inner.ext.log("Unique \(prevUnique.unique) vs \(currentUnique.unique)")
         guard prevUnique.unique == currentUnique.unique else { return }
         let controller = controllers.remove(at: count - 2)
-        controller.removeFromParent()
+        controller.isUniqueRemoved = true
         navigationController?.setViewControllers(controllers, animated: false)
         //navigationController?.viewControllers.remove(at: count - 2)
-        Ext.inner.ext.log("result: \(controller) | \(controllers) | \(navigationController?.viewControllers ?? [])")
+        Ext.inner.ext.log("Unique remove result: \(controller) | \(controllers) | \(navigationController?.viewControllers ?? [])")
     }
 }
 

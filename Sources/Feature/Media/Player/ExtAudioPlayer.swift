@@ -12,6 +12,9 @@ public protocol ExtAudioPlayerDelegate: AnyObject {
     func extAudioPlayer(_ player: ExtAudioPlayer, status: ExtAudioPlayer.Status)
     func extAudioPlayer(_ player: ExtAudioPlayer, timeStatus status: ExtAudioPlayer.TimeStatus)
 }
+public extension ExtAudioPlayerDelegate {
+    func extAudioPlayer(_ player: ExtAudioPlayer, timeStatus status: ExtAudioPlayer.TimeStatus) {}
+}
 
 /**
  音频播放器 (AVAudioPlayer)
@@ -19,7 +22,7 @@ public protocol ExtAudioPlayerDelegate: AnyObject {
  说明: 仅支持播放本地音频文件
  */
 public class ExtAudioPlayer: NSObject, ExtInnerLogable {
-    public var logLevel: Ext.LogLevel = .default
+    public var logLevel: Ext.LogLevel = .off
     
     /// 播放状态
     public enum Status {
@@ -65,7 +68,6 @@ public class ExtAudioPlayer: NSObject, ExtInnerLogable {
             player.isMeteringEnabled = isMeteringEnabled
             player.currentTime = time ?? 0
             player.play()
-//            player.play(atTime: time ?? 0)
             ext.log("play audio url: \(player.currentTime) -> \(time ?? 0) | device \(player.deviceCurrentTime) | \(url.path)")
             
             delegate?.extAudioPlayer(self, status: .playing)
@@ -107,7 +109,7 @@ private extension ExtAudioPlayer {
         avPlayer.updateMeters()
         let average = avPlayer.averagePower(forChannel: 0) // 均值分贝
         let db = CGFloat(pow(10, (0.06 * average))) // 分贝
-        //ext.log("average: \(average) | db: \(db)")
+        ext.log("average: \(average) | db: \(db)")
         delegate?.extAudioPlayer(self, timeStatus: .level(db))
     }
 }
