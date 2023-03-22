@@ -32,6 +32,7 @@ public protocol AutoPlayDelegate: AnyObject {
 }
 
 public class TableAutoPlay: ExtInnerLogable {
+    public var logLevel: Ext.LogLevel = .off
     
     public weak var delegate: AutoPlayDelegate?
     

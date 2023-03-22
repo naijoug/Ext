@@ -145,7 +145,7 @@ extension BaseScrollController: UIScrollViewDelegate {
   | ----------- |
  **/
 public class ScrollViewDragger: ExtInnerLogable {
-    public var logLevel: Ext.LogLevel = .default
+    public var logLevel: Ext.LogLevel = .off
     
     /**
      Reference:

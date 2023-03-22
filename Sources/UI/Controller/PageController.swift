@@ -12,7 +12,7 @@ public protocol PageControllerDelegate: AnyObject {
 }
 
 public class PageController: UIViewController, ExtInnerLogable {
-    public var logLevel: Ext.LogLevel = .default
+    public var logLevel: Ext.LogLevel = .off
     
     public enum Action {
         case scrollTo(_ index: Int)
