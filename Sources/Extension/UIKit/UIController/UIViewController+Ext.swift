@@ -11,7 +11,6 @@ public extension Ext {
     /// 功能
     enum Feature {
         case lifecycle
-        case unique
         case fullscreenPop
     }
     
@@ -29,8 +28,6 @@ extension Ext.Feature {
         switch self {
         case .lifecycle:
             UIViewController.ext.lifecycle()
-        case .unique:
-            UIViewController.ext.unique()
         case .fullscreenPop:
             UINavigationController.ext.fullscreenPop()
         }
@@ -172,8 +169,28 @@ public extension ExtWrapper where Base: UIViewController {
 
 // MARK: - Navigation
 
-public extension ExtWrapper where Base: UINavigationController {
+public extension ExtWrapper where Base: UIViewController {
+    /// 导航堆栈中的前一个控制器
+    var prevController: UIViewController? {
+        guard let controllers = base.navigationController?.viewControllers, controllers.count >= 2 else { return nil }
+        return controllers[controllers.count - 2]
+    }
     
+    /**
+     移除前面控制器
+     *
+     * ⚠️ : 应该在 viewDidAppear(_:) 用进行调用使用，如果在 viewDidLoad() 中使用会出现导航栏未移除的 bug
+     */
+    func removePrevController() {
+        guard var controllers = base.navigationController?.viewControllers, controllers.count >= 2 else { return }
+        guard let current = controllers.last,
+              let prev = base.navigationController?.viewControllers.remove(at: controllers.count - 2) else { return }
+        Ext.log("\(prev.ext.typeName) -> \(current.ext.typeName) | prev: \(prev) -> current: \(current)")
+        Ext.log("removed: \(base.navigationController?.viewControllers ?? [])")
+    }
+}
+
+public extension ExtWrapper where Base: UINavigationController {
     /**
      Reference:
         - https://stackoverflow.com/questions/1792858/how-do-i-get-the-rootviewcontroller-from-a-pushed-controller
@@ -198,9 +215,8 @@ public extension ExtWrapper where Base: UINavigationController {
         let current = controllers.removeLast()
         for (index, controller) in controllers.enumerated().reversed() {
             for cls in clss {
-                if controller.isMember(of: cls) {
-                    controllers.remove(at: index)
-                }
+                guard controller.isMember(of: cls) else { continue }
+                controllers.remove(at: index)
             }
         }
         controllers.append(current)
