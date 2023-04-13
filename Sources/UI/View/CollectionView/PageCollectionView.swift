@@ -52,7 +52,7 @@ open class PageCollectionView<Item: PageCollectionItem, Cell: PageCollectionCell
     /// 右侧偏移
     open var rightOffset: CGFloat { 0 }
     /// 分页视图高度
-    open var pageH: CGFloat { UIScreen.main.ext.screenWidth }
+    open var pageH: CGFloat { UIScreen.ext.screenWidth }
     
 // MARK: - UI
     

@@ -28,7 +28,7 @@ open class ExtNavBar: ExtView {
     
     // Solution: https://stackoverflow.com/questions/44932084/ios-11-navigationitem-titleview-width-not-set
     open override var intrinsicContentSize: CGSize {
-        CGSize(width: UIScreen.main.ext.screenWidth, height: 44)
+        CGSize(width: UIScreen.ext.screenWidth, height: 44)
     }
     
 }

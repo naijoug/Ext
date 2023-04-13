@@ -10,8 +10,8 @@ import UIKit
 public extension ExtWrapper where Base == UIScreen {
     
     /// 屏幕宽
-    var screenWidth: CGFloat { base.bounds.size.width }
+    static var screenWidth: CGFloat { Base.main.bounds.size.width }
     /// 屏幕高
-    var screenHeight: CGFloat { base.bounds.size.height }
+    static var screenHeight: CGFloat { Base.main.bounds.size.height }
     
 }

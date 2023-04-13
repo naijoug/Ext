@@ -48,7 +48,7 @@ public extension ExtWrapper where Base == UIApplication {
         Reference:
             - https://developer.apple.com/library/archive/documentation/StringsTextFonts/Conceptual/TextAndWebiPhoneOS/KeyboardManagement/KeyboardManagement.html
     */
-    var keyboardSize: CGSize { CGSize(width: UIScreen.main.ext.screenWidth, height: 216 + safeAreaInsets.bottom) }
+    var keyboardSize: CGSize { CGSize(width: UIScreen.ext.screenWidth, height: 216 + safeAreaInsets.bottom) }
 }
 
 @available(iOSApplicationExtension, unavailable)
