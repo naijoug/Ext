@@ -1,5 +1,5 @@
 //
-//  Speaker.swift
+//  TextSpeaker.swift
 //  Ext
 //
 //  Created by guojian on 2023/2/17.
@@ -7,14 +7,15 @@
 
 import Foundation
 import AVFoundation
+import AVFAudio
 
 /// 文本说话 UI 协议
-public protocol SpeakerUIType: UIView {
+public protocol TextSpeakerUIType: UIView {
     var isSpeaking: Bool { get set }
 }
 
 /// 文本说话(文本转语音并播放)
-public final class Speaker: ExtInnerLogable {
+public final class TextSpeaker: ExtInnerLogable {
     public var logLevel: Ext.LogLevel = .off {
         didSet { synthesizer.logLevel = logLevel }
     }
@@ -22,7 +23,7 @@ public final class Speaker: ExtInnerLogable {
         didSet { synthesizer.logConfig = logConfig }
     }
     
-    public static let shared = Speaker()
+    public static let shared = TextSpeaker()
     private init() {
         ext.log("rate: \([AVSpeechUtteranceMinimumSpeechRate, AVSpeechUtteranceDefaultSpeechRate, AVSpeechUtteranceMaximumSpeechRate])")
         ext.log("voices: \(AVSpeechSynthesisVoice.currentLanguageCode()) - \(AVSpeechSynthesisVoice.speechVoices().map({ $0.log }))")
@@ -46,10 +47,10 @@ public final class Speaker: ExtInnerLogable {
     /// 文本语音合成器
     private lazy var synthesizer = ExtSynthesizer()
     /// 当前 speaker 对应的 UI
-    private weak var speakerUI: SpeakerUIType?
+    private weak var speakerUI: TextSpeakerUIType?
 }
 
-public extension Speaker {
+public extension TextSpeaker {
     /// 语言是否可用
     /// - Parameter language: 语言 (eg: zh-CN、en-US)
     func isEnabled(language: String) -> Bool {
@@ -75,13 +76,13 @@ public extension Speaker {
         return enabledLanguages.first(where: { $0.hasPrefix(languageCode) })
     }
 }
-public extension Speaker {
+public extension TextSpeaker {
     /// 说文本
     /// - Parameters:
     ///   - text: 文本内容
     ///   - languageCode: 说话语言码 (eg: zh、en)
     ///   - speakerUI: 绑定的 UI
-    func speak(text: String, languageCode: String, speakerUI: SpeakerUIType? = nil) {
+    func speak(text: String, languageCode: String, speakerUI: TextSpeakerUIType? = nil) {
         guard let language = language(languageCode: languageCode) else {
             ext.log("speak language code: \(languageCode) not available.")
             return
@@ -94,7 +95,7 @@ public extension Speaker {
     ///   - text: 文本内容
     ///   - language: 说话语言 (eg: zh-CN、en-US)
     ///   - speakerUI: 绑定的 UI
-    func speak(text: String, language: String, speakerUI: SpeakerUIType? = nil) {
+    func speak(text: String, language: String, speakerUI: TextSpeakerUIType? = nil) {
         if synthesizer.isSpeaking {
             ext.log("正在说话")
             synthesizer.stop()
