@@ -34,7 +34,7 @@ public class RecordButton: ExtView {
     /// 是否可用
     public var isEnabled: Bool = true {
         didSet {
-            let color = isEnabled ? (isRecording ? recordColor : normalColor) : disabledColor
+            let color = isEnabled ? (isRecording ? recordColor : normalColor) : normalColor.withAlphaComponent(0.5)
             circleBorder.borderColor = color.cgColor
             innerCircle.backgroundColor = color
         }
@@ -51,7 +51,6 @@ public class RecordButton: ExtView {
     
     private var normalColor: UIColor = .systemBlue
     private var recordColor: UIColor = .systemRed
-    private var disabledColor: UIColor = .systemGray
     
     private var circleBorder: CALayer!
     private var innerCircle: UIView!
@@ -94,10 +93,9 @@ public class RecordButton: ExtView {
 public extension RecordButton {
     
     /// 设置颜色
-    func config(normal normalColor: UIColor, record recordColor: UIColor, disabled disabledColor: UIColor) {
+    func config(normal normalColor: UIColor, record recordColor: UIColor) {
         self.normalColor = normalColor
         self.recordColor = recordColor
-        self.disabledColor = disabledColor
         
         circleBorder.borderColor = normalColor.cgColor
         innerCircle.backgroundColor = normalColor
