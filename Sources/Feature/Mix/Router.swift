@@ -21,10 +21,10 @@ private extension RouterKey {
     var url: String { "\(Router.shared.scheme)\(key)" }
 }
 
-/// 路由处理者键值协议
-public protocol RouterHandlerKey: RouterKey {}
-private extension RouterHandlerKey {
-    var handlerKey: String { "handler://\(key)" }
+/// 动作路由键值协议
+public protocol RouterActionKey: RouterKey {}
+private extension RouterActionKey {
+    var actionKey: String { "action://\(key)" }
 }
 
 /// 路由参数协议
@@ -61,8 +61,8 @@ public final class Router {
     /// 跳转模式表
     private var modeMap = [String: Router.Mode]()
     
-    /// 处理者路由表
-    private var handlerMap = [String: ParamHandler]()
+    /// 动作路由表
+    private var actionMap = [String: ParamHandler]()
     
     /// 路由 scheme
     public var scheme: String = "app://"
@@ -98,19 +98,26 @@ public extension Router {
     
     typealias ParamHandler = (_ param: RouterParam?) -> Void
     
-    func register(key: RouterHandlerKey, handler: @escaping Ext.VoidHandler) {
-        handlerMap[key.handlerKey] = { _ in handler() }
+    func register(key: RouterActionKey, handler: @escaping Ext.VoidHandler) {
+        actionMap[key.actionKey] = { _ in handler() }
     }
-    func register(key: RouterHandlerKey, handler: @escaping ParamHandler) {
-        handlerMap[key.handlerKey] = handler
-    }
-    
-    func handler(for key: RouterHandlerKey) -> ParamHandler? {
-        return handlerMap[key.handlerKey]
+    func register(key: RouterActionKey, handler: @escaping ParamHandler) {
+        actionMap[key.actionKey] = handler
     }
     
-    func handle(key: RouterHandlerKey, param: RouterParam? = nil) {
-        guard let handler = self.handler(for: key) else { return }
+    func handler(for key: RouterActionKey) -> ParamHandler? {
+        actionMap[key.actionKey]
+    }
+    
+    /// 执行指定动作
+    func todo(key: RouterActionKey, param: RouterParam? = nil) {
+        guard let handler = self.handler(for: key) else {
+            Ext.inner.ext.log("❌ router action: \(key.url) unregistered.")
+            return
+        }
+        var log = " router action \(key.url)"
+        if let param { log += " | \(param)" }
+        Ext.inner.ext.log(log)
         handler(param)
     }
 }
@@ -123,7 +130,7 @@ public extension Router {
     /// 启动页面
     func launch(key: RouterKey, param: RouterParam? = nil) {
         guard let controller = controller(for: key, param: param) else {
-            Ext.inner.ext.log("❌ router: \(key.url) unregistered.")
+            Ext.inner.ext.log("❌ router launch: \(key.url) unregistered.")
             return
         }
         var log = "🚀 router launch \(key.url)"

@@ -37,4 +37,6 @@ public extension ExtCompatible {
         set { }
     }
 }
+// swiftlint:enable unused_setter_value
+
 extension NSObject: ExtCompatible { }

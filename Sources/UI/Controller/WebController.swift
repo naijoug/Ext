@@ -189,7 +189,7 @@ open class WebView: ExtView, ExtInnerLogable {
     
     private lazy var refreshControl: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(pullToRefresh), for: .valueChanged)
+        refreshControl.addTarget(self, action: #selector(pullDownToRefresh), for: .valueChanged)
         return refreshControl
     }()
     
@@ -225,7 +225,7 @@ open class WebView: ExtView, ExtInnerLogable {
     
     /// 下拉刷新
     @objc
-    private func pullToRefresh() {
+    private func pullDownToRefresh() {
         guard let resource = resource, load(resource) else {
             endNetworking()
             return

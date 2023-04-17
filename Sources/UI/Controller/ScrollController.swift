@@ -88,14 +88,14 @@ open class BaseScrollController: UIViewController, ScrollableController {
     /// 下拉刷新控件
     open private(set) lazy var refreshControl: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(pullToRefresh), for: .valueChanged)
+        refreshControl.addTarget(self, action: #selector(pullDownToRefresh), for: .valueChanged)
         return refreshControl
     }()
     
     /// 下拉刷新是否可用
-    open var pullToRefreshEnabled: Bool = false {
+    open var pullDownToRefreshEnabled: Bool = false {
         didSet {
-            guard pullToRefreshEnabled else {
+            guard pullDownToRefreshEnabled else {
                 refreshControl.removeFromSuperview()
                 return
             }
@@ -105,7 +105,7 @@ open class BaseScrollController: UIViewController, ScrollableController {
     
     /// 下拉刷新
     @objc
-    open func pullToRefresh() {}
+    open func pullDownToRefresh() {}
 }
 
 // MARK: - Delegate
