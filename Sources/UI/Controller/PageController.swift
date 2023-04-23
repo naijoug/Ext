@@ -183,12 +183,11 @@ extension PageController: UIPageViewControllerDelegate {
     }
     /// 翻页完成
     public func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
-        if completed, let controller = pageViewController.viewControllers?.first,
-           let index = controllers.firstIndex(of: controller) {
-            isTransitioning = false
-            ext.log("index: \(index)")
-            self.currentIndex = index
-            delegate?.pageController(self, didAction: .scrollTo(index))
-        }
+        guard completed, let controller = pageViewController.viewControllers?.first,
+              let index = controllers.firstIndex(of: controller) else { return }
+        isTransitioning = false
+        ext.log("index: \(index)")
+        self.currentIndex = index
+        delegate?.pageController(self, didAction: .scrollTo(index))
     }
 }
