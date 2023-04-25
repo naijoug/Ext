@@ -127,7 +127,7 @@ extension Ext {
     /// 内部类
     struct Inner: ExtLogable {
         var logLevel: Ext.LogLevel = .info
-        var logConfig: Ext.LogConfig = .init(located: false)
+        var logConfig: Ext.LogConfig = .init(located: true)
     }
 }
 

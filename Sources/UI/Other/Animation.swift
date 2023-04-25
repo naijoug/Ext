@@ -7,9 +7,11 @@
 
 import UIKit
 
-public enum Animation {}
+public extension Ext {
+    enum Animation {}
+}
 
-public extension Animation {
+public extension Ext.Animation {
     
     /// 图片飞行动画
     static func fly(image: UIImage?, startView: UIView?, endView: UIView?, handler: Ext.ResultVoidHandler?) {

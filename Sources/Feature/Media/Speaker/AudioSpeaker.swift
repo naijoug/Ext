@@ -24,7 +24,7 @@ public extension AudioSpeakerUIType {
 
 /// 音频播放管理器
 public final class AudioSpeaker: ExtInnerLogable {
-    public var logLevel: Ext.LogLevel = .off {
+    public var logLevel: Ext.LogLevel = .debug {
         didSet { player.logLevel = logLevel }
     }
     
@@ -60,7 +60,7 @@ public final class AudioSpeaker: ExtInnerLogable {
 extension AudioSpeaker: ExtPlayerDelegate {
     
     public func extPlayer(_ player: ExtPlayer, status: ExtPlayer.Status) {
-        ext.log("\(player) | vs | \(self.player)")
+        ext.log("\(player)")
         
         switch status {
         case .paused:
@@ -69,7 +69,7 @@ extension AudioSpeaker: ExtPlayerDelegate {
             speakerUI?.isBuffering = false
             speakerUI?.isSpeaking = false
         case .playToEnd:
-            ext.log("player to end. \(player) | current: \(self.player)")
+            ext.log("player to end.")
             speakerUI?.speakTo(time: 0, duration: player.duration ?? 0)
             speakerUI?.isSpeaking = false
         case .failed(let error):
@@ -102,7 +102,7 @@ public extension AudioSpeaker {
     ///   - url: 资源 URL
     ///   - time: 播放时间点
     ///   - speakerUI: 音频播放关联的 UI
-    func play(url: URL, time: TimeInterval? = nil, speakerUI: AudioSpeakerUIType?) {
+    func speak(url: URL, time: TimeInterval? = nil, speakerUI: AudioSpeakerUIType?) {
         if player.isPlaying { self.pause() }
         
         ext.log("play \(url.absoluteString) - \(time) | \(player) | \(speakerUI?.description ?? "")")

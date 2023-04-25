@@ -83,6 +83,30 @@ public extension ExtWrapper where Base == Date {
         return Date(timeIntervalSince1970: timestamp)
     }
     
+    
+    /// 时间戳 -> 倒计时
+    /// - Parameters:
+    ///   - timestamp: 时间戳
+    ///   - short: 是否为简短模式(true: 读秒倒计时, false: 时分秒[HH:mm:ss]倒计时)
+    static func countdown(_ timestamp: TimeInterval?, short: Bool = false) -> String? {
+        // Reference: https://stackoverflow.com/questions/30582967/how-to-make-a-countdown-to-date-swift
+        let current = Date()
+        guard let date = Date.ext.dateTime(timestamp), date > current else { return nil }
+        guard !short else {
+            return "\(current.timeIntervalSince1970 - date.timeIntervalSince1970)"
+        }
+        
+        let countdown = Calendar.current.dateComponents([.hour, .minute, .second], from: current, to: date)
+        let hour = countdown.hour ?? 0
+        var minute = countdown.minute ?? 0
+        let second = countdown.second ?? 0
+        Ext.log("hour: \(hour) minute: \(minute) second: \(second)")
+        guard hour > 0 else {
+            return "%02d:%02d".ext.format(minute, second) // mm:ss
+        }
+        return "%d:%02d:%02d".ext.format(hour, minute, second) // hh:mm:ss
+    }
+    
     /// 当前时间基础上调整时间
     func dateWith(day: Int? = nil, hour: Int? = nil, minute: Int? = nil, second: Int? = nil) -> Date {
         let components = DateComponents(day: day, hour: hour, minute: minute, second: second)
