@@ -15,7 +15,7 @@ open class CollectionController: BaseScrollController {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.delegate = self
         collectionView.dataSource = self
-        collectionView.alwaysBounceVertical = true
+        //collectionView.alwaysBounceVertical = true
         configCollection(collectionView)
         return collectionView
     }()
