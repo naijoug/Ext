@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import AVFoundation
 import UIKit
 
 /// 音频播放器 UI 协议 (播放音频资源时，用于调整播放相关 UI 的状态)
@@ -44,16 +45,16 @@ public final class AudioSpeaker: ExtInnerLogable {
     
     /// 播放关联 UI
     private weak var speakerUI: AudioSpeakerUIType?
-    /// 播放资源 URL
-    private var playerURL: URL? {
+    /// 播放资源 item
+    private var playerItem: AVPlayerItem? {
         didSet {
-            ext.log("\(oldValue?.debugDescription ?? "") -> \(playerURL?.debugDescription ?? "")")
-            guard let url = playerURL else {
+            ext.log("\(oldValue) -> \(playerItem)")
+            guard let item = playerItem else {
                 player.clearData()
                 return
             }
             player.periodicTime = 0.1
-            player.playerUrl = url
+            player.playerItem = item
         }
     }
 }
@@ -103,11 +104,20 @@ public extension AudioSpeaker {
     ///   - time: 播放时间点
     ///   - speakerUI: 音频播放关联的 UI
     func speak(url: URL, time: TimeInterval? = nil, speakerUI: AudioSpeakerUIType?) {
+        speak(playerItem: AVPlayerItem(url: url), time: time, speakerUI: speakerUI)
+    }
+    
+    /// 播放音频资源
+    /// - Parameters:
+    ///   - playerItem: 播放资源 item
+    ///   - time: 播放时间点
+    ///   - speakerUI: 音频播放关联的 UI
+    func speak(playerItem: AVPlayerItem, time: TimeInterval? = nil, speakerUI: AudioSpeakerUIType?) {
         if player.isPlaying { self.pause() }
         
-        ext.log("play \(url.absoluteString) - \(time) | \(player) | \(speakerUI?.description ?? "")")
+        ext.log("play \(playerItem) - \(time) | \(player) | \(speakerUI?.description ?? "")")
         
-        self.playerURL = url
+        self.playerItem = playerItem
         self.speakerUI = speakerUI
         
         guard let time = time, time > 0 else {
@@ -124,7 +134,7 @@ public extension AudioSpeaker {
     
     /// 暂停播放
     func pause() {
-        ext.log("pause \(player.currentTime) | \(player) | \(playerURL?.absoluteString ?? "")")
+        ext.log("pause \(player.currentTime) | \(player) | \(playerItem)")
         player.pause()
     }
     
@@ -133,6 +143,6 @@ public extension AudioSpeaker {
         self.pause()
         
         speakerUI = nil
-        playerURL = nil
+        playerItem = nil
     }
 }
