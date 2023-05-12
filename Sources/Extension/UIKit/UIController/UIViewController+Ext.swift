@@ -237,3 +237,52 @@ public extension ExtWrapper where Base: UINavigationController {
         }
     }
 }
+
+// MARK: - Sheet
+
+// Reference: https://developer.apple.com/documentation/uikit/uiviewcontroller/customizing_and_resizing_sheets_in_uikit
+
+@available(iOS 15.0, *)
+public extension ExtWrapper where Base: UIViewController {
+    enum SheetDetent {
+        case custom(_ ratio: CGFloat)
+        case medium
+        case large
+        
+        var detent: UISheetPresentationController.Detent {
+            switch self {
+            case .custom(let ratio):
+                if #available(iOS 16.0, *) {
+                    return .custom(ratio)
+                } else {
+                    return .medium()
+                }
+            case .medium: return .medium()
+            case .large: return .large()
+            }
+        }
+    }
+    
+    func wrapperToSheet(detents: [SheetDetent]) -> Bool {
+        // base.modalPresentationStyle = .popover
+        // guard let popover = base.popoverPresentationController else { return false }
+        // let sheet = popover.adaptiveSheetPresentationController
+        guard let sheet = base.sheetPresentationController else { return false }
+        sheet.detents = detents.map { $0.detent }
+        sheet.prefersGrabberVisible = true
+        sheet.largestUndimmedDetentIdentifier = .large
+        return true
+    }
+}
+@available(iOS 16.0, *)
+private extension UISheetPresentationController.Detent {
+    static func custom(_ ratio: CGFloat) -> UISheetPresentationController.Detent {
+        .custom(identifier: .custom) { context in
+            ratio * context.maximumDetentValue
+        }
+    }
+}
+@available(iOS 15.0, *)
+private extension UISheetPresentationController.Detent.Identifier {
+    static let custom = UISheetPresentationController.Detent.Identifier("custom")
+}

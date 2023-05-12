@@ -137,6 +137,8 @@ extension PageController: UIGestureRecognizerDelegate {
 
 public extension PageController {
     
+    var current: UIViewController? { pageController.viewControllers?.first }
+    
     /// 绑定页面数据
     func bind(_ controllers: [UIViewController], index: Int = 0) {
         guard !controllers.isEmpty else { return }
