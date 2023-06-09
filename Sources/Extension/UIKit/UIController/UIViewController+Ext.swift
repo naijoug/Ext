@@ -242,13 +242,13 @@ public extension ExtWrapper where Base: UINavigationController {
 
 // Reference: https://developer.apple.com/documentation/uikit/uiviewcontroller/customizing_and_resizing_sheets_in_uikit
 
-@available(iOS 15.0, *)
 public extension ExtWrapper where Base: UIViewController {
     enum SheetDetent {
         case custom(_ ratio: CGFloat)
         case medium
         case large
         
+        @available(iOS 15.0, *)
         var detent: UISheetPresentationController.Detent {
             switch self {
             case .custom(let ratio):
@@ -263,10 +263,15 @@ public extension ExtWrapper where Base: UIViewController {
         }
     }
     
+    @discardableResult
+    /// 包装控制器支持 iOS 15 Sheet
+    /// - Parameter detents: Sheet 显示支持尺寸
+    /// - Returns: 是否包装成功
     func wrapperToSheet(detents: [SheetDetent]) -> Bool {
         // base.modalPresentationStyle = .popover
         // guard let popover = base.popoverPresentationController else { return false }
         // let sheet = popover.adaptiveSheetPresentationController
+        guard #available(iOS 15.0, *) else { return false }
         guard let sheet = base.sheetPresentationController else { return false }
         sheet.detents = detents.map { $0.detent }
         sheet.prefersGrabberVisible = true
