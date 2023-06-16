@@ -13,6 +13,8 @@ public extension ExtWrapper where Base == Bundle {
      Reference:
         - https://stackoverflow.com/questions/31316325/how-to-get-bundle-for-a-struct
         - https://stackoverflow.com/questions/41834472/xcode8-usage-of-image-literals-in-frameworks
+        - [Image sets from Frameworks broken on Xcode 13? (Store only bug)](https://developer.apple.com/forums/thread/691272)
+            > cocoapods - resource_bundles 不要与模块名重名，会出现图片读取不到的情况
      */
     
     /// Bundle

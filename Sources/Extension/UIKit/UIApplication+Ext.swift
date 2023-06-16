@@ -143,7 +143,8 @@ public extension ExtWrapper where Base == UIApplication {
     /// 清理 LaunchScreen 缓存
     func clearLaunchScreeenCache() {
         /** Reference:
-           - https://stackoverflow.com/questions/33002829/ios-keeping-old-launch-screen-and-app-icon-after-update
+            - https://stackoverflow.com/questions/33002829/ios-keeping-old-launch-screen-and-app-icon-after-update
+            - [how to add animation in Launch Screen](https://developer.apple.com/forums/thread/719119)
         */
         do {
             let path1 = NSHomeDirectory() + "/Library/Caches/Snapshots"

@@ -224,7 +224,3 @@ public extension ExtWrapper where Base == FileManager {
         }
     }
 }
-
-public extension ExtWrapper where Base == FileManager {
-    
-}
