@@ -92,6 +92,36 @@ extension Ext.Error: LocalizedError {
 
 // MARK: - Log
 
+public extension Ext {
+    /// 日志级别
+    enum LogLevel: Int {
+        /// 关闭日志
+        case off
+        /// 日志信息
+        case info
+        /// 日志调试信息(包含日志代码位置)
+        case debug
+        
+        /// 默认日志级别
+        public static var `default`: LogLevel = .debug
+    }
+    /// 日志内容配置
+    struct LogConfig {
+        /// 日志标记 (默认: ##)
+        public var tag: String
+        /// 是否显示日期信息 (默认: 开启)
+        public var dated: Bool
+        /// 是否显示代码定位信息 (默认: 开启)
+        public var located: Bool
+        
+        public init(tag: String = "##", dated: Bool = true, located: Bool = true) {
+            self.tag = tag
+            self.dated = dated
+            self.located = located
+        }
+    }
+}
+
 public protocol ExtLogable: ExtCompatible {
     /// 日志级别
     var logLevel: Ext.LogLevel { get }
@@ -127,7 +157,7 @@ extension Ext {
     /// 内部类
     struct Inner: ExtLogable {
         var logLevel: Ext.LogLevel = .info
-        var logConfig: Ext.LogConfig = .init(located: true)
+        var logConfig: Ext.LogConfig = .init(located: false)
     }
 }
 
@@ -138,35 +168,6 @@ public extension ExtInnerLogable {
 }
 
 public extension Ext {
-    
-    /// 日志级别
-    enum LogLevel: Int {
-        /// 关闭日志
-        case off
-        /// 日志信息
-        case info
-        /// 日志调试信息(包含日志代码位置)
-        case debug
-        
-        /// 默认日志级别
-        public static var `default`: LogLevel = .debug
-    }
-    /// 日志内容配置
-    struct LogConfig {
-        /// 日志标记 (默认: ##)
-        public var tag: String
-        /// 是否显示日期信息 (默认: 开启)
-        public var dated: Bool
-        /// 是否显示代码定位信息 (默认: 开启)
-        public var located: Bool
-        
-        public init(tag: String = "##", dated: Bool = true, located: Bool = true) {
-            self.tag = tag
-            self.dated = dated
-            self.located = located
-        }
-    }
-    
     /// 日志记录
     ///
     /// - Parameters:

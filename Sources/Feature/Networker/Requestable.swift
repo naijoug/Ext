@@ -16,19 +16,19 @@ import Foundation
 public protocol Requestable {
     var baseURLString: String { get }
     var path: String { get }
-    var queryParameters: [(name: String, value: Any)] { get }
     var httpMethod: HttpMethod { get }
     var httpHeaderFields: [String: String] { get }
     var contentType: String { get }
+    var queryParameters: [(name: String, value: Any)] { get }
     var httpBody: Data? { get }
     var timeoutInterval: TimeInterval { get }
 }
 public extension Requestable {
     var path: String { "" }
-    var queryParameters: [(name: String, value: Any)] { [] }
     var httpMethod: HttpMethod { .get }
     var httpHeaderFields: [String: String] { [:] }
     var contentType: String { "" }
+    var queryParameters: [(name: String, value: Any)] { [] }
     var httpBody: Data? { nil }
     var timeoutInterval: TimeInterval { 60.0 }
 }
@@ -66,6 +66,7 @@ public extension ExtWrapper where Base == Networker {
     }
 }
 
+public protocol ExtRequestable: Requestable, ExtCompatible {}
 public extension ExtWrapper where Base: Requestable {
     @discardableResult
     /// 数据请求响应
@@ -140,10 +141,36 @@ private extension Requestable {
     }
 }
 
+public extension Ext {
+    /// 简单请求
+    struct SimpleRequest: ExtRequestable {
+        /// 请求地址
+        public var baseURLString: String
+        /// 请求路径
+        public var path: String = ""
+        /// HTTP 请求方法, 默认: GET
+        public var httpMethod: HttpMethod = .get
+        /// HTTP 请求头
+        public var httpHeaderFields: [String: String] = [:]
+        /// 请求内容类型, 默认: json
+        public var contentType: String = "application/json; charset=UTF-8"
+        /// 请求查询参数
+        public var queryParameters: [(name: String, value: Any)] = []
+        /// 请求体
+        public var httpBody: Data?
+        /// 超时时间, 默认 60s
+        public var timeoutInterval: TimeInterval = 60.0
+            
+        public init(urlString baseURLString: String) {
+            self.baseURLString = baseURLString
+        }
+    }
+}
+
 // MARK: - JSON
 
 /// JSON 参数请求协议
-public protocol JSONRequestable: Requestable {
+public protocol JSONRequestable: ExtRequestable {
     var jsonParameter: Any? { get }
 }
 public extension JSONRequestable {
@@ -170,7 +197,7 @@ public extension JSONRequestable {
 // MARK: - Codable
 
 /// Encodable 参数请求协议
-public protocol EncodeRequestable: Requestable {
+public protocol EncodeRequestable: ExtRequestable {
     var parameter: Encodable? { get }
 }
 public extension EncodeRequestable {
@@ -196,7 +223,7 @@ public extension EncodeRequestable {
 // MARK: - FormData
 
 /// FormData 参数请求协议
-public protocol FormDataRequestable: Requestable, DataLogable {
+public protocol FormDataRequestable: ExtRequestable, DataLogable {
     var boundary: String { get set }
     var formData: MultipartFormData { get }
 }
