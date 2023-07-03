@@ -15,32 +15,32 @@ import UIKit
 
 open class PlaceholderTextView: UITextView {
     
-    public enum Alignment {
-        case top
-        case center
-        case bottom
-    }
-    
-    /// 文本垂直对齐方式
-    public var textVerticalAlignment: Alignment = .top
-    
-    public override var contentSize: CGSize {
-        didSet {
-            let height = bounds.size.height
-            let contentHeight = contentSize.height
-            
-            var topCorrection: CGFloat = 0.0
-            switch textVerticalAlignment {
-            case .top: ()
-            case .center:
-                topCorrection = max(0, (height - contentHeight * zoomScale)/2.0)
-            case .bottom:
-                topCorrection = height - contentHeight
-            }
-            
-            contentInset = UIEdgeInsets(top: topCorrection, left: 0, bottom: 0, right: 0)
-        }
-    }
+//    public enum Alignment {
+//        case top
+//        case center
+//        case bottom
+//    }
+//
+//    /// 文本垂直对齐方式
+//    public var textVerticalAlignment: Alignment = .top
+//
+//    public override var contentSize: CGSize {
+//        didSet {
+//            let height = bounds.size.height
+//            let contentHeight = contentSize.height
+//
+//            var topCorrection: CGFloat = 0.0
+//            switch textVerticalAlignment {
+//            case .top: ()
+//            case .center:
+//                topCorrection = max(0, (height - contentHeight * zoomScale)/2.0)
+//            case .bottom:
+//                topCorrection = height - contentHeight
+//            }
+//
+//            contentInset = UIEdgeInsets(top: topCorrection, left: 0, bottom: 0, right: 0)
+//        }
+//    }
     
     /// 占位符是否可用
     public var placeholderEnabled: Bool = true { didSet { setNeedsDisplay() } }
@@ -76,40 +76,18 @@ open class PlaceholderTextView: UITextView {
     open override func draw(_ rect: CGRect) {
         guard placeholderEnabled, !hasText else { return }
         guard let placeholder = placeholder, !placeholder.isEmpty else { return }
-        let canvasW = rect.size.width - textContainerInset.left + placeholderOffset.x - textContainerInset.right
-        //let canvasH = rect.size.height - textContainerInset.top + placeholderOffset.y - textContainerInset.bottom
-        let placeholderFont = self.placeholderFont ?? (font ?? UIFont.systemFont(ofSize: UIFont.systemFontSize))
-        let placeholderSize = (placeholder as NSString).boundingRect(
-            with: CGSize(width: .greatestFiniteMagnitude, height: CGFloat.greatestFiniteMagnitude),
-            options: .usesLineFragmentOrigin,
-            attributes: [.font: placeholderFont],
-            context: nil
-        ).size
-        
-        var offsetX: CGFloat = textContainerInset.left + placeholderOffset.x
-        if canvasW > placeholderSize.width {
-            switch textAlignment {
-            case .center: offsetX += (canvasW - placeholderSize.width) / 2.0
-            case .right: offsetX += canvasW - placeholderSize.width
-            default: ()
-            }
-        }
-        let offsetY: CGFloat = textContainerInset.top + placeholderOffset.y
-//        if canvasH > placeholderSize.height {
-//            switch textVerticalAlignment {
-//            case .center: offsetY += (canvasH - placeholderSize.height) / 2.0
-//            case .bottom: offsetY += canvasH - placeholderSize.height
-//            default: ()
-//            }
-//        }
-        
         let style = NSMutableParagraphStyle()
         style.lineSpacing = 3
-        
+        var offsetX: CGFloat = placeholderOffset.x
+        let offsetY: CGFloat = placeholderOffset.y
+        Ext.inner.ext.log("\(offsetX), \(offsetY)")
         (placeholder as NSString).draw(
-            in: CGRect(x: offsetX, y: offsetY, width: placeholderSize.width, height: placeholderSize.height),
+            in: CGRect(x: offsetX + textContainerInset.left,
+                       y: offsetY + textContainerInset.top,
+                       width: rect.size.width - offsetX - textContainerInset.left - textContainerInset.right,
+                       height: rect.size.height - offsetY - textContainerInset.top - textContainerInset.bottom),
             withAttributes: [
-                .font: placeholderFont,
+                .font: placeholderFont ?? (font ?? UIFont.systemFont(ofSize: UIFont.systemFontSize)),
                 .foregroundColor: placeholderColor,
                 .paragraphStyle: style
             ]
