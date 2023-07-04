@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name             = "Ext"
-  spec.version          = "0.5.0"
+  spec.version          = "0.5.1"
   spec.summary          = "Some useful Swift extensions."
   spec.homepage         = 'https://github.com/naijoug/Ext'
   spec.license          = { :type => "MIT", :file => "LICENSE" }
