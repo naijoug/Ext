@@ -21,8 +21,8 @@ public extension ExtWrapper where Base == Int {
     /// 毫秒格式化显示 mm:ss
     var time: String {
         guard base > 0 else { return "00:00" }
-        let minute = base/1000/60
-        let sencond = lround(Double(base)/1000)%60
+        let minute = Int(Double(base)/1000)/60
+        let sencond = Int(Double(base)/1000)%60
         return String(format: "%02d:%02d", minute, sencond)
     }
 }
