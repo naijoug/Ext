@@ -227,9 +227,11 @@ public extension ExtWrapper where Base: AVAsset {
     ///   - frames: 导出图片帧数
     ///   - handler: 导出结果
     func exportImages(_ size: CGSize, frames: Int, handler: @escaping Ext.ExportImageHandler) {
-        let times = (0..<frames).map {
-            CMTime(seconds: base.duration.seconds * TimeInterval($0)/TimeInterval(frames), preferredTimescale: base.duration.timescale)
+        guard frames > 0 else {
+            handler(.failure(Ext.Error.inner("export frames must be greater than zero.")))
+            return
         }
+        let times = (0..<frames).map { base.duration.seconds * TimeInterval($0)/TimeInterval(frames) }
         exportImages(size, times: times, handler: handler)
     }
     
@@ -250,9 +252,7 @@ public extension ExtWrapper where Base: AVAsset {
         let remainderT = durationT - TimeInterval(fullFrames)*frameInterval // 剩余时长
         let lastW = size.width * CGFloat(remainderT/frameInterval)  // 最后一帧图片宽度
         //Ext.log("总时长: \(seconds) | 完整帧数: \(fullFrames) | 剩余时长: \(remainderT) | 最后一帧图片宽度\(lastW)")
-        let times = stride(from: 0, to: durationT, by: frameInterval).map {
-            CMTime(seconds: $0, preferredTimescale: base.duration.timescale)
-        }
+        let times = Array(stride(from: 0, to: durationT, by: frameInterval))
         exportImages(size, times: times) { result in
             switch result {
             case .failure(let error): handler(.failure(error))
@@ -268,20 +268,31 @@ public extension ExtWrapper where Base: AVAsset {
             }
         }
     }
+    
     /// 导出多张图片(异步)
     ///
     /// - Parameters:
     ///   - size: 图片最大尺寸
     ///   - times: 导出图片时间点
     ///   - handler: 导出结果
-    func exportImages(_ size: CGSize, times: [CMTime], handler: @escaping Ext.ExportImageHandler) {
+    func exportImages(_ size: CGSize, times: [TimeInterval], handler: @escaping Ext.ExportImageHandler) {
+        let cmTimes = times.map { CMTime(seconds: $0, preferredTimescale: base.duration.timescale) }
+        exportImages(size, cmTimes: cmTimes, handler: handler)
+    }
+    /// 导出多张图片(异步)
+    ///
+    /// - Parameters:
+    ///   - size: 图片最大尺寸
+    ///   - times: 导出图片时间点
+    ///   - handler: 导出结果
+    func exportImages(_ size: CGSize, cmTimes: [CMTime], handler: @escaping Ext.ExportImageHandler) {
         func handleResult(_ result: Result<[Ext.ImageFrame], Swift.Error>) {
             DispatchQueue.main.async {
                 handler(result)
             }
         }
         
-        guard !times.isEmpty else {
+        guard !cmTimes.isEmpty else {
             handler(.success([]))
             return
         }
@@ -294,7 +305,7 @@ public extension ExtWrapper where Base: AVAsset {
         //Ext.inner.ext.log("times: \(times)")
         var frames = [Ext.ImageFrame]()
         var count = 0
-        generator.generateCGImagesAsynchronously(forTimes: times.map { NSValue(time: $0) }) { (requestedTime, cgImage, actualTime, result, error) in
+        generator.generateCGImagesAsynchronously(forTimes: cmTimes.map { NSValue(time: $0) }) { (requestedTime, cgImage, actualTime, result, error) in
             switch result {
             case .succeeded:
                 if let cgImage = cgImage {
@@ -309,7 +320,7 @@ public extension ExtWrapper where Base: AVAsset {
             }
             
             count += 1
-            guard count == times.count else { return } // 全部导出完成
+            guard count == cmTimes.count else { return } // 全部导出完成
             handleResult(.success(frames))
         }
     }
@@ -319,7 +330,15 @@ public extension ExtWrapper where Base: AVAsset {
     /// - Parameters:
     ///   - size: 图片最大尺寸
     ///   - time: 导出图片时间点
-    func exportImage(_ size: CGSize, time: CMTime) -> Ext.ImageFrame? {
+    func exportImage(_ size: CGSize, time: TimeInterval) -> Ext.ImageFrame? {
+        exportImage(size, cmTime: CMTime(seconds: time, preferredTimescale: base.duration.timescale))
+    }
+    /// 导出一帧图片(同步)
+    ///
+    /// - Parameters:
+    ///   - size: 图片最大尺寸
+    ///   - time: 导出图片时间点
+    func exportImage(_ size: CGSize, cmTime: CMTime) -> Ext.ImageFrame? {
         let generator = AVAssetImageGenerator(asset: base)
         generator.requestedTimeToleranceAfter    = .zero
         generator.requestedTimeToleranceBefore   = .zero
@@ -328,7 +347,7 @@ public extension ExtWrapper where Base: AVAsset {
         
         do {
             var actualTime = CMTime(value: 0, timescale: 0) // actual time for the image
-            let cgImage = try generator.copyCGImage(at: time, actualTime: &actualTime)
+            let cgImage = try generator.copyCGImage(at: cmTime, actualTime: &actualTime)
             return (UIImage(cgImage: cgImage), actualTime)
         } catch {
             Ext.inner.ext.log("image generate failed.", error: error)
