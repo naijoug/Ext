@@ -9,7 +9,8 @@ import UIKit
 
 /**
  Reference:
-    - https://github.com/forkingdog/FDFullscreenPopGesture
+    - [FDFullscreenPopGesture](https://github.com/forkingdog/FDFullscreenPopGesture)
+    - [SJFullscreenPopGesture](https://github.com/changsanjiang/SJFullscreenPopGesture)
  */
 
 extension ExtWrapper where Base: UINavigationController {
