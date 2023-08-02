@@ -291,6 +291,12 @@ public extension WebView {
         return true
     }
     
+    /// 刷新网页
+    func refresh() {
+        guard let resource = resource else { return }
+        load(resource)
+    }
+    
     /// 设置 web 页面背景颜色
     func setBackgroundColor(_ backgroundColor: UIColor) {
         // solution: https://developer.apple.com/forums/thread/121139
