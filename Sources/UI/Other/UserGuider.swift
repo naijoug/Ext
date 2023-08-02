@@ -101,29 +101,24 @@ private class GuideView: UIView, ExtLogable {
         }
     }
     
-    
 // MARK: - UI
     
     /// 引导视图四周的蒙版视图
-    private lazy var topView: UIView = { ext.add(UIView(), backgroundColor: maskColor) }()
-    private lazy var bottomView: UIView = { ext.add(UIView(), backgroundColor: maskColor) }()
-    private lazy var leftView: UIView = { ext.add(UIView(), backgroundColor: maskColor) }()
-    private lazy var rightView: UIView = { ext.add(UIView(), backgroundColor: maskColor) }()
+    private lazy var topView: UIView = ext.add(UIView())
+    private lazy var bottomView: UIView = ext.add(UIView())
+    private lazy var leftView: UIView = ext.add(UIView())
+    private lazy var rightView: UIView = ext.add(UIView())
     
-    private lazy var centerView: UIView = { ext.add(UIView(), backgroundColor: maskColor) }()
+    private lazy var centerView: UIView = ext.add(UIView())
     
-    private lazy var imageView: UIImageView = {
-        ext.add(UIImageView(image: upImage)).setup {
-            $0.contentMode = .center
-        }
-    }()
-    private lazy var titleLabel: UILabel = {
-        ext.add(UILabel()).setup {
-            $0.numberOfLines = 0
-            $0.textAlignment = .center
-            $0.attributedText = attributedText
-        }
-    }()
+    private lazy var imageView = ext.add(UIImageView(image: upImage)).setup {
+        $0.contentMode = .center
+    }
+    private lazy var titleLabel = ext.add(UILabel()).setup {
+        $0.numberOfLines = 0
+        $0.textAlignment = .center
+        $0.attributedText = attributedText
+    }
     
 // MARK: - Init
     
@@ -134,6 +129,7 @@ private class GuideView: UIView, ExtLogable {
         self.attributedText = attributedText
         self.upImage = upImage
         self.downImage = downImage
+        
         super.init(frame: .zero)
         
         setupUI()
@@ -142,14 +138,14 @@ private class GuideView: UIView, ExtLogable {
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
     
     deinit {
-        Ext.log("♻️ tip: \(titleLabel.text ?? "")")
+        Ext.log("♻️ tip: \(attributedText.string)")
     }
     func setupUI() {
-        topView.ext.active()
-        bottomView.ext.active()
-        leftView.ext.active()
-        rightView.ext.active()
-        centerView.ext.active()
+        topView.backgroundColor = maskColor
+        bottomView.backgroundColor = maskColor
+        leftView.backgroundColor = maskColor
+        rightView.backgroundColor = maskColor
+        centerView.backgroundColor = maskColor
     }
 }
 

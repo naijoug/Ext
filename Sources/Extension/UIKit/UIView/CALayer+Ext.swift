@@ -106,7 +106,7 @@ private extension ExtWrapper where Base: CALayer {
             rY = arrow.height
             rHeight -= arrow.height
         }
-
+        
         // 先把箭头的三个点放进关键点数组中
         var points = [beginPoint, topPoint, endPoint]
         
@@ -133,10 +133,6 @@ private extension ExtWrapper where Base: CALayer {
     }
 }
 
-
-
-
-
 // 一些在注释中使用的叫法
 // 箭头: 气泡形状突出那个三角形把它叫做【箭头】
 // 箭头的顶点和底点: 将箭头指向的那个点叫为【顶点】，其余两个点叫为【底点】
@@ -145,7 +141,6 @@ private extension ExtWrapper where Base: CALayer {
 // 箭头的相对位置: 如果箭头的方向是向右或者向左，0表达箭头在最上方，1表示箭头在最下方
 //              如果箭头的方向是向上或者向下，0表达箭头在最左边，1表示箭头在最右边
 //              默认是 0.5，即在中间
-
 
 /// 气泡箭头
 public struct BubbleArrow {
@@ -159,18 +154,19 @@ public struct BubbleArrow {
     
     /// 箭头方向
     public var direction: ArrowDirection = .top
-    /// 箭头位置的圆角半径
-    public var radius: CGFloat = 4
-    /// 箭头的宽度
-    public var width: CGFloat = 20
-    /// 箭头的高度
-    public var height: CGFloat = 10
     /// 箭头的相对位置 (0 ~ 1.0)
     public var position: CGFloat = 0.5 {
         didSet {
             position = max(0, min(1.0, position))
         }
     }
+    
+    /// 箭头位置的圆角半径
+    public var radius: CGFloat = 4
+    /// 箭头的宽度
+    public var width: CGFloat = 20
+    /// 箭头的高度
+    public var height: CGFloat = 10
     
     public init() {}
 }

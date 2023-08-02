@@ -39,55 +39,42 @@ public extension ExtWrapper where Base == NSAttributedString {
 
 public extension ExtWrapper where Base == String {
     
-    func widthFitTextField(_ height: CGFloat, font: UIFont) -> CGFloat {
-        let textField = UITextField()
-        textField.text = base
-        textField.font = font
-        return textField.ext.widthFit(height)
-    }
-    
     func heightFitLabel(_ width: CGFloat, font: UIFont, numberOfLines: Int = 0) -> CGFloat {
         let label = UILabel()
         label.text = base
         label.font = font
         label.numberOfLines = numberOfLines
-        return label.ext.heightFit(width)
+        return label.ext.sizeFit(width: width).height
     }
     
     func heightFitTextView(_ width: CGFloat, font: UIFont) -> CGFloat {
         let textView = UITextView()
         textView.text = base
         textView.font = font
-        return textView.ext.heightFit(width)
+        return textView.ext.sizeFit(width: width).height
     }
 }
 public extension ExtWrapper where Base == NSAttributedString {
-    
-    func widthFitTextField(_ height: CGFloat) -> CGFloat {
-        let field = UITextField()
-        field.attributedText = base
-        return field.ext.widthFit(height)
-    }
     
     func heightFitLabel(_ width: CGFloat, numberOfLines: Int = 0) -> CGFloat {
         let label = UILabel()
         label.attributedText = base
         label.numberOfLines = numberOfLines
-        return label.ext.heightFit(width)
+        return label.ext.sizeFit(width: width).height
     }
     
     func heightFitTextView(_ width: CGFloat) -> CGFloat {
         let textView = UITextView()
         textView.attributedText = base
-        return textView.ext.heightFit(width)
+        return textView.ext.sizeFit(width: width).height
     }
 }
 
 public extension ExtWrapper where Base: UIView {
-    func widthFit(_ height: CGFloat) -> CGFloat {
-        return ceil(base.sizeThatFits(CGSize(width: CGFloat.greatestFiniteMagnitude, height: height)).width)
+    func sizeFit(height: CGFloat) -> CGSize {
+        base.sizeThatFits(CGSize(width: CGFloat.greatestFiniteMagnitude, height: height))
     }
-    func heightFit(_ width: CGFloat) -> CGFloat {
-        return ceil(base.sizeThatFits(CGSize(width: width, height: CGFloat.greatestFiniteMagnitude)).height)
+    func sizeFit(width: CGFloat) -> CGSize {
+        base.sizeThatFits(CGSize(width: width, height: CGFloat.greatestFiniteMagnitude))
     }
 }

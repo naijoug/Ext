@@ -159,7 +159,7 @@ open class WebView: ExtView, ExtInnerLogable {
     
 // MARK: - UI
     
-    private lazy var userContentController: WKUserContentController = { WKUserContentController() }()
+    private lazy var userContentController = WKUserContentController()
     
     private lazy var webView: WKWebView = {
         let preferences = WKPreferences()
