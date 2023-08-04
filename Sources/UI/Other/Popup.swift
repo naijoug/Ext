@@ -45,12 +45,16 @@ public extension Popup {
         /// 是否在 Pop 队列中 (默认: false)
         public var inQueue: Bool = false
         
-        /// 显示完成
+        /// 显示完成 (默认: impact 反馈效果)
         public var showedHandler: Ext.VoidHandler?
         /// 隐藏完成
         public var hiddenHandler: Ext.VoidHandler?
         
-        public init() {}
+        public init() {
+            showedHandler = {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            }
+        }
     }
     
 }
