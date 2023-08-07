@@ -150,7 +150,12 @@ public extension ExtWrapper where Base == String {
      */
     var firstCapitalized: String { base.prefix(1).capitalized + base.dropFirst() }
     
-    /// 解码 html 字符串
+    /**
+     解码 html 字符串
+     
+     Reference:
+        - https://stackoverflow.com/questions/53954178/initialization-of-nsattributedstring-is-crashing-application
+     */
     var htmlDecoded: String? { NSAttributedString.ext.html(base)?.string }
 }
 
