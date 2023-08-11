@@ -245,7 +245,11 @@ public extension Router {
         }
         goto(controller, mode: .modal())
     }
-    
+}
+
+// MARK: - Share
+
+public extension Router {
     /// 系统分享
     /// - Parameter items: 分享数据
     /// - Parameter handler: 分享完成回调
@@ -284,7 +288,6 @@ public extension Router {
         goto(vc, mode: .modal())
     }
 }
-
 public class ExtActivity: UIActivity {
     private var title: String
     private var image: UIImage?
@@ -301,7 +304,7 @@ public class ExtActivity: UIActivity {
     public override class var activityCategory: UIActivity.Category { .action }
     public override func canPerform(withActivityItems activityItems: [Any]) -> Bool { true }
     public override func perform() {
-        self.handler?()
-        self.activityDidFinish(true)
+        handler?()
+        activityDidFinish(true)
     }
 }

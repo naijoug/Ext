@@ -18,6 +18,27 @@ public final class AlbumManager: ExtInnerLogable {
 }
 
 public extension AlbumManager {
+    
+    /// 保存到相册
+    /// - Parameters:
+    ///   - url: 资源 URL
+    static func save(url: URL, handler: Ext.ResultVoidHandler?) {
+        PHPhotoLibrary.shared().performChanges {
+            PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL: url)
+        } completionHandler: { (completed, error) in
+            Ext.inner.ext.log("save \(completed)", error: error)
+            DispatchQueue.main.async {
+                if let error = error {
+                    handler?(.failure(error))
+                    return
+                }
+                handler?(.success(()))
+            }
+        }
+    }
+}
+
+public extension AlbumManager {
     /// 媒体资源类型
     enum MediaType {
         case image
