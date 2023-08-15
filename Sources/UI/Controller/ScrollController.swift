@@ -144,7 +144,7 @@ extension BaseScrollController: UIScrollViewDelegate {
   |  ScrollView |
   | ----------- |
  **/
-public class ScrollViewDragger: ExtInnerLogable {
+public class ScrollViewDragger: ExtLogable {
     public var logLevel: Ext.LogLevel = .off
     
     /**
@@ -160,13 +160,13 @@ public class ScrollViewDragger: ExtInnerLogable {
     
     /// 目标调整高度视图
     private weak var targetView: UIView?
-    /// 高度更新回调
-    private var updateHandler: Ext.DataHandler<CGFloat>?
     
-    public init(_ targetView: UIView, updateHandler: Ext.DataHandler<CGFloat>?) {
+    public init(_ targetView: UIView) {
         self.targetView = targetView
-        self.updateHandler = updateHandler
     }
+    
+    /// 高度更新回调
+    public var updateHandler: Ext.DataHandler<CGFloat>?
     
     /// 处理滚动状态
     public func handle(_ status: ScrollViewStatus, minRatio: CGFloat, maxRatio: CGFloat) {
@@ -226,7 +226,7 @@ public class ScrollViewDragger: ExtInnerLogable {
                 ext.log("     向上推 \(upEnabled)")
                 guard upEnabled else { return }
             } else {
-                let downEnabled = currentH < maxH
+                let downEnabled = (offsetY <= 0) && currentH < maxH
                 ext.log("     向下拉 \(downEnabled)")
                 guard downEnabled else { return }
             }
