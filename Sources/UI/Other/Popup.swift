@@ -15,7 +15,7 @@ public final class Popup {
     /// 是否正在显示弹出框
     public private(set) var isPoping: Bool = false {
         didSet {
-            Ext.log("Poping \(oldValue) -> \(isPoping)")
+            Ext.log("poping \(oldValue) -> \(isPoping)")
         }
     }
 }
@@ -50,13 +50,8 @@ public extension Popup {
         /// 隐藏完成
         public var hiddenHandler: Ext.VoidHandler?
         
-        public init() {
-            showedHandler = {
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-            }
-        }
+        public init() {}
     }
-    
 }
 
 public extension Popup {
@@ -71,7 +66,7 @@ public extension Popup {
         
         let inQueue = config.inQueue && (config.containerView == nil)
         if inQueue, isPoping {
-            Ext.log("正在 poping 中...")
+            Ext.log("poping...")
             return
         }
         
@@ -127,7 +122,11 @@ public extension Popup {
         GlobalPlayer.shared.pause()
         // 显示 popup
         showAnimation(popupView) {
-            config.showedHandler?()
+            guard let showedHandler = config.showedHandler else {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                return
+            }
+            showedHandler()
         }
     }
     

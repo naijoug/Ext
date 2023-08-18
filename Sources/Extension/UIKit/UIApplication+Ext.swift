@@ -8,6 +8,8 @@
 import UIKit
 
 public extension ExtWrapper where Base == UIApplication {
+    /// 当前应用包名
+    static var bundleID: String { Bundle.main.bundleIdentifier ?? "" }
     /// 当前版本号
     static var version: String { (Bundle.main.infoDictionary!["CFBundleShortVersionString"] as? String) ?? "0" }
     /// 构建版本号
