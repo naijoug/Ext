@@ -154,7 +154,7 @@ private extension IAPHelper {
     /// 请求产品列表
     func _loadProducts(productIdentifiers: Set<String>, handler: @escaping ProductsHandler) {
         guard !productIdentifiers.isEmpty else {
-            handleProducts(nil, error: IAPError.productIdEmpty)
+            handler(.failure(IAPError.productIdEmpty))
             return
         }
         ext.log("load products: \(productIdentifiers)")
